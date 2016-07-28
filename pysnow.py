@@ -123,7 +123,7 @@ class Request(object):
 
     def _all_inner(self, fields):
         """
-        Yields all records for the query and follows links if present on the response after validating the response
+        Yields all records for the query and follows links if present on the response after validating
         :return: List of records with content
         """
         response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
