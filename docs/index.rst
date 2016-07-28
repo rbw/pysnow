@@ -19,7 +19,7 @@ The REST API is active by default in all instances, starting with the Eureka rel
 
 Installation
 ------------
-pip install pysnow
+# pip install pysnow
 
 Limitations
 -----------
