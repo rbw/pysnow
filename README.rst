@@ -7,6 +7,10 @@ Python library for the ServiceNow REST API focused on ease of use and elegant sy
 
 The REST API is active by default in all instances, starting with the Eureka release.
 
+Documentation
+-------------
+Click `here <http://pysnow.readthedocs.org/>`_. to see the documentation
+
 Installation
 ------------
 # pip install pysnow
