@@ -51,6 +51,10 @@ Compatibility
 -------------
 pysnow is compatible with both Python 2 and 3. It's been tested in Python 2.7 and Python 3.4.
 
+Author
+------
+pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
+
 Quick links
 -----------
 
