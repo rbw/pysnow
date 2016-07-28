@@ -45,7 +45,7 @@ Basic usage
    r.delete()
 
 
-See the `documentation <http://pysnow.readthedocs.org/>`_. for more examples and other info
+See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and other info
 
 Compatibility
 -------------
