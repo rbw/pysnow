@@ -9,7 +9,7 @@ The REST API is active by default in all instances, starting with the Eureka rel
 
 Documentation
 -------------
-Click `here <http://pysnow.readthedocs.org/>`_. to see the documentation
+Click `here <http://pysnow.readthedocs.org/>`_ to see the documentation
 
 Installation
 ------------
