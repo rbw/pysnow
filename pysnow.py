@@ -25,23 +25,24 @@ class MultipleResults(Exception):
     pass
 
 
-class MultipleResultsDelete(Exception):
-    pass
-
-
 class NoResults(Exception):
     pass
 
 
 class Client(object):
+    """
+    Sets configuration and creates a session object used in `Request` later on
+    """
     def __init__(self, instance, user, password, **kwargs):
+        """
+        :param instance: instance name, used to resolve FQDN in `Request`
+        :param user: username
+        :param password: password
+        """
         # Connection properties
         self.instance = instance
-        self.fqdn = "%s.service-now.com" % instance
         self._user = user
         self._password = password
-        self.base = "api/now"
-
         self.raise_on_empty = kwargs.pop('raise_on_empty', True)
         self.default_payload = kwargs.pop('default_payload', {})
 
@@ -49,6 +50,7 @@ class Client(object):
         if not isinstance(self.default_payload, dict):
             raise InvalidUsage("Payload must be of type dict")
 
+        # Create new session object
         self.session = self._create_session()
 
     def _create_session(self):
@@ -62,114 +64,178 @@ class Client(object):
         return s
 
     def _request(self, method, table, **kwargs):
-        kwargs.update(self.__dict__)
-        return Request(method, table, **kwargs)
+        """
+        Merges `Client` properties with kwargs and passes along to the `Request` constructor.
+        :param method: HTTP method
+        :param table: Table to operate on
+        :param kwargs: Keyword arguments passed along to `Request`
+        :return: `Request` object
+        """
+        return Request(method,
+                       table,
+                       default_payload=self.default_payload,
+                       raise_on_empty=self.raise_on_empty,
+                       session=self.session,
+                       instance=self.instance,
+                       **kwargs)
 
-    def get(self, table, **kwargs):
+    def query(self, table, **kwargs):
+        """
+        Query wrapper method.
+        :param table: table to perform query on
+        :param kwargs: Keyword arguments passed along to `Request`
+        :return: `Request` object
+        """
         return self._request('GET', table, **kwargs)
 
     def insert(self, table, payload, **kwargs):
+        """
+        Creates a new `Request` object and calls insert()
+        :param table: table to insert on
+        :param payload: update payload (dict)
+        :param kwargs: Keyword arguments passed along to `Request`
+        :return: New record content
+        """
         r = self._request('POST', table, **kwargs)
         return r.insert(payload)
 
-    def delete(self, table, **kwargs):
-        r = self._request('DELETE', table, **kwargs)
-        return r.delete()
-
-    def delete_multiple(self, table, **kwargs):
-        r = self._request('DELETE', table, **kwargs)
-        return r.delete_multiple()
-
 
 class Request(object):
+    base = "api/now"
+
     def __init__(self, method, table, **kwargs):
+        """
+        Takes arguments used to perform a HTTP request
+        :param method: HTTP request method
+        :param table: table to operate on
+        """
         self.method = method
         self.table = table
-        self.url_link = None
-
-        # Get `Client` properties
+        self.url_link = None  # Updated when a linked request is iterated on
+        self.fqdn = "%s.service-now.com" % kwargs.pop('instance')
         self.default_payload = kwargs.pop('default_payload')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
-        self.base = kwargs.pop('base')
-        self.fqdn = kwargs.pop('fqdn')
 
         if method in ('GET', 'DELETE'):
             self.query = kwargs.pop('query')
-            self.fields = kwargs.pop('fields', None)
-            self.query_formatted = self._get_formatted_query()
 
-    def _all_inner(self):
-        response = self.session.get(self._get_url(self.table), params=self.query_formatted)
+    def _all_inner(self, fields):
+        """
+        Yields all records for the query and follows links if present on the response after validating the response
+        :return: List of records with content
+        """
+        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
         yield self._get_content(response)
         while 'next' in response.links:
             self.url_link = response.links['next']['url']
             response = self.session.get(self.url_link)
             yield self._get_content(response)
 
-    def all(self):
-        return itertools.chain.from_iterable(self._all_inner())
+    def get_all(self, fields=list()):
+        """
+        Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
+        :param fields: List of fields to return in the result
+        :return: Iterable chain object
+        """
+        return itertools.chain.from_iterable(self._all_inner(fields))
 
-    def one(self):
-        response = self.session.get(self._get_url(self.table), params=self.query_formatted)
+    def get_one(self, fields=list()):
+        """
+        Convenience method for queries returning only one result. Validates response before returning.
+        :param fields: List of fields to return in the result
+        :raises: Raises MultipleResults exception if more than one match is found
+        :return: Record content
+        """
+        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
         content = self._get_content(response)
         l = len(content)
-        if l == 1:
-            return content[0]
-        elif l == 0:
-            raise NoResults('No results for one()')
-        else:
+        if l > 1:
             raise MultipleResults('Multiple results for one()')
 
+        return content[0]
+
     def insert(self, payload):
+        """
+        Inserts a new record with the payload passed as an argument
+        :param payload: The record to create (dict)
+        :return: Created record
+        """
         response = self.session.post(self._get_url(self.table), data=json.dumps(payload))
         return self._get_content(response)
 
     def delete(self):
+        """
+        Deletes the queried record and returns response content after response validation
+        :raises: `NoResults` exception if query returned no results
+        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :return: Delete response content (Generally always {'Success': True})
+        """
         try:
-            sys_id = self.one()['sys_id']
+            try:
+                sys_id = self.get_one()['sys_id']
+            except KeyError:
+                raise NoResults('Attempted to delete a non-existing record')
         except MultipleResults:
-            raise MultipleResultsDelete("Matched multiple records when attempting to delete. "
-                                        "Use delete_multiple() if you know what you're doing.")
+            raise NotImplementedError("Deletion of multiple records is not supported")
         response = self.session.delete(self._get_url(self.table, sys_id))
         return self._get_content(response)
 
-    def delete_multiple(self):
-        raise NotImplementedError
-
     def update(self, payload):
-        sys_id = self.one()['sys_id']
+        """
+        Updates the queried record with `payload` and returns the updated record after validating the response
+        :param payload: Payload to update the record with
+        :raises: `NoResults` exception if query returned no results
+        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :return: The updated record
+        """
+        try:
+            try:
+                sys_id = self.get_one()['sys_id']
+            except KeyError:
+                raise InvalidUsage('Attempted to update a non-existing record')
+        except MultipleResults:
+            raise NotImplementedError("Update of multiple records is not supported")
         response = self.session.put(self._get_url(self.table, sys_id), data=json.dumps(payload))
         return self._get_content(response)
 
     def _get_content(self, response):
         """
-        Checks for errors in the response object. Returns response content, in bytes.
+        Checks for errors in the response. Returns response content, in bytes.
         :param response: response object
+        :raises: `UnexpectedResponse` if the server responded with an unexpected response
         :return: ServiceNow response content
         """
 
         method = response.request.method
 
         if method == 'DELETE':
-            if response.status_code != 204:
-                raise UnexpectedResponse("Unexpected HTTP response code. Expected: 204, got %d" % response.status_code)
-            else:
+            # Make sure the delete operation returned the expected response
+            if response.status_code == 204:
                 return {'success': True}
+            else:
+                raise UnexpectedResponse("Unexpected HTTP response code. Expected: 204, got %d" % response.status_code)
+        # Make sure the POST operation returned the expected response
         elif method == 'POST' and response.status_code != 201:
             raise UnexpectedResponse("Unexpected HTTP response code. Expected: 201, got %d" % response.status_code)
 
         content_json = response.json()
 
         if response.status_code == 404 and self.raise_on_empty is False:
-            content_json['result'] = []
+            content_json['result'] = [{}]
         elif 'error' in content_json:
             raise UnexpectedResponse("ServiceNow responded (%i): %s" % (response.status_code,
                                                                         content_json['error']['message']))
 
         return content_json['result']
 
-    def _get_url(self, table, sysid=None):
+    def _get_url(self, table, sys_id=None):
+        """
+        Takes table and sys_id (if present), and returns a URL
+        :param table: ServiceNow table
+        :param sys_id: Record sys_id
+        :return: url string
+        """
         if table == 'attachment':
             base = self.base
         else:
@@ -183,13 +249,14 @@ class Request(object):
             }
         )
 
-        if sysid:
-            return "%s/%s" % (url_str, sysid)
+        if sys_id:
+            return "%s/%s" % (url_str, sys_id)
 
         return url_str
 
-    def _get_formatted_query(self):
-        """ Converts the query to a ServiceNow-interpretable format
+    def _get_formatted_query(self, fields):
+        """
+        Converts the query to a ServiceNow-interpretable format
         :return: ServiceNow query
         """
 
@@ -208,9 +275,9 @@ class Request(object):
         result = {'sysparm_query': sysparm_query}
         result.update(self.default_payload)
 
-        if self.fields is not None:
-            if isinstance(self.fields, list):
-                result.update({'sysparm_fields': ",".join(self.fields)})
+        if len(fields) > 0:
+            if isinstance(fields, list):
+                result.update({'sysparm_fields': ",".join(fields)})
             else:
                 raise InvalidUsage("You must pass the fields as a list")
 
