@@ -3,7 +3,7 @@
 pysnow
 ======
 
-Python library for the ServiceNow REST API focused on ease of use and elegant syntax.
+Python library for the ServiceNow REST API focused on ease of use, simple code and elegant syntax.
 
 The REST API is active by default in all instances, starting with the Eureka release.
 
