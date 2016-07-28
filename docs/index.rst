@@ -1,10 +1,21 @@
-.. pysnow documentation master file, created by
-   sphinx-quickstart on Thu Jul 28 17:55:40 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. title:: Python library for the ServiceNow REST API
 
-Welcome to pysnow's documentation!
-==================================
+|pysnow|
+========
+
+Python library for the ServiceNow REST API focused on ease of use and elegant syntax.
+
+The REST API is active by default in all instances, starting with the Eureka release.
+Compatible with both Python 2 and 3. Tested with 2.7 and 3.4.
+
+Quick links
+-----------
+
+* http://wiki.servicenow.com/index.php?title=REST_API
+* http://wiki.servicenow.com/index.php?title=Table_API
+* http://wiki.servicenow.com/index.php?title=Tables_and_Classes
+* http://wiki.servicenow.com/index.php?title=Encoded_Query_Strings
+
 
 Contents:
 
@@ -12,6 +23,7 @@ Contents:
    :maxdepth: 2
 
 .. automodule:: pysnow
+    :members:
 
 .. autoclass:: Client
     :members:
@@ -19,11 +31,4 @@ Contents:
 .. autoclass:: Request
     :members:
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
