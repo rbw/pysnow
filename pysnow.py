@@ -6,7 +6,7 @@ import itertools
 from requests.auth import HTTPBasicAuth
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 class UnexpectedResponse(Exception):
@@ -26,19 +26,21 @@ class NoResults(Exception):
 
 
 class Client(object):
-    def __init__(self, instance, user, password, **kwargs):
+    def __init__(self, instance, user, password, raise_on_empty=True, default_payload=list()):
         """Sets configuration and creates a session object used in `Request` later on
 
         :param instance: instance name, used to resolve FQDN in `Request`
         :param user: username
         :param password: password
+        :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
+        :param default_payload: default payload to send with all requests, set i.e. 'sysparm_limit' here
         """
         # Connection properties
         self.instance = instance
         self._user = user
         self._password = password
-        self.raise_on_empty = kwargs.pop('raise_on_empty', True)
-        self.default_payload = kwargs.pop('default_payload', {})
+        self.raise_on_empty = raise_on_empty
+        self.default_payload = default_payload
 
         # Sets default payload for all requests, i.e. sysparm_limit, sysparm_offset etc
         if not isinstance(self.default_payload, dict):
