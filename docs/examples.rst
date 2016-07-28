@@ -1,0 +1,84 @@
+Usage examples
+==============
+
+Import and instantiation
+------------------------
+
+.. code-block:: python
+
+    import pysnow
+
+    # Create client object
+    s = pysnow.Client(instance='myinstance',
+                      user='myusername',
+                      password='mypassword',
+                      raise_on_empty=True)
+
+
+Getting a single record
+------------------------
+
+Here we'll utilize `get_one()`, which is a convenience function for getting a single record without having to use a generator.
+
+.. code-block:: python
+
+    request = s.query(table='incident', query={'number': 'INC01234'})
+
+    # Fetch one record and filter out everything but 'number' and 'sys_id' from the results
+    result = request.get_one(fields=['number', 'sys_id'])
+    print(result['number'])
+
+
+Getting all records
+-------------------
+
+`get_all()` returns a generator response (iterable) , also, this method chains linked responses
+
+.. code-block:: python
+
+    request = s.query(table='incident', query={'state': 2})
+
+    # Fetch all records without using a field filter,
+    # then iterate over the results and print out sys_ids
+    while record in request.get_all():
+        print(record['sys_id'])
+
+
+Updating a record
+-----------------
+
+.. code-block:: python
+
+    request = s.query(table='incident', query={'number': 'INC01234'})
+
+    # Update the record
+    result = request.update({'description': 'test'})
+
+    print("Record '%s' was successfully updated" % result)
+
+
+Creating a new record
+---------------------
+
+.. code-block:: python
+
+    # Create a new record
+    result = s.insert(table='incident', {'field1': 'value1', 'field2': 'value2'})
+
+    # Print out the number of the created record
+    print(result['number'])
+
+
+Deleting a record
+---------------------
+
+.. code-block:: python
+
+    # Create a
+    request = s.query(table='incident', query={'number': 'INC01234'})
+    result = request.delete()
+
+    if result['success'] == True:
+        print("Record deleted")
+
+
