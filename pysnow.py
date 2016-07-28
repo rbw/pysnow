@@ -30,11 +30,8 @@ class NoResults(Exception):
 
 
 class Client(object):
-    """
-    Sets configuration and creates a session object used in `Request` later on
-    """
     def __init__(self, instance, user, password, **kwargs):
-        """
+        """Sets configuration and creates a session object used in `Request` later on
         :param instance: instance name, used to resolve FQDN in `Request`
         :param user: username
         :param password: password
@@ -54,8 +51,7 @@ class Client(object):
         self.session = self._create_session()
 
     def _create_session(self):
-        """
-        Creates and returns a new session object with the credentials passed to the constructor
+        """Creates and returns a new session object with the credentials passed to the constructor
         :return: session object
         """
         s = requests.Session()
@@ -64,8 +60,7 @@ class Client(object):
         return s
 
     def _request(self, method, table, **kwargs):
-        """
-        Creates and returns a new `Request` object, takes some basic settings from the `Client` object and
+        """Creates and returns a new `Request` object, takes some basic settings from the `Client` object and
         passes along to the `Request` constructor
         :param method: HTTP method
         :param table: Table to operate on
@@ -81,8 +76,7 @@ class Client(object):
                        **kwargs)
 
     def query(self, table, **kwargs):
-        """
-        Query wrapper method.
+        """Query wrapper method.
         :param table: table to perform query on
         :param kwargs: Keyword arguments passed along to `Request`
         :return: `Request` object
@@ -90,8 +84,7 @@ class Client(object):
         return self._request('GET', table, **kwargs)
 
     def insert(self, table, payload, **kwargs):
-        """
-        Creates a new `Request` object and calls insert()
+        """Creates a new `Request` object and calls insert()
         :param table: table to insert on
         :param payload: update payload (dict)
         :param kwargs: Keyword arguments passed along to `Request`
@@ -105,8 +98,7 @@ class Request(object):
     base = "api/now"
 
     def __init__(self, method, table, **kwargs):
-        """
-        Takes arguments used to perform a HTTP request
+        """Takes arguments used to perform a HTTP request
         :param method: HTTP request method
         :param table: table to operate on
         """
@@ -122,8 +114,7 @@ class Request(object):
             self.query = kwargs.pop('query')
 
     def _all_inner(self, fields):
-        """
-        Yields all records for the query and follows links if present on the response after validating
+        """Yields all records for the query and follows links if present on the response after validating
         :return: List of records with content
         """
         response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
@@ -134,16 +125,14 @@ class Request(object):
             yield self._get_content(response)
 
     def get_all(self, fields=list()):
-        """
-        Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
+        """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
         :param fields: List of fields to return in the result
         :return: Iterable chain object
         """
         return itertools.chain.from_iterable(self._all_inner(fields))
 
     def get_one(self, fields=list()):
-        """
-        Convenience method for queries returning only one result. Validates response before returning.
+        """Convenience method for queries returning only one result. Validates response before returning.
         :param fields: List of fields to return in the result
         :raises: Raises MultipleResults exception if more than one match is found
         :return: Record content
@@ -157,8 +146,7 @@ class Request(object):
         return content[0]
 
     def insert(self, payload):
-        """
-        Inserts a new record with the payload passed as an argument
+        """Inserts a new record with the payload passed as an argument
         :param payload: The record to create (dict)
         :return: Created record
         """
@@ -166,8 +154,7 @@ class Request(object):
         return self._get_content(response)
 
     def delete(self):
-        """
-        Deletes the queried record and returns response content after response validation
+        """Deletes the queried record and returns response content after response validation
         :raises: `NoResults` exception if query returned no results
         :raises: `NotImplementedError` if query returned more than one result (currently not supported)
         :return: Delete response content (Generally always {'Success': True})
@@ -183,8 +170,7 @@ class Request(object):
         return self._get_content(response)
 
     def update(self, payload):
-        """
-        Updates the queried record with `payload` and returns the updated record after validating the response
+        """Updates the queried record with `payload` and returns the updated record after validating the response
         :param payload: Payload to update the record with
         :raises: `NoResults` exception if query returned no results
         :raises: `NotImplementedError` if query returned more than one result (currently not supported)
@@ -201,13 +187,11 @@ class Request(object):
         return self._get_content(response)
 
     def _get_content(self, response):
-        """
-        Checks for errors in the response. Returns response content, in bytes.
+        """Checks for errors in the response. Returns response content, in bytes.
         :param response: response object
         :raises: `UnexpectedResponse` if the server responded with an unexpected response
         :return: ServiceNow response content
         """
-
         method = response.request.method
 
         if method == 'DELETE':
@@ -231,8 +215,7 @@ class Request(object):
         return content_json['result']
 
     def _get_url(self, table, sys_id=None):
-        """
-        Takes table and sys_id (if present), and returns a URL
+        """Takes table and sys_id (if present), and returns a URL
         :param table: ServiceNow table
         :param sys_id: Record sys_id
         :return: url string
