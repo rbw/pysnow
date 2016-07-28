@@ -30,7 +30,7 @@ Basic usage
 		     raise_on_empty=True)
 
    # Create a new record
-   s.insert(table='incident', {'field1': 'value1', 'field2': 'value2'})
+   s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
 
    # Create a `Request` object by querying for 'INC01234' on table 'incident'
    r = s.query(table='incident', query={'number': 'INC01234'})

@@ -63,7 +63,7 @@ Creating a new record
 .. code-block:: python
 
     # Create a new record
-    result = s.insert(table='incident', {'field1': 'value1', 'field2': 'value2'})
+    result = s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
 
     # Print out the number of the created record
     print(result['number'])
