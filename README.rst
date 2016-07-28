@@ -6,7 +6,6 @@ pysnow
 Python library for the ServiceNow REST API focused on ease of use and elegant syntax.
 
 The REST API is active by default in all instances, starting with the Eureka release.
-Compatible with both Python 2 and 3. Tested with 2.7 and 3.4.
 
 Getting started
 ---------------
@@ -43,6 +42,10 @@ Basic usage
 
 
 See the `documentation <http://pysnow.readthedocs.org/>`_. for more examples and other info
+
+Compatibility
+------------
+pysnow is compatible with both Python 2 and 3. It's been tested in Python 2.7 and Python 3.4.
 
 Quick links
 -----------
