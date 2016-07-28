@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-Python client for the ServiceNow REST API
-"""
-
 import requests
 import json
 import itertools
@@ -32,6 +28,7 @@ class NoResults(Exception):
 class Client(object):
     def __init__(self, instance, user, password, **kwargs):
         """Sets configuration and creates a session object used in `Request` later on
+
         :param instance: instance name, used to resolve FQDN in `Request`
         :param user: username
         :param password: password
@@ -52,6 +49,7 @@ class Client(object):
 
     def _create_session(self):
         """Creates and returns a new session object with the credentials passed to the constructor
+
         :return: session object
         """
         s = requests.Session()
@@ -62,6 +60,7 @@ class Client(object):
     def _request(self, method, table, **kwargs):
         """Creates and returns a new `Request` object, takes some basic settings from the `Client` object and
         passes along to the `Request` constructor
+
         :param method: HTTP method
         :param table: Table to operate on
         :param kwargs: Keyword arguments passed along to `Request`
@@ -77,6 +76,7 @@ class Client(object):
 
     def query(self, table, **kwargs):
         """Query wrapper method.
+
         :param table: table to perform query on
         :param kwargs: Keyword arguments passed along to `Request`
         :return: `Request` object
@@ -85,6 +85,7 @@ class Client(object):
 
     def insert(self, table, payload, **kwargs):
         """Creates a new `Request` object and calls insert()
+
         :param table: table to insert on
         :param payload: update payload (dict)
         :param kwargs: Keyword arguments passed along to `Request`
@@ -99,6 +100,7 @@ class Request(object):
 
     def __init__(self, method, table, **kwargs):
         """Takes arguments used to perform a HTTP request
+
         :param method: HTTP request method
         :param table: table to operate on
         """
@@ -115,6 +117,7 @@ class Request(object):
 
     def _all_inner(self, fields):
         """Yields all records for the query and follows links if present on the response after validating
+
         :return: List of records with content
         """
         response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
@@ -126,13 +129,15 @@ class Request(object):
 
     def get_all(self, fields=list()):
         """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
+
         :param fields: List of fields to return in the result
         :return: Iterable chain object
         """
         return itertools.chain.from_iterable(self._all_inner(fields))
 
     def get_one(self, fields=list()):
-        """Convenience method for queries returning only one result. Validates response before returning.
+        """Convenience function for queries returning only one result. Validates response before returning.
+
         :param fields: List of fields to return in the result
         :raises: Raises MultipleResults exception if more than one match is found
         :return: Record content
@@ -147,6 +152,7 @@ class Request(object):
 
     def insert(self, payload):
         """Inserts a new record with the payload passed as an argument
+
         :param payload: The record to create (dict)
         :return: Created record
         """
@@ -155,6 +161,7 @@ class Request(object):
 
     def delete(self):
         """Deletes the queried record and returns response content after response validation
+
         :raises: `NoResults` exception if query returned no results
         :raises: `NotImplementedError` if query returned more than one result (currently not supported)
         :return: Delete response content (Generally always {'Success': True})
@@ -171,6 +178,7 @@ class Request(object):
 
     def update(self, payload):
         """Updates the queried record with `payload` and returns the updated record after validating the response
+
         :param payload: Payload to update the record with
         :raises: `NoResults` exception if query returned no results
         :raises: `NotImplementedError` if query returned more than one result (currently not supported)
@@ -188,6 +196,7 @@ class Request(object):
 
     def _get_content(self, response):
         """Checks for errors in the response. Returns response content, in bytes.
+
         :param response: response object
         :raises: `UnexpectedResponse` if the server responded with an unexpected response
         :return: ServiceNow response content
@@ -216,6 +225,7 @@ class Request(object):
 
     def _get_url(self, table, sys_id=None):
         """Takes table and sys_id (if present), and returns a URL
+
         :param table: ServiceNow table
         :param sys_id: Record sys_id
         :return: url string
