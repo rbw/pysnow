@@ -44,7 +44,7 @@ Basic usage
 See the `documentation <http://pysnow.readthedocs.org/>`_. for more examples and other info
 
 Compatibility
-------------
+-------------
 pysnow is compatible with both Python 2 and 3. It's been tested in Python 2.7 and Python 3.4.
 
 Quick links
