@@ -65,7 +65,8 @@ class Client(object):
 
     def _request(self, method, table, **kwargs):
         """
-        Merges `Client` properties with kwargs and passes along to the `Request` constructor.
+        Creates and returns a new `Request` object, takes some basic settings from the `Client` object and
+        passes along to the `Request` constructor
         :param method: HTTP method
         :param table: Table to operate on
         :param kwargs: Keyword arguments passed along to `Request`
