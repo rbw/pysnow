@@ -27,7 +27,7 @@ Currently `delete()` and `update()` operations only works for queries yielding a
 If there's a demand, delete_multiple() and update_multiple() will be implemented into the API to avoid accidents.
 
 Compatibility
-------------
+-------------
 pysnow is compatible with both Python 2 and 3. It's been tested in Python 2.7 and Python 3.4.
 
 Quick links
