@@ -36,13 +36,17 @@ Basic usage
    r = s.query(table='incident', query={'number': 'INC01234'})
 
    # Fetch one record and filter out everything but 'number' and 'sys_id' from the results
-   res = r.get_one(fields=['number', 'sys_id'])
+   r.get_one(fields=['number', 'sys_id'])
 
    # Update
    r.update({'this': 'that'})
 
    # Delete
    r.delete()
+   
+   # Iterate over all records with state == 2 and print out number
+   for record in s.query(table='incident', query={'state': 2}).get_all():
+       print(record['number'])
 
 
 See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and other info
@@ -50,6 +54,10 @@ See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and 
 Compatibility
 -------------
 pysnow is compatible with both Python 2 and 3. It's been tested in Python 2.7 and Python 3.4.
+
+Author
+------
+pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
 
 Quick links
 -----------
