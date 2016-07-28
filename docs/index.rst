@@ -11,6 +11,13 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+.. automodule:: pysnow
+
+.. autoclass:: Client
+    :members:
+
+.. autoclass:: Request
+    :members:
 
 
 Indices and tables
