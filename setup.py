@@ -16,7 +16,7 @@ setup(
     maintainer='Robert Wikman',
     maintainer_email='rbw@vault13.org',
     url='https://github.com/rbw0/pysnow',
-    download_url='https://github.com/rbw0/pysnow/tarball/%d' % __version__,
+    download_url='https://github.com/rbw0/pysnow/tarball/%s' % __version__,
     keywords=['servicenow', 'rest', 'api', 'http'],
     classifiers=[],
     license='GPLv2',
