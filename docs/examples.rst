@@ -74,8 +74,10 @@ Deleting a record
 
 .. code-block:: python
 
-    # Create a
+    # Query the incident table by number
     request = s.query(table='incident', query={'number': 'INC01234'})
+
+    # Delete the record
     result = request.delete()
 
     if result['success'] == True:
