@@ -18,7 +18,7 @@ Import and instantiation
 Getting a single record
 ------------------------
 
-Here we'll utilize `get_one()`, which is a convenience function for getting a single record without having to use a generator.
+Here we'll utilize `get_one()`, a convenience function for getting a single record without having to use a generator.
 
 .. code-block:: python
 
