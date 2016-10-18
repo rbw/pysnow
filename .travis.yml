@@ -7,7 +7,8 @@ python:
   - "3.5"
 # command to install dependencies
 install:
-  - pip install pysnow requests httpretty urllib3[secure]
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.6' ]]; then travis_retry pip install pyopenssl ndg-httpsclient pyasn1
+  - pip install pysnow requests httpretty
 # command to run tests
 script: nosetests tests/incident.py
 
