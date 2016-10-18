@@ -191,7 +191,7 @@ class TestIncident(unittest.TestCase):
         self.assertEquals(r.status_code, 204)
 
     @httpretty.activate
-    def test_delete_incident(self):
+    def test_delete_incident_multiple(self):
         """
         Make sure delete queries yielding more than 1 record fails
         """
