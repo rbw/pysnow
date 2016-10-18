@@ -195,7 +195,7 @@ class Request(object):
         except MultipleResults:
             raise NotImplementedError("Update of multiple records is not supported")
         response = self.session.put(self._get_url(self.table, sys_id), data=json.dumps(payload))
-        return self._get_content(response)
+        return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
     def _get_content(self, response):
         """Checks for errors in the response. Returns response content, in bytes.
