@@ -217,8 +217,12 @@ class Request(object):
 
         content_json = response.json()
 
-        if response.status_code == 404 and self.raise_on_empty is False:
-            content_json['result'] = [{}]
+        # It seems that Helsinki and later returns status 200 instead of 404 on empty result sets
+        if len(content_json['result']) == 0 or response.status_code == 404:
+            if self.raise_on_empty is False:
+                content_json['result'] = [{}]
+            else:
+                raise UnexpectedResponse('Query yielded no results')
         elif 'error' in content_json:
             raise UnexpectedResponse("ServiceNow responded (%i): %s" % (response.status_code,
                                                                         content_json['error']['message']))
