@@ -18,7 +18,7 @@ Import and instantiation
 Getting a single record
 ------------------------
 
-Here we'll utilize `get_one()`, which is a convenience function for getting a single record without having to use a generator.
+Here we'll utilize `get_one()`, a convenience function for getting a single record without having to use a generator.
 
 .. code-block:: python
 
@@ -74,8 +74,10 @@ Deleting a record
 
 .. code-block:: python
 
-    # Create a
+    # Query the incident table by number
     request = s.query(table='incident', query={'number': 'INC01234'})
+
+    # Delete the record
     result = request.delete()
 
     if result['success'] == True:

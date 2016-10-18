@@ -6,7 +6,7 @@ import itertools
 from requests.auth import HTTPBasicAuth
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 class UnexpectedResponse(Exception):
@@ -26,19 +26,21 @@ class NoResults(Exception):
 
 
 class Client(object):
-    def __init__(self, instance, user, password, **kwargs):
+    def __init__(self, instance, user, password, raise_on_empty=True, default_payload=dict()):
         """Sets configuration and creates a session object used in `Request` later on
 
         :param instance: instance name, used to resolve FQDN in `Request`
         :param user: username
         :param password: password
+        :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
+        :param default_payload: default payload to send with all requests, set i.e. 'sysparm_limit' here
         """
         # Connection properties
         self.instance = instance
         self._user = user
         self._password = password
-        self.raise_on_empty = kwargs.pop('raise_on_empty', True)
-        self.default_payload = kwargs.pop('default_payload', {})
+        self.raise_on_empty = raise_on_empty
+        self.default_payload = default_payload
 
         # Sets default payload for all requests, i.e. sysparm_limit, sysparm_offset etc
         if not isinstance(self.default_payload, dict):
@@ -111,6 +113,7 @@ class Request(object):
         self.default_payload = kwargs.pop('default_payload')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
+        self.status_code = None
 
         if method in ('GET', 'DELETE'):
             self.query = kwargs.pop('query')
@@ -157,7 +160,7 @@ class Request(object):
         :return: Created record
         """
         response = self.session.post(self._get_url(self.table), data=json.dumps(payload))
-        return self._get_content(response)
+        return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
     def delete(self):
         """Deletes the queried record and returns response content after response validation
@@ -192,7 +195,7 @@ class Request(object):
         except MultipleResults:
             raise NotImplementedError("Update of multiple records is not supported")
         response = self.session.put(self._get_url(self.table, sys_id), data=json.dumps(payload))
-        return self._get_content(response)
+        return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
     def _get_content(self, response):
         """Checks for errors in the response. Returns response content, in bytes.
@@ -202,6 +205,7 @@ class Request(object):
         :return: ServiceNow response content
         """
         method = response.request.method
+        self.status_code = response.status_code
 
         if method == 'DELETE':
             # Make sure the delete operation returned the expected response
@@ -215,8 +219,12 @@ class Request(object):
 
         content_json = response.json()
 
-        if response.status_code == 404 and self.raise_on_empty is False:
-            content_json['result'] = [{}]
+        # It seems that Helsinki and later returns status 200 instead of 404 on empty result sets
+        if len(content_json['result']) == 0 or response.status_code == 404:
+            if self.raise_on_empty is False:
+                content_json['result'] = [{}]
+            else:
+                raise UnexpectedResponse('Query yielded no results')
         elif 'error' in content_json:
             raise UnexpectedResponse("ServiceNow responded (%i): %s" % (response.status_code,
                                                                         content_json['error']['message']))
