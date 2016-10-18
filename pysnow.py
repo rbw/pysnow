@@ -113,6 +113,7 @@ class Request(object):
         self.default_payload = kwargs.pop('default_payload')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
+        self.status_code = None
 
         if method in ('GET', 'DELETE'):
             self.query = kwargs.pop('query')
@@ -204,6 +205,7 @@ class Request(object):
         :return: ServiceNow response content
         """
         method = response.request.method
+        self.status_code = response.status_code
 
         if method == 'DELETE':
             # Make sure the delete operation returned the expected response
