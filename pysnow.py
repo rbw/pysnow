@@ -160,7 +160,7 @@ class Request(object):
         :return: Created record
         """
         response = self.session.post(self._get_url(self.table), data=json.dumps(payload))
-        return self._get_content(response)
+        return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
     def delete(self):
         """Deletes the queried record and returns response content after response validation
