@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/rbw0/pysnow.svg?branch=master
+    :target: https://travis-ci.org/rbw0/pysnow
+
 .. title:: pysnow
 
 pysnow
@@ -53,7 +56,7 @@ See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and 
 
 Compatibility
 -------------
-pysnow is compatible with both Python 2 and 3. It's been tested in Python 2.7 and Python 3.4.
+pysnow is compatible with both Python 2 and 3.
 
 Author
 ------
