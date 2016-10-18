@@ -26,7 +26,7 @@ class NoResults(Exception):
 
 
 class Client(object):
-    def __init__(self, instance, user, password, raise_on_empty=True, default_payload=list()):
+    def __init__(self, instance, user, password, raise_on_empty=True, default_payload=dict()):
         """Sets configuration and creates a session object used in `Request` later on
 
         :param instance: instance name, used to resolve FQDN in `Request`
