@@ -38,6 +38,7 @@ class TestIncident(unittest.TestCase):
         self.assertEqual(self.client._user, self.mock_connection['user'])
         self.assertEqual(self.client._password, self.mock_connection['pass'])
         self.assertEqual(self.client.raise_on_empty, self.mock_connection['raise_on_empty'])
+        self.assertDictEqual(self.client.default_payload, {})
 
     @httpretty.activate
     def test_get_incident(self):
