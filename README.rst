@@ -57,7 +57,10 @@ See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and 
 Compatibility
 -------------
 pysnow is compatible with both Python 2 and 3.
-Tested: 2.6, 2.7, 3.3, 3.4, 3.5
+Tested: 2.7, 3.3, 3.4, 3.5
+
+Fails in some versions of 2.6 due to SSL issues.
+https://github.com/kennethreitz/requests/issues/2022
 
 Author
 ------
