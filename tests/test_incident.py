@@ -22,7 +22,8 @@ class TestIncident(unittest.TestCase):
         self.mock_incident = {
             'path': 'api/now/table/incident',
             'number': 'INC01234',
-            'sys_id': '98ace1a537ea2a00cf5c9c9953990e19'
+            'sys_id': '98ace1a537ea2a00cf5c9c9953990e19',
+            'link_arg': '?page=2'
         }
 
         self.client = pysnow.Client(instance=self.mock_connection['instance'],
@@ -56,6 +57,55 @@ class TestIncident(unittest.TestCase):
 
         # Make sure we got an incident back with the expected number
         self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+
+    @httpretty.activate
+    def test_get_linked_result(self):
+        """
+        Fetch multiple incident records from a linked result
+        """
+
+        link_header = "<https://%s/%s/%s>; rel='next'" % (
+            self.mock_connection['fqdn'],
+            self.mock_incident['path'],
+            self.mock_incident['link_arg']
+        )
+
+        json_body_first = json.dumps({'result': [{'number': self.mock_incident['number'], 'linked': False}]})
+        json_body_second = json.dumps({'result': [{'number': self.mock_incident['number'], 'linked': True}]})
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body_first,
+                               status=200,
+                               content_type="application/json",
+                               adding_headers={'Link': link_header})
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s/%s" % (
+                                   self.mock_connection['fqdn'],
+                                   self.mock_incident['path'],
+                                   self.mock_incident['link_arg']
+                               ),
+                               body=json_body_second,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+
+        result = r.get_all()
+
+        # Return the first result from the container
+        first = next(result)
+        self.assertEquals(first['number'], self.mock_incident['number'])
+        # Make sure it's the record we're after
+        self.assertFalse(first['linked'])
+
+        # Return the second result from the container (linked)
+        second = next(result)
+        self.assertEquals(second['number'], self.mock_incident['number'])
+        # Make sure it's the record we're after
+        self.assertTrue(second['linked'])
+
 
     @httpretty.activate
     def test_get_incident_no_results(self):
