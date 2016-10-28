@@ -1,7 +1,7 @@
 .. image:: https://travis-ci.org/rbw0/pysnow.svg?branch=master
     :target: https://travis-ci.org/rbw0/pysnow
-.. image:: https://coveralls.io/repos/github/rbw0/pysnow/badge.svg
-    :target: https://coveralls.io/github/rbw0/pysnow
+.. image:: https://coveralls.io/repos/github/rbw0/pysnow/badge.svg?branch=master
+	:target: https://coveralls.io/github/rbw0/pysnow?branch=master
 
 .. title:: pysnow
 
