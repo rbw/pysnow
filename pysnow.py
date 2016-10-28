@@ -6,7 +6,7 @@ import itertools
 from requests.auth import HTTPBasicAuth
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 
 class UnexpectedResponse(Exception):
