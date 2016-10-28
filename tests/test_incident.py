@@ -34,6 +34,19 @@ class TestIncident(unittest.TestCase):
         logging.basicConfig(level=logging.DEBUG)
         self.log = logging.getLogger('debug')
 
+    def test_invalid_default_payload(self):
+        """
+        Make sure passing an invalid payload doesn't work
+        """
+        try:
+            pysnow.Client(instance=self.mock_connection['instance'],
+                          user=self.mock_connection['user'],
+                          password=self.mock_connection['pass'],
+                          raise_on_empty=self.mock_connection['raise_on_empty'],
+                          default_payload='invalid payload')
+        except pysnow.InvalidUsage:
+            pass
+
     def test_connection(self):
         self.assertEqual(self.client.instance, self.mock_connection['instance'])
         self.assertEqual(self.client._user, self.mock_connection['user'])
@@ -42,9 +55,9 @@ class TestIncident(unittest.TestCase):
         self.assertEqual(self.client.default_payload, {})
 
     @httpretty.activate
-    def test_get_incident(self):
+    def test_get_incident_by_dict_query(self):
         """
-        Fetch incident and compare numbers
+        Make sure fetching by dict type query works
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
@@ -57,6 +70,60 @@ class TestIncident(unittest.TestCase):
 
         # Make sure we got an incident back with the expected number
         self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+
+    @httpretty.activate
+    def test_get_incident_by_string_query(self):
+        """
+        Make sure fetching by string type query works
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query='nameINincident,task^elementLIKEstate')
+
+        # Make sure we got an incident back with the expected number
+        self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+
+    @httpretty.activate
+    def test_get_incident_content_error(self):
+        """
+        Make sure error in content is properly handled
+        """
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({'error': {'message': 'test'}}),
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+
+        try:
+            r.get_one()
+        except pysnow.UnexpectedResponse:
+            pass
+
+    @httpretty.activate
+    def test_get_incident_invalid_query(self):
+        """
+        Make sure querying by non-dict and non-string doesn't work
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        # Pass query as a list() , which is invalid
+        r = self.client.query(table='incident', query=list())
+        try:
+            r.get_one()
+        except pysnow.InvalidUsage:
+            pass
 
     @httpretty.activate
     def test_get_linked_result(self):
@@ -105,7 +172,6 @@ class TestIncident(unittest.TestCase):
         self.assertEquals(second['number'], self.mock_incident['number'])
         # Make sure it's the record we're after
         self.assertTrue(second['linked'])
-
 
     @httpretty.activate
     def test_get_incident_no_results(self):
@@ -156,6 +222,24 @@ class TestIncident(unittest.TestCase):
         self.assertEquals(r.status_code, 201)
 
     @httpretty.activate
+    def test_insert_incident_invalid_status(self):
+        """
+        Update an incident and get an unexpected status code back, make sure it fails properly.
+        """
+        json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client._request('POST', 'incident')
+        try:
+            r.insert(payload={'field1': 'value1', 'field2': 'value2'})
+        except pysnow.UnexpectedResponse:
+            pass
+
+    @httpretty.activate
     def test_update_incident(self):
         """
         Updates an existing incident. Checks for sys_id and status code 200
@@ -182,6 +266,58 @@ class TestIncident(unittest.TestCase):
         self.assertEquals(result[0]['sys_id'], self.mock_incident['sys_id'])
         self.assertEquals(result[0]['this'], 'that')
         self.assertEquals(r.status_code, 200)
+
+    @httpretty.activate
+    def test_update_incident_non_existent(self):
+        """
+        Attempt to update a non-existent incident
+        """
+        json_body = json.dumps({})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.PUT,
+                               "https://%s/%s/%s" % (self.mock_connection['fqdn'],
+                                                     self.mock_incident['path'],
+                                                     self.mock_incident['sys_id']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.update({'this': 'that'})
+        except pysnow.InvalidUsage:
+            pass
+
+    @httpretty.activate
+    def test_update_incident_invalid_update(self):
+        """
+        Make sure updates which are non-dict and non-string type are properly handled
+        """
+        json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id'], 'this': 'that'}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.PUT,
+                               "https://%s/%s/%s" % (self.mock_connection['fqdn'],
+                                                     self.mock_incident['path'],
+                                                     self.mock_incident['sys_id']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.update('invalid update')
+        except pysnow.InvalidUsage:
+            pass
 
     @httpretty.activate
     def test_update_incident_multiple(self):
@@ -217,19 +353,17 @@ class TestIncident(unittest.TestCase):
         """
         Delete an incident, make sure we get a 204 back along with expected body
         """
-        json_body_get = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
         httpretty.register_uri(httpretty.GET,
                                "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
-                               body=json_body_get,
+                               body=json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]}),
                                status=200,
                                content_type="application/json")
 
-        json_body_delete = json.dumps({'success': True})
         httpretty.register_uri(httpretty.DELETE,
                                "https://%s/%s/%s" % (self.mock_connection['fqdn'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
-                               body=json_body_delete,
+                               body=json.dumps({'success': True}),
                                status=204,
                                content_type="application/json")
 
@@ -269,3 +403,52 @@ class TestIncident(unittest.TestCase):
         except NotImplementedError:
             pass
 
+    @httpretty.activate
+    def test_delete_incident_invalid_response(self):
+        """
+        Make sure non-204 responses are properly handled
+        """
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]}),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.DELETE,
+                               "https://%s/%s/%s" % (self.mock_connection['fqdn'],
+                                                     self.mock_incident['path'],
+                                                     self.mock_incident['sys_id']),
+                               body=json.dumps({'success': True}),
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.delete()
+        except pysnow.UnexpectedResponse:
+            pass
+
+    @httpretty.activate
+    def test_delete_incident_non_existent(self):
+        """
+        Attempt to delete a non-existing record
+        """
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({}),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.DELETE,
+                               "https://%s/%s/%s" % (self.mock_connection['fqdn'],
+                                                     self.mock_incident['path'],
+                                                     self.mock_incident['sys_id']),
+                               body=json.dumps({'success': True}),
+                               status=204,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.delete()
+        except pysnow.NoResults:
+            pass
