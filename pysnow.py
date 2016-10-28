@@ -194,6 +194,10 @@ class Request(object):
                 raise InvalidUsage('Attempted to update a non-existing record')
         except MultipleResults:
             raise NotImplementedError("Update of multiple records is not supported")
+
+        if not isinstance(payload, dict):
+            raise InvalidUsage("Update payload must be of type dict")
+
         response = self.session.put(self._get_url(self.table, sys_id), data=json.dumps(payload))
         return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
