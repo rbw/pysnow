@@ -224,7 +224,7 @@ class Request(object):
         content_json = response.json()
 
         # It seems that Helsinki and later returns status 200 instead of 404 on empty result sets
-        if len(content_json['result']) == 0 or response.status_code == 404:
+        if ('result' in content_json and len(content_json['result']) == 0) or response.status_code == 404:
             if self.raise_on_empty is False:
                 content_json['result'] = [{}]
             else:
