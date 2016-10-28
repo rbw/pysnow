@@ -9,7 +9,7 @@ install:
   - pip install pysnow requests httpretty coverage python-coveralls nose
 # command to run tests
 script:
-  - nosetests --with-coverage --cover-package=pysnow
+  - nosetests --with-coverage --cover-package=pysnow --cover-erase
 after_success:
   - coveralls
 
