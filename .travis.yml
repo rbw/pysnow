@@ -6,7 +6,12 @@ python:
   - "3.5"
 # command to install dependencies
 install:
-  - pip install pysnow requests httpretty
+  - pip install pysnow requests httpretty coverage python-coveralls nose
 # command to run tests
-script: nosetests
+script:
+  - nosetests --with-coverage
+after_success:
+  - coveralls
+
+
 
