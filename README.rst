@@ -46,6 +46,9 @@ Basic usage
    # Update
    r.update({'this': 'that'})
 
+   # Attach
+   r.attach('path/to/somefile.txt')
+
    # Delete
    r.delete()
    
