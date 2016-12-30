@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+import ntpath
 import requests
 import json
 import itertools
@@ -201,6 +203,37 @@ class Request(object):
         response = self.session.put(self._get_url(self.table, sys_id), data=json.dumps(payload))
         return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
+    def attach(self, file):
+        """Attaches the queried record with `file` and returns the response after validating the response
+
+        :param file: File to attach to the record
+        :raises: `NoResults` exception if query returned no results
+        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :return: The attachment record metadata
+        """
+        try:
+            try:
+                sys_id = self.get_one()['sys_id']
+            except KeyError:
+                raise InvalidUsage('Attempted to update a non-existing record')
+        except MultipleResults:
+            raise NotImplementedError("Update of multiple records is not supported")
+
+        if not os.path.isfile(file):
+            raise InvalidUsage("Attachment '%s' must be an existing regular file" % file)
+
+        response = self.session.post(
+            self._get_attachment_url(),
+            data={
+                'table_name': self.table,
+                'table_sys_id': sys_id,
+                'file_name': ntpath.basename(file)
+            },
+            files={'file': open(file, 'rb')},
+            headers={'content-type': None}  # Temporarily override header
+        )
+        return self._get_content(response)
+
     def _get_content(self, response):
         """Checks for errors in the response. Returns response content, in bytes.
 
@@ -259,6 +292,24 @@ class Request(object):
             return "%s/%s" % (url_str, sys_id)
 
         return url_str
+
+    def _get_attachment_url(self, sys_id=None):
+        """Takes sys_id (if present), and returns an attachment URL
+
+        :param sys_id: Record sys_id
+        :return: url string
+        """
+        url_str = 'https://%(fqdn)s/%(base)s/attachment' % (
+            {
+                'fqdn': self.fqdn,
+                'base': self.base
+            }
+        )
+
+        if sys_id:
+            url_str = "%s/%s" % (url_str, sys_id)
+
+        return "%s/%s" % (url_str, "upload")
 
     def _get_formatted_query(self, fields):
         """
