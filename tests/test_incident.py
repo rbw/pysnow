@@ -26,6 +26,13 @@ class TestIncident(unittest.TestCase):
             'link_arg': '?page=2'
         }
 
+        # Mock attachment attributes
+        self.mock_attachment = {
+            'path': 'api/now/attachment/upload',
+            'sys_id': 'b39fb9c1db0032000062f34ebf96198b',
+            'file_name': 'example.txt',
+        }
+
         self.client = pysnow.Client(instance=self.mock_connection['instance'],
                                     user=self.mock_connection['user'],
                                     password=self.mock_connection['pass'],
@@ -347,6 +354,43 @@ class TestIncident(unittest.TestCase):
             self.assertEquals(True, False)
         except NotImplementedError:
             pass
+
+    @httpretty.activate
+    def test_attach_incident(self):
+        """
+        Attaches file to an existing incident. Checks for table_sys_id, file_name and status code 201
+        """
+        json_get_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
+        json_post_body = json.dumps(
+            {
+                'result':
+                 {
+                     'sys_id': self.mock_attachment['sys_id'],
+                     'table_sys_id': self.mock_incident['sys_id'],
+                     'file_name': self.mock_attachment['file_name']
+                 }
+            }
+        )
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_get_body,
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_attachment['path']),
+                               body=json_post_body,
+                               status=201,
+                               content_type="multipart/form-data")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        result = r.attach('tests/example.txt')
+
+        # Make sure we got an incident back with the expected sys_id
+        self.assertEquals(result['table_sys_id'], self.mock_incident['sys_id'])
+        self.assertEquals(result['file_name'], self.mock_attachment['file_name'])
+        self.assertEquals(r.status_code, 201)
 
     @httpretty.activate
     def test_delete_incident(self):
