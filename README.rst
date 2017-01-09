@@ -73,6 +73,7 @@ Contributors
 * jcpunk
 * AMMullan
 * amontalban
+* ryancurrah
 
 Author
 ------
