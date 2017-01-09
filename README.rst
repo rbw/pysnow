@@ -67,6 +67,13 @@ Tested: 2.7, 3.3, 3.4, 3.5
 Fails in some versions of 2.6 due to SSL issues.
 https://github.com/kennethreitz/requests/issues/2022
 
+Contributors
+------
+* lingfish
+* jcpunk
+* AMMullan
+* amontalban
+
 Author
 ------
 pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
