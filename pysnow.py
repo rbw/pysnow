@@ -264,14 +264,16 @@ class Request(object):
             'details': None
         }
 
-        content_json = response.json()
-
-        if 'error' in content_json:
-            e = content_json['error']
-            if 'message' in e:
-                server_error['summary'] = e['message']
-            if 'detail' in e:
-                server_error['details'] = e['detail']
+        try:
+            content_json = response.json()
+            if 'error' in content_json:
+                e = content_json['error']
+                if 'message' in e:
+                    server_error['summary'] = e['message']
+                if 'detail' in e:
+                    server_error['details'] = e['detail']
+        except ValueError:
+            pass
 
         if method == 'DELETE':
             # Make sure the delete operation returned the expected response
