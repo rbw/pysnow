@@ -261,7 +261,7 @@ class Request(object):
             if self.raise_on_empty is False:
                 content_json['result'] = [{}]
             else:
-                raise UnexpectedResponse('Query yielded no results')
+                raise NoResults('Query yielded no results')
         elif 'error' in content_json:
             raise UnexpectedResponse("ServiceNow responded (%i): %s" % (response.status_code,
                                                                         content_json['error']['message']))
