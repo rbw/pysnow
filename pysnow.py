@@ -12,7 +12,22 @@ __version__ = "0.2.1"
 
 
 class UnexpectedResponse(Exception):
-    pass
+    def __init__(self, code_expected, code_actual, http_method, error_summary, error_details):
+        if code_expected == code_actual:
+            message = "Unexpected response on HTTP %s from server: %s" % (
+                http_method,
+                error_summary
+            )
+        else:
+            message = "Unexpected HTTP %s response code. Expected %d, got %d" % (
+                http_method,
+                code_expected,
+                code_actual
+            )
+
+        super(UnexpectedResponse, self).__init__(message)
+        self.error_summary = error_summary
+        self.error_details = error_details
 
 
 class InvalidUsage(Exception):
@@ -244,18 +259,35 @@ class Request(object):
         method = response.request.method
         self.status_code = response.status_code
 
+        server_error = {
+            'summary': None,
+            'details': None
+        }
+
+        content_json = response.json()
+
+        if 'error' in content_json:
+            e = content_json['error']
+            if 'message' in e:
+                server_error['summary'] = e['message']
+            if 'detail' in e:
+                server_error['details'] = e['detail']
+
         if method == 'DELETE':
             # Make sure the delete operation returned the expected response
             if response.status_code == 204:
                 return {'success': True}
             else:
-                raise UnexpectedResponse("Unexpected HTTP response code. Expected: 204, got %d" % response.status_code)
+                raise UnexpectedResponse(
+                    204, response.status_code, method,
+                    server_error['summary'], server_error['details']
+                )
         # Make sure the POST operation returned the expected response
         elif method == 'POST' and response.status_code != 201:
-            raise UnexpectedResponse("Unexpected HTTP response code. Expected: 201, got %d" % response.status_code)
-
-        content_json = response.json()
-
+            raise UnexpectedResponse(
+                201, response.status_code, method,
+                server_error['summary'], server_error['details']
+            )
         # It seems that Helsinki and later returns status 200 instead of 404 on empty result sets
         if ('result' in content_json and len(content_json['result']) == 0) or response.status_code == 404:
             if self.raise_on_empty is False:
@@ -263,8 +295,10 @@ class Request(object):
             else:
                 raise NoResults('Query yielded no results')
         elif 'error' in content_json:
-            raise UnexpectedResponse("ServiceNow responded (%i): %s" % (response.status_code,
-                                                                        content_json['error']['message']))
+            raise UnexpectedResponse(
+                200, response.status_code, method,
+                server_error['summary'], server_error['details']
+            )
 
         return content_json['result']
 
