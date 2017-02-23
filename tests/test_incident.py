@@ -199,7 +199,7 @@ class TestIncident(unittest.TestCase):
         try:
             result = client.query(table='incident', query={'number': self.mock_incident['number']}).get_one()
             self.assertNotEquals(result, {})
-        except pysnow.UnexpectedResponse:
+        except pysnow.NoResults:
             pass
 
         client.raise_on_empty = False
