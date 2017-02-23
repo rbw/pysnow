@@ -34,7 +34,7 @@ Basic usage
 		     password='mypassword',
 		     raise_on_empty=True)
 
-   # Create new record and catch exceptions related to the server response
+   # Create new record and catch possible server response exceptions
    try:
        s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
    except pysnow.UnexpectedResponse as e:
