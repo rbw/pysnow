@@ -51,7 +51,7 @@ class NoResults(Exception):
 
 
 class Client(object):
-    def __init__(self, instance, user, password, raise_on_empty=True, default_payload=dict()):
+    def __init__(self, instance, user, password, raise_on_empty=True, default_payload=None):
         """Sets configuration and creates a session object used in `Request` later on
 
         :param instance: instance name, used to resolve FQDN in `Request`
@@ -65,7 +65,7 @@ class Client(object):
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
-        self.default_payload = default_payload
+        self.default_payload = default_payload or dict()
 
         # Sets default payload for all requests, i.e. sysparm_limit, sysparm_offset etc
         if not isinstance(self.default_payload, dict):
@@ -281,7 +281,7 @@ class Request(object):
                 if 'detail' in e:
                     server_error['details'] = e['detail']
         except ValueError:
-            pass
+            content_json = {}
 
         if method == 'DELETE':
             # Make sure the delete operation returned the expected response
@@ -383,4 +383,3 @@ class Request(object):
                 raise InvalidUsage("You must pass the fields as a list")
 
         return result
-
