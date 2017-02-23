@@ -12,6 +12,14 @@ __version__ = "0.2.1"
 
 
 class UnexpectedResponse(Exception):
+    """Informs the user about what went wrong when interfacing with the API
+
+    :param code_expected: Expected HTTP status code
+    :param code_actual: Actual HTTP status code
+    :param http_method: HTTP method used
+    :param error_summary: Summary of what went wrong
+    :param error_details: Details about the error
+    """
     def __init__(self, code_expected, code_actual, http_method, error_summary, error_details):
         if code_expected == code_actual:
             message = "Unexpected response on HTTP %s from server: %s" % (
