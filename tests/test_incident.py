@@ -233,17 +233,34 @@ class TestIncident(unittest.TestCase):
         """
         Update an incident and get an unexpected status code back, make sure it fails properly.
         """
-        json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
+        json_body = {
+            'result':
+                [
+                    {
+                        'sys_id': self.mock_incident['sys_id']
+                    }
+                ],
+            'error':
+                {
+                    'message': 'Error summary',
+                    'detail': 'Error detail '
+                }
+        }
+
         httpretty.register_uri(httpretty.POST,
                                "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
-                               body=json_body,
-                               status=200,
+                               body=json.dumps(json_body),
+                               status=403,
                                content_type="application/json")
 
         r = self.client._request('POST', 'incident')
+
         try:
             r.insert(payload={'field1': 'value1', 'field2': 'value2'})
-        except pysnow.UnexpectedResponse:
+        except pysnow.UnexpectedResponse as e:
+            # Make sure the exception object contains summary and details
+            self.assertEquals(e.error_summary, json_body['error']['message'])
+            self.assertEquals(e.error_details, json_body['error']['detail'])
             pass
 
     @httpretty.activate
@@ -414,7 +431,6 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
         result = r.delete()
 
-        # Make sure we got an incident back with the expected number and status code 201
         self.assertEquals(result['success'], True)
         self.assertEquals(r.status_code, 204)
 

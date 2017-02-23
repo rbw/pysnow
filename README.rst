@@ -34,8 +34,11 @@ Basic usage
 		     password='mypassword',
 		     raise_on_empty=True)
 
-   # Create a new record
-   s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
+   # Create new record and catch possible server response exceptions
+   try:
+       s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
+   except pysnow.UnexpectedResponse as e:
+       print("%s, details: %s" % (e.error_summary, e.error_details))
 
    # Create a `Request` object by querying for 'INC01234' on table 'incident'
    r = s.query(table='incident', query={'number': 'INC01234'})
@@ -51,7 +54,7 @@ Basic usage
 
    # Delete
    r.delete()
-   
+
    # Iterate over all records with state == 2 and print out number
    for record in s.query(table='incident', query={'state': 2}).get_all():
        print(record['number'])
