@@ -84,3 +84,18 @@ Deleting a record
         print("Record deleted")
 
 
+
+Catching server response errors
+-------------------------------
+
+`UnexpectedResponse` can be used with all CRUD methods and contains important information of what went wrong when interfacing with the API
+
+.. code-block:: python
+
+   # Create new record and catch possible server response exceptions
+   try:
+       s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
+   except pysnow.UnexpectedResponse as e:
+       print("%s, details: %s" % (e.error_summary, e.error_details))
+
+
