@@ -381,11 +381,11 @@ class TestIncident(unittest.TestCase):
         json_post_body = json.dumps(
             {
                 'result':
-                 {
-                     'sys_id': self.mock_attachment['sys_id'],
-                     'table_sys_id': self.mock_incident['sys_id'],
-                     'file_name': self.mock_attachment['file_name']
-                 }
+                    {
+                         'sys_id': self.mock_attachment['sys_id'],
+                         'table_sys_id': self.mock_incident['sys_id'],
+                         'file_name': self.mock_attachment['file_name']
+                    }
             }
         )
 
@@ -408,6 +408,114 @@ class TestIncident(unittest.TestCase):
         self.assertEquals(result['table_sys_id'], self.mock_incident['sys_id'])
         self.assertEquals(result['file_name'], self.mock_attachment['file_name'])
         self.assertEquals(r.status_code, 201)
+
+    @httpretty.activate
+    def test_attach_incident_non_existent(self):
+        """
+        Attempts to attach file to a non-existent incident
+        """
+        json_post_body = json.dumps(
+            {
+                'result':
+                    {
+                         'sys_id': self.mock_attachment['sys_id'],
+                         'table_sys_id': self.mock_incident['sys_id'],
+                         'file_name': self.mock_attachment['file_name']
+                    }
+            }
+        )
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({}),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_attachment['path']),
+                               body=json_post_body,
+                               status=201,
+                               content_type="multipart/form-data")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.attach('tests/example.txt')
+        except pysnow.InvalidUsage:
+            pass
+
+    @httpretty.activate
+    def test_attach_incident_non_file(self):
+        """
+        Attempts to attach a non-file to an incident
+        """
+        json_post_body = json.dumps(
+            {
+                'result':
+                    {
+                         'sys_id': self.mock_attachment['sys_id'],
+                         'table_sys_id': self.mock_incident['sys_id'],
+                         'file_name': self.mock_attachment['file_name']
+                    }
+            }
+        )
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({}),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_attachment['path']),
+                               body=json_post_body,
+                               status=201,
+                               content_type="multipart/form-data")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.attach('tests/non_existing_file.txt')
+            self.assertEquals(True, False)
+        except pysnow.InvalidUsage:
+            pass
+
+    @httpretty.activate
+    def test_attach_incident_multiple(self):
+        """
+        Make sure attach fails when getting multiple records back
+        """
+        json_get_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']},
+                                               {'sys_id': self.mock_incident['sys_id']}]})
+
+        json_post_body = json.dumps(
+            {
+                'result':
+                    {
+                         'sys_id': self.mock_attachment['sys_id'],
+                         'table_sys_id': self.mock_incident['sys_id'],
+                         'file_name': self.mock_attachment['file_name']
+                    }
+            }
+        )
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_get_body,
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_attachment['path']),
+                               body=json_post_body,
+                               status=201,
+                               content_type="multipart/form-data")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+
+        try:
+            r.attach('tests/example.txt')
+            self.assertEquals(True, False)
+        except NotImplementedError:
+            pass
 
     @httpretty.activate
     def test_delete_incident(self):
