@@ -82,6 +82,10 @@ Author
 ------
 pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
 
+Additional thanks
+-----------------
+Big thanks to JetBrains (www.jetbrains.com) for providing me with IDE licenses!
+
 Quick links
 -----------
 
