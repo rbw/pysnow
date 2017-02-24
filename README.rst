@@ -65,10 +65,7 @@ See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and 
 Compatibility
 -------------
 pysnow is compatible with both Python 2 and 3.
-Tested: 2.7, 3.3, 3.4, 3.5
-
-Fails in some versions of 2.6 due to SSL issues.
-https://github.com/kennethreitz/requests/issues/2022
+Automatically tested: 2.6, 2.7, 3.3, 3.4 and 3.5
 
 Contributors
 ------
@@ -82,9 +79,9 @@ Author
 ------
 pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
 
-Additional thanks
------------------
-Big thanks to JetBrains (www.jetbrains.com) for providing me with IDE licenses!
+Thank you JetBrains
+-------------------
+Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
 
 Quick links
 -----------
