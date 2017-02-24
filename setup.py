@@ -42,5 +42,5 @@ with io.open('README.rst') as readme:
             'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
             'Topic :: Software Development :: Libraries :: Python Modules'
         ],
-        license='GPLv2',
+        license='MIT',
     )
