@@ -21,8 +21,86 @@ Installation
 # pip install pysnow
 
 
-Basic usage
------------
+Setting up connection
+---------------------
+
+.. code-block:: python
+
+   import pysnow
+
+   # Create client object
+   s = pysnow.Client(instance='myinstance',
+		     user='myusername',
+		     password='mypassword',
+		     raise_on_empty=True)
+
+Querying
+--------
+
+Pysnow offers three different ways to create queries.
+
+- Query builder (Build complex queries in a logical manner)
+- Dict type queries (For simple query expressions)
+- String type queries (SN query pass-through, a little obscure)
+
+**Query builder**
+
+.. code-block:: python
+
+	import pysnow
+	from datetime import datetime as dt
+	from datetime import timedelta as td
+	
+	s = pysnow.Client(...)
+	
+	# Set start and end range
+	start = dt(1970, 1, 1)
+	end = dt.now() - td(days=20)
+	
+	# Query incident records with number starting with 'INC0123', created between 1970-01-01 and 20 days back in time
+	q = pysnow.Query()\
+	    .field('number').starts_with('INC0123')
+	    .AND()\
+	    .field('sys_created_on').between(start, end)
+	
+	r = s.query('incident', query=q)
+	
+	# Execute query and iterate over the results, returning only 'number', 'sys_created_on' and 'short_description'
+	for row in r.get_all(['number', 'sys_created_on', 'short_description']):
+	    print(row)
+
+**Dict type queries**
+
+.. code-block:: python
+
+	import pysnow
+	
+	s = pysnow.Client(...)
+	
+	# Query incident records with 'short_description' that equals 'Happy days'
+	r = s.query(table='incident', query={'short_description': 'Happy days'})
+	
+	# Execute query and iterate over the results returning all fields
+	for row in r.get_all():
+	    print(row)	
+
+**String type queries**
+
+.. code-block:: python	
+
+	import pysnow
+	
+	s = pysnow.Client(...)
+	
+	# Query incident records starting with 'INC012' or short_description containing 'test'
+	r = s.query(table='incident', query='numberSTARTSWITHINC012^ORshort_descriptionLIKEtest')
+	
+	# Execute query and iterate over the results returning all fields
+	for row in r.get_all():
+	    print(row)    
+
+Misc usage
+----------
 
 .. code-block:: python
 
