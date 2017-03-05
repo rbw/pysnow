@@ -56,6 +56,7 @@ class InvalidQuery(Exception):
 
 class Query(object):
     def __init__(self):
+        """Creates a query object"""
         self._query = []
         self.current_field = None
         self.c_oper = None
@@ -98,6 +99,13 @@ class Query(object):
         return self._add_condition('<', value, types=[int])
 
     def between(self, start, end):
+        """ between() - takes filter / condition based on a datetime or integer range
+
+        :param start: `int` or `datetime` object
+        :param end: `int` or `datetime` object
+        :raises: `TypeError` if start or end arguments is of an invalid type
+        :return: self
+        """
         if hasattr(start, 'strftime') and hasattr(end, 'strftime'):
             dt_between = (
               'javascript:gs.dateGenerate("%(start)s")'
@@ -116,10 +124,25 @@ class Query(object):
         return self._add_condition('BETWEEN', dt_between, types=[str])
 
     def field(self, field):
+        """ Sets current field
+
+        :param field: field (str) to operate on
+        :return: self
+        """
         self.current_field = field
         return self
 
     def _add_condition(self, operator, value, types):
+        """ Appends condition to self._query after performing validation
+
+        :param operator: operator (str)
+        :param value: value / operand
+        :param types: allowed types
+        :raises: `InvalidQuery` if a field hasn't been set
+        :raises: `InvalidQuery` if a condition already has been set
+        :raises: `TypeError` if the value is of an unexpected type
+        :return: self
+        """
         if not self.current_field:
             raise InvalidQuery("Conditions requires a field()")
         elif not type(value) in types:
@@ -136,6 +159,12 @@ class Query(object):
         return self
 
     def _add_logical_operator(self, operator):
+        """ Adds a logical operator between conditions in query
+
+        :param operator: logical operator (str)
+        :raises: `InvalidQuery` if a condition hasn't been set
+        :return: self
+        """
         if not self.c_oper:
             raise InvalidQuery("Logical operators must be preceded by a condition")
 
@@ -147,6 +176,12 @@ class Query(object):
         return self
 
     def __str__(self):
+        """ String representation of the query object
+        :raises: `InvalidQuery` if there's no condition defined
+        :raises: `InvalidQuery` if field() hasn't been set
+        :raises: `InvalidQuery` if a condition hasn't been set
+        :return: Query string
+        """
         if len(self._query) == 0:
             raise InvalidQuery("At least one condition is required")
         elif self.current_field is None:
