@@ -79,15 +79,15 @@ class Query(object):
         self.l_oper = None
 
     def AND(self):
-        """Logical AND for use between query expressions"""
+        """Logical operator for use between conditions"""
         return self._add_logical_operator('^')
 
     def OR(self):
-        """Logical OR for use between query expressions"""
+        """Logical operator for use between conditions"""
         return self._add_logical_operator('^OR')
 
     def NQ(self):
-        """Logical NQ for use between query expressions"""
+        """Logical operator for use between conditions"""
         return self._add_logical_operator('^NQ')
 
     def starts_with(self, value):
