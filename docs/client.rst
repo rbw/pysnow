@@ -2,7 +2,6 @@
 =================================================
 
 .. automodule:: pysnow
-
 .. autoclass:: Client
     :members:
 

@@ -119,7 +119,8 @@ class Query(object):
 
         :param start: `int` or `datetime` object
         :param end: `int` or `datetime` object
-        :raises: `QueryTypeError` if start or end arguments is of an invalid type
+        :raise:
+            :QueryTypeError: if start or end arguments is of an invalid type
         :return: self
         """
         if hasattr(start, 'strftime') and hasattr(end, 'strftime'):
@@ -154,9 +155,10 @@ class Query(object):
         :param operator: operator (str)
         :param value: value / operand
         :param types: allowed types
-        :raises: `QueryMissingField` if a field hasn't been set
-        :raises: `QueryMultipleConditions` if a condition already has been set
-        :raises: `QueryTypeError` if the value is of an unexpected type
+        :raise:
+            :QueryMissingField: if a field hasn't been set
+            :QueryMultipleConditions: if a condition already has been set
+            :QueryTypeError: if the value is of an unexpected type
         :return: self
         """
         if not self.current_field:
@@ -178,7 +180,8 @@ class Query(object):
         """ Adds a logical operator between conditions in query
 
         :param operator: logical operator (str)
-        :raises: `QueryConditionError` if a condition hasn't been set
+        :raise:
+            :QueryConditionError: if a condition hasn't been set
         :return: self
         """
         if not self.c_oper:
@@ -193,9 +196,10 @@ class Query(object):
 
     def __str__(self):
         """ String representation of the query object
-        :raises: `QueryEmpty` if there's no condition defined
-        :raises: `QueryMissingField` if field() hasn't been set
-        :raises: `QueryConditionError` if a condition hasn't been set
+        :raise:
+            :QueryEmpty: if there's no condition defined
+            :QueryMissingField: if field() hasn't been set
+            :QueryConditionError: if a condition hasn't been set
         :return: Query string
         """
         if len(self._query) == 0:
@@ -325,7 +329,8 @@ class Request(object):
         """Convenience function for queries returning only one result. Validates response before returning.
 
         :param fields: List of fields to return in the result
-        :raises: Raises MultipleResults exception if more than one match is found
+        :raise:
+            :MultipleResults: if more than one match is found
         :return: Record content
         """
         response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
@@ -348,8 +353,9 @@ class Request(object):
     def delete(self):
         """Deletes the queried record and returns response content after response validation
 
-        :raises: `NoResults` exception if query returned no results
-        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :raise:
+            :NoResults: if query returned no results
+            :NotImplementedError: if query returned more than one result (currently not supported)
         :return: Delete response content (Generally always {'Success': True})
         """
         try:
@@ -366,8 +372,9 @@ class Request(object):
         """Updates the queried record with `payload` and returns the updated record after validating the response
 
         :param payload: Payload to update the record with
-        :raises: `NoResults` exception if query returned no results
-        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :raise:
+            :NoResults: if query returned no results
+            :NotImplementedError: if query returned more than one result (currently not supported)
         :return: The updated record
         """
         try:
@@ -388,8 +395,9 @@ class Request(object):
         """Attaches the queried record with `file` and returns the response after validating the response
 
         :param file: File to attach to the record
-        :raises: `NoResults` exception if query returned no results
-        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :raise:
+            :NoResults: if query returned no results
+            :NotImplementedError: if query returned more than one result (currently not supported)
         :return: The attachment record metadata
         """
         try:
@@ -419,7 +427,8 @@ class Request(object):
         """Checks for errors in the response. Returns response content, in bytes.
 
         :param response: response object
-        :raises: `UnexpectedResponse` if the server responded with an unexpected response
+        :raise:
+            :UnexpectedResponse: if the server responded with an unexpected response
         :return: ServiceNow response content
         """
         method = response.request.method
