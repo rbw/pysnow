@@ -59,7 +59,7 @@ Pysnow offers three different ways to create queries.
 	
 	# Query incident records with number starting with 'INC0123', created between 1970-01-01 and 20 days back in time
 	q = pysnow.Query()\
-	    .field('number').starts_with('INC0123')
+	    .field('number').starts_with('INC0123')\
 	    .AND()\
 	    .field('sys_created_on').between(start, end)
 	
