@@ -58,7 +58,6 @@ class Query(object):
     def __init__(self):
         self._query = []
         self.current_field = None
-
         self.c_oper = None
         self.l_oper = None
 
@@ -72,52 +71,68 @@ class Query(object):
         return self._add_logical_operator('^NQ')
 
     def starts_with(self, value):
-        return self._add_condition('STARTSWITH', value)
+        return self._add_condition('STARTSWITH', value, types=[str])
 
     def ends_with(self, value):
-        return self._add_condition('ENDS_WITH', value)
+        return self._add_condition('ENDSWITH', value, types=[str])
 
     def contains(self, value):
-        return self._add_condition('LIKE', value)
+        return self._add_condition('LIKE', value, types=[str])
 
     def not_contains(self, value):
-        return self._add_condition('NOTLIKE', value)
+        return self._add_condition('NOTLIKE', value, types=[int, str])
 
     def is_empty(self):
-        return self._add_condition('ISEMPTY')
+        return self._add_condition('ISEMPTY', operand='', types=[str, int])
 
     def equals(self, value):
-        return self._add_condition('=', value)
+        return self._add_condition('=', value, types=[int, str])
 
     def not_equals(self, value):
-        return self._add_condition('!=', value)
+        return self._add_condition('!=', value, types=[int, str])
 
     def greater_than(self, value):
-        return self._add_condition('>', value)
+        return self._add_condition('>', value, types=[int])
 
     def less_than(self, value):
-        return self._add_condition('<', value)
+        return self._add_condition('<', value, types=[int])
 
-    def between(self, field, start, end):
+    def between(self, start, end):
         if hasattr(start, 'strftime') and hasattr(end, 'strftime'):
             dt_between = (
-              "BETWEEN"
-              "javascript:gs.dateGenerate('%(start)s')"
+              'javascript:gs.dateGenerate("%(start)s")'
               "@"
-              "javascript:gs.dateGenerate('%(end)s')"
+              'javascript:gs.dateGenerate("%(end)s")'
             ) % {
               'start': start.strftime('%Y-%m-%d %H:%M:%S'),
               'end': end.strftime('%Y-%m-%d %H:%M:%S')
             }
-            return self._add_condition(field, dt_between)
         elif isinstance(start, int) and isinstance(end, int):
-            return self._add_condition(field, "%d@%d" % (start, end))
+            dt_between = '%d@%d' % (start, end)
         else:
             raise TypeError("Expected `start` and `end` of type `int` "
                             "or instance of `datetime`, not %s and %s" % (type(start), type(end)))
 
+        return self._add_condition('BETWEEN', dt_between, types=[str])
+
     def field(self, field):
         self.current_field = field
+        return self
+
+    def _add_condition(self, operator, value, types):
+        if not self.current_field:
+            raise InvalidQuery("Conditions requires a field()")
+        elif not type(value) in types:
+            caller = inspect.currentframe().f_back.f_code.co_name
+            raise TypeError("Invalid type passed to %s() , expected: %s" % (caller, types))
+        elif self.c_oper:
+            raise InvalidQuery("Expected logical operator after condition")
+
+        self.c_oper = inspect.currentframe().f_back.f_code.co_name
+        self._query.append("%(current_field)s%(operator)s%(value)s" % {
+                               'current_field': self.current_field,
+                               'operator': operator,
+                               'value': value})
         return self
 
     def _add_logical_operator(self, operator):
@@ -131,18 +146,7 @@ class Query(object):
         self._query.append(operator)
         return self
 
-    def _add_condition(self, operator, value=''):
-        if not self.current_field:
-            raise InvalidQuery("Conditions requires a field()")
-        elif self.c_oper:
-            raise InvalidQuery("Expected logical operator after condition")
-
-        self.c_oper = inspect.currentframe().f_back.f_code.co_name
-        self._query.append(self.current_field + operator + value)
-        return self
-
-    @property
-    def query(self):
+    def __str__(self):
         if len(self._query) == 0:
             raise InvalidQuery("At least one condition is required")
         elif self.current_field is None:
@@ -150,7 +154,7 @@ class Query(object):
         elif self.c_oper is None:
             raise InvalidQuery("field() expects a condition")
 
-        return self._query
+        return str().join(self._query)
 
 
 class Client(object):
@@ -464,7 +468,9 @@ class Request(object):
         :return: ServiceNow query
         """
 
-        if isinstance(self.query, dict):  # Dict-type query
+        if isinstance(self.query, Query):
+            sysparm_query = str(self.query)
+        elif isinstance(self.query, dict):  # Dict-type query
             try:
                 items = self.query.iteritems()  # Python 2
             except AttributeError:
