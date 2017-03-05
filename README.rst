@@ -43,7 +43,7 @@ Pysnow offers three different ways to create queries.
 - Dict type queries (For simple query expressions)
 - String type queries (SN query pass-through, a little obscure)
 
-**Query builder**
+**Using the query builder**
 
 .. code-block:: python
 
