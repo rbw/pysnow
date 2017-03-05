@@ -5,10 +5,10 @@ import ntpath
 import requests
 import json
 import itertools
-from requests.auth import HTTPBasicAuth
+import inspect
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 
 
 class UnexpectedResponse(Exception):
@@ -50,6 +50,168 @@ class NoResults(Exception):
     pass
 
 
+class QueryTypeError(TypeError):
+    pass
+
+
+class QueryMissingField(Exception):
+    pass
+
+
+class QueryEmpty(Exception):
+    pass
+
+
+class QueryConditionError(Exception):
+    pass
+
+
+class QueryMultipleConditions(Exception):
+    pass
+
+
+class Query(object):
+    def __init__(self):
+        """Creates a query object"""
+        self._query = []
+        self.current_field = None
+        self.c_oper = None
+        self.l_oper = None
+
+    def AND(self):
+        return self._add_logical_operator('^')
+
+    def OR(self):
+        return self._add_logical_operator('^OR')
+
+    def NQ(self):
+        return self._add_logical_operator('^NQ')
+
+    def starts_with(self, value):
+        return self._add_condition('STARTSWITH', value, types=[str])
+
+    def ends_with(self, value):
+        return self._add_condition('ENDSWITH', value, types=[str])
+
+    def contains(self, value):
+        return self._add_condition('LIKE', value, types=[str])
+
+    def not_contains(self, value):
+        return self._add_condition('NOTLIKE', value, types=[str])
+
+    def is_empty(self):
+        return self._add_condition('ISEMPTY', '', types=[str, int])
+
+    def equals(self, value):
+        return self._add_condition('=', value, types=[int, str])
+
+    def not_equals(self, value):
+        return self._add_condition('!=', value, types=[int, str])
+
+    def greater_than(self, value):
+        return self._add_condition('>', value, types=[int])
+
+    def less_than(self, value):
+        return self._add_condition('<', value, types=[int])
+
+    def between(self, start, end):
+        """ between() - takes filter / condition based on a datetime or integer range
+
+        :param start: `int` or `datetime` object
+        :param end: `int` or `datetime` object
+        :raise:
+            :QueryTypeError: if start or end arguments is of an invalid type
+        :return: self
+        """
+        if hasattr(start, 'strftime') and hasattr(end, 'strftime'):
+            dt_between = (
+              'javascript:gs.dateGenerate("%(start)s")'
+              "@"
+              'javascript:gs.dateGenerate("%(end)s")'
+            ) % {
+              'start': start.strftime('%Y-%m-%d %H:%M:%S'),
+              'end': end.strftime('%Y-%m-%d %H:%M:%S')
+            }
+        elif isinstance(start, int) and isinstance(end, int):
+            dt_between = '%d@%d' % (start, end)
+        else:
+            raise QueryTypeError("Expected `start` and `end` of type `int` "
+                                 "or instance of `datetime`, not %s and %s" % (type(start), type(end)))
+
+        return self._add_condition('BETWEEN', dt_between, types=[str])
+
+    def field(self, field):
+        """ Sets current field
+
+        :param field: field (str) to operate on
+        :return: self
+        """
+        self.current_field = field
+        return self
+
+    def _add_condition(self, operator, value, types):
+        """ Appends condition to self._query after performing validation
+
+        :param operator: operator (str)
+        :param value: value / operand
+        :param types: allowed types
+        :raise:
+            :QueryMissingField: if a field hasn't been set
+            :QueryMultipleConditions: if a condition already has been set
+            :QueryTypeError: if the value is of an unexpected type
+        :return: self
+        """
+        if not self.current_field:
+            raise QueryMissingField("Conditions requires a field()")
+        elif not type(value) in types:
+            caller = inspect.currentframe().f_back.f_code.co_name
+            raise QueryTypeError("Invalid type passed to %s() , expected: %s" % (caller, types))
+        elif self.c_oper:
+            raise QueryMultipleConditions("Expected logical operator after condition")
+
+        self.c_oper = inspect.currentframe().f_back.f_code.co_name
+        self._query.append("%(current_field)s%(operator)s%(value)s" % {
+                               'current_field': self.current_field,
+                               'operator': operator,
+                               'value': value})
+        return self
+
+    def _add_logical_operator(self, operator):
+        """ Adds a logical operator between conditions in query
+
+        :param operator: logical operator (str)
+        :raise:
+            :QueryConditionError: if a condition hasn't been set
+        :return: self
+        """
+        if not self.c_oper:
+            raise QueryConditionError("Logical operators must be preceded by a condition")
+
+        self.current_field = None
+        self.c_oper = None
+
+        self.l_oper = inspect.currentframe().f_back.f_code.co_name
+        self._query.append(operator)
+        return self
+
+    def __str__(self):
+        """ String representation of the query object
+        :raise:
+            :QueryEmpty: if there's no condition defined
+            :QueryMissingField: if field() hasn't been set
+            :QueryConditionError: if a condition hasn't been set
+        :return: Query string
+        """
+        if len(self._query) == 0:
+            raise QueryEmpty("At least one condition is required")
+        elif self.current_field is None:
+            raise QueryMissingField("Logical operator expects a field()")
+        elif self.c_oper is None:
+            raise QueryConditionError("field() expects a condition")
+
+        return str().join(self._query)
+
+
 class Client(object):
     def __init__(self, instance, user, password, raise_on_empty=True, default_payload=None):
         """Sets configuration and creates a session object used in `Request` later on
@@ -80,7 +242,7 @@ class Client(object):
         :return: session object
         """
         s = requests.Session()
-        s.auth = HTTPBasicAuth(self._user, self._password)
+        s.auth = requests.auth.HTTPBasicAuth(self._user, self._password)
         s.headers.update({'content-type': 'application/json', 'accept': 'application/json'})
         return s
 
@@ -167,7 +329,8 @@ class Request(object):
         """Convenience function for queries returning only one result. Validates response before returning.
 
         :param fields: List of fields to return in the result
-        :raises: Raises MultipleResults exception if more than one match is found
+        :raise:
+            :MultipleResults: if more than one match is found
         :return: Record content
         """
         response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
@@ -190,8 +353,9 @@ class Request(object):
     def delete(self):
         """Deletes the queried record and returns response content after response validation
 
-        :raises: `NoResults` exception if query returned no results
-        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :raise:
+            :NoResults: if query returned no results
+            :NotImplementedError: if query returned more than one result (currently not supported)
         :return: Delete response content (Generally always {'Success': True})
         """
         try:
@@ -208,8 +372,9 @@ class Request(object):
         """Updates the queried record with `payload` and returns the updated record after validating the response
 
         :param payload: Payload to update the record with
-        :raises: `NoResults` exception if query returned no results
-        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :raise:
+            :NoResults: if query returned no results
+            :NotImplementedError: if query returned more than one result (currently not supported)
         :return: The updated record
         """
         try:
@@ -230,8 +395,9 @@ class Request(object):
         """Attaches the queried record with `file` and returns the response after validating the response
 
         :param file: File to attach to the record
-        :raises: `NoResults` exception if query returned no results
-        :raises: `NotImplementedError` if query returned more than one result (currently not supported)
+        :raise:
+            :NoResults: if query returned no results
+            :NotImplementedError: if query returned more than one result (currently not supported)
         :return: The attachment record metadata
         """
         try:
@@ -261,7 +427,8 @@ class Request(object):
         """Checks for errors in the response. Returns response content, in bytes.
 
         :param response: response object
-        :raises: `UnexpectedResponse` if the server responded with an unexpected response
+        :raise:
+            :UnexpectedResponse: if the server responded with an unexpected response
         :return: ServiceNow response content
         """
         method = response.request.method
@@ -361,7 +528,9 @@ class Request(object):
         :return: ServiceNow query
         """
 
-        if isinstance(self.query, dict):  # Dict-type query
+        if isinstance(self.query, Query):
+            sysparm_query = str(self.query)
+        elif isinstance(self.query, dict):  # Dict-type query
             try:
                 items = self.query.iteritems()  # Python 2
             except AttributeError:
