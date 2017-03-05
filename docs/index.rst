@@ -14,6 +14,7 @@ The REST API is active by default in all instances, starting with the Eureka rel
 
    examples
    client
+   query
    request
 
 
