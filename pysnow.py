@@ -72,50 +72,62 @@ class QueryMultipleConditions(Exception):
 
 class Query(object):
     def __init__(self):
-        """Creates a query object"""
+        """Create complex queries in a logical manner"""
         self._query = []
         self.current_field = None
         self.c_oper = None
         self.l_oper = None
 
     def AND(self):
+        """Logical AND for use between query expressions"""
         return self._add_logical_operator('^')
 
     def OR(self):
+        """Logical OR for use between query expressions"""
         return self._add_logical_operator('^OR')
 
     def NQ(self):
+        """Logical NQ for use between query expressions"""
         return self._add_logical_operator('^NQ')
 
     def starts_with(self, value):
+        """Query records with the given field starting with the value specified"""
         return self._add_condition('STARTSWITH', value, types=[str])
 
     def ends_with(self, value):
+        """Query records with the given field ending with the value specified"""
         return self._add_condition('ENDSWITH', value, types=[str])
 
     def contains(self, value):
+        """Query records with the given field containing the value specified"""
         return self._add_condition('LIKE', value, types=[str])
 
     def not_contains(self, value):
+        """Query records with the given field not containing the value specified"""
         return self._add_condition('NOTLIKE', value, types=[str])
 
     def is_empty(self):
+        """Query records with the given field empty"""
         return self._add_condition('ISEMPTY', '', types=[str, int])
 
     def equals(self, value):
+        """Query records with the given field equalling the value specified"""
         return self._add_condition('=', value, types=[int, str])
 
     def not_equals(self, value):
+        """Query records with the given field not equalling the value specified"""
         return self._add_condition('!=', value, types=[int, str])
 
     def greater_than(self, value):
+        """Query records with the given field greater than the value specified"""
         return self._add_condition('>', value, types=[int])
 
     def less_than(self, value):
+        """Query records with the given field less than the value specified"""
         return self._add_condition('<', value, types=[int])
 
     def between(self, start, end):
-        """ between() - takes filter / condition based on a datetime or integer range
+        """ Takes filter / condition based on a datetime or integer range
 
         :param start: `int` or `datetime` object
         :param end: `int` or `datetime` object
