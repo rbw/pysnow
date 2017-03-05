@@ -50,7 +50,23 @@ class NoResults(Exception):
     pass
 
 
-class InvalidQuery(Exception):
+class QueryTypeError(TypeError):
+    pass
+
+
+class QueryMissingField(Exception):
+    pass
+
+
+class QueryEmpty(Exception):
+    pass
+
+
+class QueryConditionError(Exception):
+    pass
+
+
+class QueryMultipleConditions(Exception):
     pass
 
 
@@ -81,10 +97,10 @@ class Query(object):
         return self._add_condition('LIKE', value, types=[str])
 
     def not_contains(self, value):
-        return self._add_condition('NOTLIKE', value, types=[int, str])
+        return self._add_condition('NOTLIKE', value, types=[str])
 
     def is_empty(self):
-        return self._add_condition('ISEMPTY', operand='', types=[str, int])
+        return self._add_condition('ISEMPTY', '', types=[str, int])
 
     def equals(self, value):
         return self._add_condition('=', value, types=[int, str])
@@ -103,7 +119,7 @@ class Query(object):
 
         :param start: `int` or `datetime` object
         :param end: `int` or `datetime` object
-        :raises: `TypeError` if start or end arguments is of an invalid type
+        :raises: `QueryTypeError` if start or end arguments is of an invalid type
         :return: self
         """
         if hasattr(start, 'strftime') and hasattr(end, 'strftime'):
@@ -118,8 +134,8 @@ class Query(object):
         elif isinstance(start, int) and isinstance(end, int):
             dt_between = '%d@%d' % (start, end)
         else:
-            raise TypeError("Expected `start` and `end` of type `int` "
-                            "or instance of `datetime`, not %s and %s" % (type(start), type(end)))
+            raise QueryTypeError("Expected `start` and `end` of type `int` "
+                                 "or instance of `datetime`, not %s and %s" % (type(start), type(end)))
 
         return self._add_condition('BETWEEN', dt_between, types=[str])
 
@@ -138,18 +154,18 @@ class Query(object):
         :param operator: operator (str)
         :param value: value / operand
         :param types: allowed types
-        :raises: `InvalidQuery` if a field hasn't been set
-        :raises: `InvalidQuery` if a condition already has been set
-        :raises: `TypeError` if the value is of an unexpected type
+        :raises: `QueryMissingField` if a field hasn't been set
+        :raises: `QueryMultipleConditions` if a condition already has been set
+        :raises: `QueryTypeError` if the value is of an unexpected type
         :return: self
         """
         if not self.current_field:
-            raise InvalidQuery("Conditions requires a field()")
+            raise QueryMissingField("Conditions requires a field()")
         elif not type(value) in types:
             caller = inspect.currentframe().f_back.f_code.co_name
-            raise TypeError("Invalid type passed to %s() , expected: %s" % (caller, types))
+            raise QueryTypeError("Invalid type passed to %s() , expected: %s" % (caller, types))
         elif self.c_oper:
-            raise InvalidQuery("Expected logical operator after condition")
+            raise QueryMultipleConditions("Expected logical operator after condition")
 
         self.c_oper = inspect.currentframe().f_back.f_code.co_name
         self._query.append("%(current_field)s%(operator)s%(value)s" % {
@@ -162,11 +178,11 @@ class Query(object):
         """ Adds a logical operator between conditions in query
 
         :param operator: logical operator (str)
-        :raises: `InvalidQuery` if a condition hasn't been set
+        :raises: `QueryConditionError` if a condition hasn't been set
         :return: self
         """
         if not self.c_oper:
-            raise InvalidQuery("Logical operators must be preceded by a condition")
+            raise QueryConditionError("Logical operators must be preceded by a condition")
 
         self.current_field = None
         self.c_oper = None
@@ -177,17 +193,17 @@ class Query(object):
 
     def __str__(self):
         """ String representation of the query object
-        :raises: `InvalidQuery` if there's no condition defined
-        :raises: `InvalidQuery` if field() hasn't been set
-        :raises: `InvalidQuery` if a condition hasn't been set
+        :raises: `QueryEmpty` if there's no condition defined
+        :raises: `QueryMissingField` if field() hasn't been set
+        :raises: `QueryConditionError` if a condition hasn't been set
         :return: Query string
         """
         if len(self._query) == 0:
-            raise InvalidQuery("At least one condition is required")
+            raise QueryEmpty("At least one condition is required")
         elif self.current_field is None:
-            raise InvalidQuery("Logical operator expects a field()")
+            raise QueryMissingField("Logical operator expects a field()")
         elif self.c_oper is None:
-            raise InvalidQuery("field() expects a condition")
+            raise QueryConditionError("field() expects a condition")
 
         return str().join(self._query)
 
