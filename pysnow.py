@@ -5,10 +5,10 @@ import ntpath
 import requests
 import json
 import itertools
-from requests.auth import HTTPBasicAuth
+import inspect
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 
 
 class UnexpectedResponse(Exception):
@@ -50,6 +50,109 @@ class NoResults(Exception):
     pass
 
 
+class InvalidQuery(Exception):
+    pass
+
+
+class Query(object):
+    def __init__(self):
+        self._query = []
+        self.current_field = None
+
+        self.c_oper = None
+        self.l_oper = None
+
+    def AND(self):
+        return self._add_logical_operator('^')
+
+    def OR(self):
+        return self._add_logical_operator('^OR')
+
+    def NQ(self):
+        return self._add_logical_operator('^NQ')
+
+    def starts_with(self, value):
+        return self._add_condition('STARTSWITH', value)
+
+    def ends_with(self, value):
+        return self._add_condition('ENDS_WITH', value)
+
+    def contains(self, value):
+        return self._add_condition('LIKE', value)
+
+    def not_contains(self, value):
+        return self._add_condition('NOTLIKE', value)
+
+    def is_empty(self):
+        return self._add_condition('ISEMPTY')
+
+    def equals(self, value):
+        return self._add_condition('=', value)
+
+    def not_equals(self, value):
+        return self._add_condition('!=', value)
+
+    def greater_than(self, value):
+        return self._add_condition('>', value)
+
+    def less_than(self, value):
+        return self._add_condition('<', value)
+
+    def between(self, field, start, end):
+        if hasattr(start, 'strftime') and hasattr(end, 'strftime'):
+            dt_between = (
+              "BETWEEN"
+              "javascript:gs.dateGenerate('%(start)s')"
+              "@"
+              "javascript:gs.dateGenerate('%(end)s')"
+            ) % {
+              'start': start.strftime('%Y-%m-%d %H:%M:%S'),
+              'end': end.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            return self._add_condition(field, dt_between)
+        elif isinstance(start, int) and isinstance(end, int):
+            return self._add_condition(field, "%d@%d" % (start, end))
+        else:
+            raise TypeError("Expected `start` and `end` of type `int` "
+                            "or instance of `datetime`, not %s and %s" % (type(start), type(end)))
+
+    def field(self, field):
+        self.current_field = field
+        return self
+
+    def _add_logical_operator(self, operator):
+        if not self.c_oper:
+            raise InvalidQuery("Logical operators must be preceded by a condition")
+
+        self.current_field = None
+        self.c_oper = None
+
+        self.l_oper = inspect.currentframe().f_back.f_code.co_name
+        self._query.append(operator)
+        return self
+
+    def _add_condition(self, operator, value=''):
+        if not self.current_field:
+            raise InvalidQuery("Conditions requires a field()")
+        elif self.c_oper:
+            raise InvalidQuery("Expected logical operator after condition")
+
+        self.c_oper = inspect.currentframe().f_back.f_code.co_name
+        self._query.append(self.current_field + operator + value)
+        return self
+
+    @property
+    def query(self):
+        if len(self._query) == 0:
+            raise InvalidQuery("At least one condition is required")
+        elif self.current_field is None:
+            raise InvalidQuery("Logical operator expects a field()")
+        elif self.c_oper is None:
+            raise InvalidQuery("field() expects a condition")
+
+        return self._query
+
+
 class Client(object):
     def __init__(self, instance, user, password, raise_on_empty=True, default_payload=None):
         """Sets configuration and creates a session object used in `Request` later on
@@ -80,7 +183,7 @@ class Client(object):
         :return: session object
         """
         s = requests.Session()
-        s.auth = HTTPBasicAuth(self._user, self._password)
+        s.auth = requests.auth.HTTPBasicAuth(self._user, self._password)
         s.headers.update({'content-type': 'application/json', 'accept': 'application/json'})
         return s
 
