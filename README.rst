@@ -47,8 +47,8 @@ Creating the `Client` object
 Querying
 --------
 
-Although optional, queries offers a simple way to specify what you're after.
-
+ | Although optional, queries is a simple and powerful way to specify what you're after.
+ \ Pysnow offers 3 ways to query the SN REST API.
 - Using the `Query` builder (For complex queries)
 - Dict type queries (For simple queries, i.e. `equals`)
 - SN Pass-through type queries (...)
