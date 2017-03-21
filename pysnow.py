@@ -62,33 +62,42 @@ class QueryEmpty(Exception):
     pass
 
 
-class QueryConditionError(Exception):
+class QueryExpressionError(Exception):
     pass
 
 
-class QueryMultipleConditions(Exception):
+class QueryMultipleExpressions(Exception):
     pass
 
 
 class Query(object):
     def __init__(self):
-        """Create complex queries in a logical manner"""
+        """The Query builder"""
         self._query = []
         self.current_field = None
         self.c_oper = None
         self.l_oper = None
 
     def AND(self):
-        """Logical operator for use between conditions"""
+        """AND operator for use between expressions"""
         return self._add_logical_operator('^')
 
     def OR(self):
-        """Logical operator for use between conditions"""
+        """OR operator for use between expressions"""
         return self._add_logical_operator('^OR')
 
     def NQ(self):
-        """Logical operator for use between conditions"""
+        """NQ operator for use between expressions"""
         return self._add_logical_operator('^NQ')
+
+    def field(self, field):
+        """ Sets the field to operate on
+
+        :param field: field (str) to operate on
+        :return: self
+        """
+        self.current_field = field
+        return self
 
     def starts_with(self, value):
         """Query records with the given field starting with the value specified"""
@@ -127,7 +136,7 @@ class Query(object):
         return self._add_condition('<', value, types=[int])
 
     def between(self, start, end):
-        """ Takes filter / condition based on a datetime or integer range
+        """Query records in a start and end range
 
         :param start: `int` or `datetime` object
         :param end: `int` or `datetime` object
@@ -152,15 +161,6 @@ class Query(object):
 
         return self._add_condition('BETWEEN', dt_between, types=[str])
 
-    def field(self, field):
-        """ Sets current field
-
-        :param field: field (str) to operate on
-        :return: self
-        """
-        self.current_field = field
-        return self
-
     def _add_condition(self, operator, value, types):
         """ Appends condition to self._query after performing validation
 
@@ -169,17 +169,17 @@ class Query(object):
         :param types: allowed types
         :raise:
             :QueryMissingField: if a field hasn't been set
-            :QueryMultipleConditions: if a condition already has been set
+            :QueryMultipleExpressions: if a condition already has been set
             :QueryTypeError: if the value is of an unexpected type
         :return: self
         """
         if not self.current_field:
-            raise QueryMissingField("Conditions requires a field()")
+            raise QueryMissingField("Expressions requires a field()")
         elif not type(value) in types:
             caller = inspect.currentframe().f_back.f_code.co_name
             raise QueryTypeError("Invalid type passed to %s() , expected: %s" % (caller, types))
         elif self.c_oper:
-            raise QueryMultipleConditions("Expected logical operator after condition")
+            raise QueryMultipleExpressions("Expected logical operator after expression")
 
         self.c_oper = inspect.currentframe().f_back.f_code.co_name
         self._query.append("%(current_field)s%(operator)s%(value)s" % {
@@ -189,15 +189,15 @@ class Query(object):
         return self
 
     def _add_logical_operator(self, operator):
-        """ Adds a logical operator between conditions in query
+        """ Adds a logical operator between expressions in query
 
         :param operator: logical operator (str)
         :raise:
-            :QueryConditionError: if a condition hasn't been set
+            :QueryExpressionError: if a expression hasn't been set
         :return: self
         """
         if not self.c_oper:
-            raise QueryConditionError("Logical operators must be preceded by a condition")
+            raise QueryExpressionError("Logical operators must be preceded by a expression")
 
         self.current_field = None
         self.c_oper = None
@@ -209,17 +209,17 @@ class Query(object):
     def __str__(self):
         """ String representation of the query object
         :raise:
-            :QueryEmpty: if there's no condition defined
+            :QueryEmpty: if there's no expression defined
             :QueryMissingField: if field() hasn't been set
-            :QueryConditionError: if a condition hasn't been set
+            :QueryExpressionError: if a expression hasn't been set
         :return: Query string
         """
         if len(self._query) == 0:
-            raise QueryEmpty("At least one condition is required")
+            raise QueryEmpty("At least one expression is required")
         elif self.current_field is None:
             raise QueryMissingField("Logical operator expects a field()")
         elif self.c_oper is None:
-            raise QueryConditionError("field() expects a condition")
+            raise QueryExpressionError("field() expects a expression")
 
         return str().join(self._query)
 

@@ -12,7 +12,7 @@ class TestIncident(unittest.TestCase):
         except pysnow.QueryMissingField:
             pass
 
-    def test_query_no_condition(self):
+    def test_query_no_expression(self):
         try:
             q = str(pysnow.Query().field('test'))
             self.assertFalse(q)
@@ -26,11 +26,11 @@ class TestIncident(unittest.TestCase):
         except pysnow.QueryEmpty:
             pass
 
-    def test_query_multiple_conditions(self):
+    def test_query_multiple_expressions(self):
         try:
             q = str(pysnow.Query().field('test').equals('test').between(1, 2))
             self.assertFalse(q)
-        except pysnow.QueryMultipleConditions:
+        except pysnow.QueryMultipleExpressions:
             pass
 
     def test_query_unfinished_logical(self):
@@ -41,19 +41,19 @@ class TestIncident(unittest.TestCase):
             pass
 
     def test_query_logical_and(self):
-        # Make sure AND() operator between conditions works
+        # Make sure AND() operator between expressions works
         q = pysnow.Query().field('test').equals('test').AND().field('test2').equals('test')
 
         self.assertEquals(str(q), 'test=test^test2=test')
 
     def test_query_logical_or(self):
-        # Make sure OR() operator between conditions works
+        # Make sure OR() operator between expressions works
         q = pysnow.Query().field('test').equals('test').OR().field('test2').equals('test')
 
         self.assertEquals(str(q), 'test=test^ORtest2=test')
 
     def test_query_logical_nq(self):
-        # Make sure NQ() operator between conditions works
+        # Make sure NQ() operator between expressions works
         q = pysnow.Query().field('test').equals('test').NQ().field('test2').equals('test')
 
         self.assertEquals(str(q), 'test=test^NQtest2=test')
