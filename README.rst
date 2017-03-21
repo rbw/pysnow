@@ -78,10 +78,12 @@ Although optional, queries offers a simple way to specify what you're.
 	# Execute query and iterate over the results, returning only 'number', 'sys_created_on' and 'short_description'
 	for row in r.get_all(['number', 'sys_created_on', 'short_description']):
 	    print(row)
-	    
-	    
- | More about using the query builder here:
- | http://pysnow.readthedocs.io/en/latest/query.html	    
+::
+
+
+
+More in the `Query builder documentation <http://pysnow.readthedocs.io/en/latest/query.html/>`_ 
+
 
 
 **Dict query example**
