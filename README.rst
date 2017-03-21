@@ -82,7 +82,7 @@ Querying
 
 
 
-More in the `Query builder documentation <http://pysnow.readthedocs.io/en/latest/query.html/>`_ 
+More in the `Query builder documentation <http://pysnow.readthedocs.io/en/latest/query.html>`_ 
 
 
 
