@@ -31,8 +31,8 @@ Installation
 # pip install pysnow
 
 
-Setting up connection
----------------------
+Creating the `Client` object
+----------------------------
 
 .. code-block:: python
 
@@ -47,13 +47,13 @@ Setting up connection
 Querying
 --------
 
-Pysnow offers three different ways to create queries.
+Although optional, queries offers a simple way to specify what you're.
 
-- Query builder (Build complex queries in a logical manner)
-- Dict type queries (For simple query expressions)
-- String type queries (SN query pass-through, a little obscure)
+- Using the `Query` builder (For complex queries)
+- Dict type queries (For simple queries, i.e. `equals`)
+- SN Pass-through type queries (...)
 
-**Using the query builder**
+**Query builder example**
 
 .. code-block:: python
 
@@ -78,8 +78,13 @@ Pysnow offers three different ways to create queries.
 	# Execute query and iterate over the results, returning only 'number', 'sys_created_on' and 'short_description'
 	for row in r.get_all(['number', 'sys_created_on', 'short_description']):
 	    print(row)
+	    
+	    
+ | More about using the query builder here:
+ | http://pysnow.readthedocs.io/en/latest/query.html	    
 
-**Dict type queries**
+
+**Dict query example**
 
 .. code-block:: python
 
@@ -94,7 +99,7 @@ Pysnow offers three different ways to create queries.
 	for row in r.get_all():
 	    print(row)	
 
-**String type queries**
+**SN Pass-through example**
 
 .. code-block:: python	
 
@@ -146,6 +151,7 @@ Misc usage
    # Iterate over all records with state == 2 and print out number
    for record in s.query(table='incident', query={'state': 2}).get_all():
        print(record['number'])
+       
 
 
 See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and other info
