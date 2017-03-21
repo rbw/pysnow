@@ -47,7 +47,7 @@ Creating the `Client` object
 Querying
 --------
 
-Although optional, queries offers a simple way to specify what you're.
+Although optional, queries offers a simple way to specify what you're after.
 
 - Using the `Query` builder (For complex queries)
 - Dict type queries (For simple queries, i.e. `equals`)
