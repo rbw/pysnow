@@ -143,7 +143,7 @@ class Query(object):
         elif isinstance(value, str):
             raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(value))
 
-        return self._add_condition('<', value, types=[int])
+        return self._add_condition('<', value, types=[int, str])
 
     def between(self, start, end):
         """Query records in a start and end range
