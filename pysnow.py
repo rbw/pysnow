@@ -70,7 +70,7 @@ class QueryMultipleExpressions(Exception):
     pass
 
 
-class Query(object):
+class QueryBuilder(object):
     def __init__(self):
         """The Query builder"""
         self._query = []
@@ -232,6 +232,11 @@ class Query(object):
             raise QueryExpressionError("field() expects a expression")
 
         return str().join(self._query)
+
+
+# For backwards compatibility
+class Query(QueryBuilder):
+    pass
 
 
 class Client(object):
@@ -550,7 +555,7 @@ class Request(object):
         :return: ServiceNow query
         """
 
-        if isinstance(self.query, Query):
+        if isinstance(self.query, QueryBuilder):
             sysparm_query = str(self.query)
         elif isinstance(self.query, dict):  # Dict-type query
             try:
@@ -562,7 +567,7 @@ class Request(object):
         elif isinstance(self.query, str):  # String-type query
             sysparm_query = self.query
         else:
-            raise InvalidUsage("You must pass a query using either a dictionary or string (for advanced queries)")
+            raise InvalidUsage("Query must be instance of %s, %s or %s" % (QueryBuilder, str, dict))
 
         result = {'sysparm_query': sysparm_query}
         result.update(self.default_payload)
