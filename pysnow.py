@@ -129,10 +129,20 @@ class Query(object):
 
     def greater_than(self, value):
         """Query records with the given field greater than the value specified"""
-        return self._add_condition('>', value, types=[int])
+        if hasattr(value, 'strftime'):
+            value = value.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(value, str):
+            raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(value))
+
+        return self._add_condition('>', value, types=[int, str])
 
     def less_than(self, value):
         """Query records with the given field less than the value specified"""
+        if hasattr(value, 'strftime'):
+            value = value.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(value, str):
+            raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(value))
+
         return self._add_condition('<', value, types=[int])
 
     def between(self, start, end):
