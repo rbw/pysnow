@@ -8,7 +8,7 @@ import itertools
 import inspect
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 
 class UnexpectedResponse(Exception):
@@ -72,22 +72,22 @@ class QueryMultipleExpressions(Exception):
 
 class QueryBuilder(object):
     def __init__(self):
-        """The Query builder"""
+        """Query builder - used for building complex queries"""
         self._query = []
         self.current_field = None
         self.c_oper = None
         self.l_oper = None
 
     def AND(self):
-        """AND operator for use between expressions"""
+        """Operator for use between expressions"""
         return self._add_logical_operator('^')
 
     def OR(self):
-        """OR operator for use between expressions"""
+        """Operator for use between expressions"""
         return self._add_logical_operator('^OR')
 
     def NQ(self):
-        """NQ operator for use between expressions"""
+        """Operator for use between expressions"""
         return self._add_logical_operator('^NQ')
 
     def field(self, field):
