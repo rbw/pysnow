@@ -172,8 +172,10 @@ class TestIncident(unittest.TestCase):
 
         # Make sure a valid operation works
         q = pysnow.Query().field('test').greater_than(1)
-
         self.assertEquals(str(q), 'test>1')
+
+        q = pysnow.Query().field('test').greater_than(dt(2016, 2, 1))
+        self.assertEquals(str(q), 'test>2016-02-01 00:00:00')
 
     def test_query_cond_less_than(self):
         # Make sure type checking works
@@ -185,8 +187,10 @@ class TestIncident(unittest.TestCase):
 
         # Make sure a valid operation works
         q = pysnow.Query().field('test').less_than(1)
-
         self.assertEquals(str(q), 'test<1')
+
+        q = pysnow.Query().field('test').less_than(dt(2016, 2, 1))
+        self.assertEquals(str(q), 'test<2016-02-01 00:00:00')
 
     def test_complex_query(self):
         start = dt(2016, 2, 1)
