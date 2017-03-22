@@ -49,7 +49,7 @@ Querying
 
  | Although optional, queries is a simple and powerful way to specify what you're after.
  \ Pysnow offers 3 ways to query the SN REST API.
-- Using the `Query` builder (For complex queries)
+- Using the `QueryBuilder` (For complex queries)
 - Dict type queries (For simple queries, i.e. `equals`)
 - SN Pass-through type queries (...)
 
@@ -68,12 +68,12 @@ Querying
 	end = dt.now() - td(days=20)
 	
 	# Query incident records with number starting with 'INC0123', created between 1970-01-01 and 20 days back in time
-	q = pysnow.Query()\
-	    .field('number').starts_with('INC0123')\
-	    .AND()\
-	    .field('sys_created_on').between(start, end)
+	qb = pysnow.QueryBuilder()\
+	     .field('number').starts_with('INC0123')\
+	     .AND()\
+	     .field('sys_created_on').between(start, end)
 	
-	r = s.query('incident', query=q)
+	r = s.query('incident', query=qb)
 	
 	# Execute query and iterate over the results, returning only 'number', 'sys_created_on' and 'short_description'
 	for row in r.get_all(['number', 'sys_created_on', 'short_description']):
@@ -82,7 +82,7 @@ Querying
 
 
 
-More in the `Query builder documentation <http://pysnow.readthedocs.io/en/latest/query.html>`_ 
+More in the `QueryBuilder documentation <http://pysnow.readthedocs.io/en/latest/query.html>`_
 
 
 

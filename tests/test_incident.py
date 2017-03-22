@@ -62,6 +62,21 @@ class TestIncident(unittest.TestCase):
         self.assertEqual(self.client.default_payload, {})
 
     @httpretty.activate
+    def test_invalid_query_type(self):
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        try:
+            self.client.query(table='incident', query=1).get_one()
+            self.assertFalse('Query of type int should fail')
+        except pysnow.InvalidUsage:
+            pass
+
+    @httpretty.activate
     def test_get_incident_by_dict_query(self):
         """
         Make sure fetching by dict type query works

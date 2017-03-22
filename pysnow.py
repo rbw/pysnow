@@ -8,7 +8,7 @@ import itertools
 import inspect
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 
 class UnexpectedResponse(Exception):
@@ -70,24 +70,24 @@ class QueryMultipleExpressions(Exception):
     pass
 
 
-class Query(object):
+class QueryBuilder(object):
     def __init__(self):
-        """The Query builder"""
+        """Query builder - used for building complex queries"""
         self._query = []
         self.current_field = None
         self.c_oper = None
         self.l_oper = None
 
     def AND(self):
-        """AND operator for use between expressions"""
+        """Operator for use between expressions"""
         return self._add_logical_operator('^')
 
     def OR(self):
-        """OR operator for use between expressions"""
+        """Operator for use between expressions"""
         return self._add_logical_operator('^OR')
 
     def NQ(self):
-        """NQ operator for use between expressions"""
+        """Operator for use between expressions"""
         return self._add_logical_operator('^NQ')
 
     def field(self, field):
@@ -129,11 +129,21 @@ class Query(object):
 
     def greater_than(self, value):
         """Query records with the given field greater than the value specified"""
-        return self._add_condition('>', value, types=[int])
+        if hasattr(value, 'strftime'):
+            value = value.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(value, str):
+            raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(value))
+
+        return self._add_condition('>', value, types=[int, str])
 
     def less_than(self, value):
         """Query records with the given field less than the value specified"""
-        return self._add_condition('<', value, types=[int])
+        if hasattr(value, 'strftime'):
+            value = value.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(value, str):
+            raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(value))
+
+        return self._add_condition('<', value, types=[int, str])
 
     def between(self, start, end):
         """Query records in a start and end range
@@ -222,6 +232,11 @@ class Query(object):
             raise QueryExpressionError("field() expects a expression")
 
         return str().join(self._query)
+
+
+# For backwards compatibility
+class Query(QueryBuilder):
+    pass
 
 
 class Client(object):
@@ -540,7 +555,7 @@ class Request(object):
         :return: ServiceNow query
         """
 
-        if isinstance(self.query, Query):
+        if isinstance(self.query, QueryBuilder):
             sysparm_query = str(self.query)
         elif isinstance(self.query, dict):  # Dict-type query
             try:
@@ -552,7 +567,7 @@ class Request(object):
         elif isinstance(self.query, str):  # String-type query
             sysparm_query = self.query
         else:
-            raise InvalidUsage("You must pass a query using either a dictionary or string (for advanced queries)")
+            raise InvalidUsage("Query must be instance of %s, %s or %s" % (QueryBuilder, str, dict))
 
         result = {'sysparm_query': sysparm_query}
         result.update(self.default_payload)
