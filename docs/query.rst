@@ -1,7 +1,7 @@
-``pysnow.Query`` --- Creates a new Query object
-===================================================
+``pysnow.QueryBuilder`` --- Creates a new QueryBuilder object
+=============================================================
 
 .. automodule:: pysnow
-.. autoclass:: Query
+.. autoclass:: QueryBuilder
     :members:
 
