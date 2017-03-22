@@ -49,7 +49,7 @@ Querying
 
  | Although optional, queries is a simple and powerful way to specify what you're after.
  \ Pysnow offers 3 ways to query the SN REST API.
-- Using the `Query` builder (For complex queries)
+- Using the `QueryBuilder` (For complex queries)
 - Dict type queries (For simple queries, i.e. `equals`)
 - SN Pass-through type queries (...)
 
@@ -82,7 +82,7 @@ Querying
 
 
 
-More in the `Query builder documentation <http://pysnow.readthedocs.io/en/latest/query.html>`_ 
+More in the `QueryBuilder documentation <http://pysnow.readthedocs.io/en/latest/query.html>`_
 
 
 
