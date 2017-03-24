@@ -163,6 +163,7 @@ OAuth. The easiest way to do this is to use `Requests-OAuthlib <https://requests
 There is a complete example available in the `examples <docs/examples.rst>`_.
 
 .. code-block:: python
+
    import pysnow
 
    oauth_session = ... # create requests session that uses OAuth
@@ -170,9 +171,6 @@ There is a complete example available in the `examples <docs/examples.rst>`_.
    s = pysnow.Client(instance='myinstance',
 		     session=outh_session,
 		     raise_on_empty=True)
-
-
-
 
 See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and other info
 
