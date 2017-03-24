@@ -154,6 +154,24 @@ Misc usage
    for record in s.query(table='incident', query={'state': 2}).get_all():
        print(record['number'])
        
+Using OAuth
+-----------
+
+You can use OAuth authentication. In order to do so you'll need to create a
+`Requests <http://docs.python-requests.org/en/master/>`_ session that handles
+OAuth. The easiest way to do this is to use `Requests-OAuthlib <https://requests-oauthlib.readthedocs.io/en/latest/>`_.
+There is a complete example available in the `examples <docs/examples.rst>`_.
+
+.. code-block:: python
+   import pysnow
+
+   oauth_session = ... # create requests session that uses OAuth
+
+   s = pysnow.Client(instance='myinstance',
+		     session=outh_session,
+		     raise_on_empty=True)
+
+
 
 
 See the `documentation <http://pysnow.readthedocs.org/>`_ for more examples and other info
