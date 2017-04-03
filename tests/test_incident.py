@@ -123,7 +123,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={})
 
         # Trigger a request by fetching next element from the generator
-        r.get_all(limit=2).__next__()
+        next(r.get_all(limit=2))
 
         # Get last request QS
         qs = httpretty.last_request().querystring
