@@ -38,6 +38,7 @@ class TestIncident(unittest.TestCase):
                                     password=self.mock_connection['pass'],
                                     raise_on_empty=self.mock_connection['raise_on_empty'])
 
+        # Use `nosetests -l debug` to enable this logger
         logging.basicConfig(level=logging.DEBUG)
         self.log = logging.getLogger('debug')
 
@@ -92,6 +93,36 @@ class TestIncident(unittest.TestCase):
 
         # Make sure we got an incident back with the expected number
         self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+
+    @httpretty.activate
+    def test_get_limited_result(self):
+        """
+        Make sure fetching by dict type query works
+        """
+        json_body = json.dumps({'result':
+                                    [
+                                        {
+                                            'number': self.mock_incident['number']
+                                        },
+                                        {
+                                            'number': self.mock_incident['number']
+                                        },
+                                        {
+                                            'number': self.mock_incident['number']
+                                        },
+                                        {
+                                            'number': self.mock_incident['number']
+                                        }
+                                    ]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        response = r.get_all(limit=2)
+
 
     @httpretty.activate
     def test_get_incident_by_string_query(self):
