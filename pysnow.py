@@ -332,25 +332,26 @@ class Request(object):
         if method in ('GET', 'DELETE'):
             self.query = kwargs.pop('query')
 
-    def _all_inner(self, fields):
+    def _all_inner(self, fields, limit):
         """Yields all records for the query and follows links if present on the response after validating
 
         :return: List of records with content
         """
-        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
+        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields, limit))
         yield self._get_content(response)
         while 'next' in response.links:
             self.url_link = response.links['next']['url']
             response = self.session.get(self.url_link)
             yield self._get_content(response)
 
-    def get_all(self, fields=list()):
+    def get_all(self, fields=list(), limit=None):
         """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
 
         :param fields: List of fields to return in the result
+        :param limit: Limits the number of records returned
         :return: Iterable chain object
         """
-        return itertools.chain.from_iterable(self._all_inner(fields))
+        return itertools.chain.from_iterable(self._all_inner(fields, limit))
 
     def get_one(self, fields=list()):
         """Convenience function for queries returning only one result. Validates response before returning.
@@ -360,7 +361,7 @@ class Request(object):
             :MultipleResults: if more than one match is found
         :return: Record content
         """
-        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields))
+        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields, limit=1))
         content = self._get_content(response)
         l = len(content)
         if l > 1:
@@ -549,7 +550,7 @@ class Request(object):
 
         return "%s/%s" % (url_str, "upload")
 
-    def _get_formatted_query(self, fields):
+    def _get_formatted_query(self, fields, limit):
         """
         Converts the query to a ServiceNow-interpretable format
         :return: ServiceNow query
@@ -571,6 +572,9 @@ class Request(object):
 
         result = {'sysparm_query': sysparm_query}
         result.update(self.default_payload)
+
+        if limit:
+            result.update({'sysparm_limit': limit, 'sysparm_suppress_pagination_header': True})
 
         if len(fields) > 0:
             if isinstance(fields, list):
