@@ -121,7 +121,18 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={})
-        response = r.get_all(limit=2)
+
+        # Trigger a request by fetching next element from the generator
+        r.get_all(limit=2).__next__()
+
+        # Get last request QS
+        qs = httpretty.last_request().querystring
+
+        # Make sure sysparm_limit equals limit
+        self.assertEqual(int(qs['sysparm_limit'][0]), 2)
+
+        # Make sure sysparm_suppress_pagination_header is True
+        self.assertTrue(qs['sysparm_suppress_pagination_header'])
 
 
     @httpretty.activate
