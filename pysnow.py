@@ -360,7 +360,7 @@ class Request(object):
         
         :return: status_code of last_response
         """
-        if not self.last_response:
+        if self.last_response is None:
             raise NoRequestExecuted("%s hasn't been executed" % self)
 
         return self.last_response.status_code
