@@ -107,8 +107,8 @@ class TestIncident(unittest.TestCase):
         # Make sure we get the expected status code back
         self.assertEquals(r.status_code, 200)
 
-        # Make sure last_response is an object
-        self.assertIsInstance(r.last_response, object)
+        # Make sure last_response is not None
+        self.assertIsNotNone(r.last_response)
 
     @httpretty.activate
     def test_get_incident_by_dict_query(self):
