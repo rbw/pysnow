@@ -339,6 +339,7 @@ class Request(object):
     @property
     def last_response(self):
         """Return _last_response after making sure an inner `requests.request` has been performed
+        
         :raise:
             :NoRequestExecuted: If no request has been executed    
         :return: last response
@@ -358,6 +359,8 @@ class Request(object):
     def status_code(self):
         """Return last_response.status_code after making sure an inner `requests.request` has been performed
         
+        :raise:
+            :NoRequestExecuted: If no request has been executed        
         :return: status_code of last_response
         """
         if self.last_response is None:
