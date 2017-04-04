@@ -50,6 +50,10 @@ class NoResults(Exception):
     pass
 
 
+class NoRequestExecuted(Exception):
+    pass
+
+
 class QueryTypeError(TypeError):
     pass
 
@@ -327,10 +331,39 @@ class Request(object):
         self.default_payload = kwargs.pop('default_payload')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
-        self.status_code = None
+        self._last_response = None
 
         if method in ('GET', 'DELETE'):
             self.query = kwargs.pop('query')
+
+    @property
+    def last_response(self):
+        """Return _last_response after making sure an inner `requests.request` has been performed
+        :raise:
+            :NoRequestExecuted: If no request has been executed    
+        :return: last response
+        """
+        if self._last_response is None:
+            raise NoRequestExecuted("%s hasn't been executed" % self)
+        return self._last_response
+
+    @last_response.setter
+    def last_response(self, response):
+        """ Sets last_response property        
+        :param response: `requests.request` response
+        """
+        self._last_response = response
+
+    @property
+    def status_code(self):
+        """Return last_response.status_code after making sure an inner `requests.request` has been performed
+        
+        :return: status_code of last_response
+        """
+        if not self.last_response:
+            raise NoRequestExecuted("%s hasn't been executed" % self)
+
+        return self.last_response.status_code
 
     def _all_inner(self, fields, limit):
         """Yields all records for the query and follows links if present on the response after validating
@@ -460,7 +493,7 @@ class Request(object):
         :return: ServiceNow response content
         """
         method = response.request.method
-        self.status_code = response.status_code
+        self.last_response = response
 
         server_error = {
             'summary': None,
