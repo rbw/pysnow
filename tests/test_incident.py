@@ -78,6 +78,39 @@ class TestIncident(unittest.TestCase):
             pass
 
     @httpretty.activate
+    def test_last_response_not_executed(self):
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        try:
+            self.client.query(table='incident', query={}).last_response
+            self.assertFalse('Getting last_response should fail when no `Request` has been executed')
+        except pysnow.NoRequestExecuted:
+            pass
+
+    @httpretty.activate
+    def test_last_response(self):
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        r.get_one()
+
+        # Make sure we get the expected status code back
+        self.assertEquals(r.status_code, 200)
+
+        # Make sure last_response is an object
+        self.assertIsInstance(r.last_response, object)
+
+    @httpretty.activate
     def test_get_incident_by_dict_query(self):
         """
         Make sure fetching by dict type query works
@@ -247,8 +280,10 @@ class TestIncident(unittest.TestCase):
         client.raise_on_empty = False
         r = client.query(table='incident', query={'number': self.mock_incident['number']})
 
+        res = r.get_one()
+
         # Quietly continue if `raise_on_empty` if False
-        self.assertEquals(r.get_one(), {})
+        self.assertEquals(res, {})
         self.assertEquals(r.status_code, 404)
 
     @httpretty.activate
