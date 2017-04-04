@@ -99,21 +99,7 @@ class TestIncident(unittest.TestCase):
         """
         Make sure fetching by dict type query works
         """
-        json_body = json.dumps({'result':
-                                    [
-                                        {
-                                            'number': self.mock_incident['number']
-                                        },
-                                        {
-                                            'number': self.mock_incident['number']
-                                        },
-                                        {
-                                            'number': self.mock_incident['number']
-                                        },
-                                        {
-                                            'number': self.mock_incident['number']
-                                        }
-                                    ]})
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
                                "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
                                body=json_body,
@@ -133,7 +119,6 @@ class TestIncident(unittest.TestCase):
 
         # Make sure sysparm_suppress_pagination_header is True
         self.assertTrue(qs['sysparm_suppress_pagination_header'])
-
 
     @httpretty.activate
     def test_get_incident_by_string_query(self):
