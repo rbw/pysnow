@@ -111,6 +111,24 @@ class TestIncident(unittest.TestCase):
         self.assertNotEquals(r.last_response, None)
 
     @httpretty.activate
+    def test_get_incident_by_qb(self):
+        """
+        Make sure fetching by dict type query works
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        q = pysnow.QueryBuilder().field('number').equals(self.mock_incident['number'])
+        r = self.client.query(table='incident', query=q)
+
+        # Make sure we got an incident back with the expected number
+        self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+
+    @httpretty.activate
     def test_get_incident_by_dict_query(self):
         """
         Make sure fetching by dict type query works
@@ -289,7 +307,24 @@ class TestIncident(unittest.TestCase):
     @httpretty.activate
     def test_insert_incident(self):
         """
-        Create new incident, make sure status code is 201 and we get a sys_id back
+        Create new incident, make sure we get a sys_id back
+        """
+        json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=201,
+                               content_type="application/json")
+
+        result = self.client.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
+
+        # Make sure we got an incident back
+        self.assertEquals(result[0]['sys_id'], self.mock_incident['sys_id'])
+
+    @httpretty.activate
+    def test_insert_incident_status(self):
+        """
+        Create new incident, make sure status code is 201
         """
         json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
         httpretty.register_uri(httpretty.POST,
@@ -299,10 +334,9 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client._request('POST', 'incident')
-        result = r.insert(payload={'field1': 'value1', 'field2': 'value2'})
+        r.insert(payload={'field1': 'value1', 'field2': 'value2'})
 
-        # Make sure we got an incident back with the expected number and status code 201
-        self.assertEquals(result[0]['sys_id'], self.mock_incident['sys_id'])
+        # Make sure we got code 201 back
         self.assertEquals(r.status_code, 201)
 
     @httpretty.activate
