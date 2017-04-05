@@ -233,7 +233,7 @@ class QueryBuilder(object):
         elif self.current_field is None:
             raise QueryMissingField("Logical operator expects a field()")
         elif self.c_oper is None:
-            raise QueryExpressionError("field() expects a expression")
+            raise QueryExpressionError("field() expects an expression")
 
         return str().join(self._query)
 
