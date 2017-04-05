@@ -545,10 +545,7 @@ class Request(object):
         :param sys_id: Record sys_id
         :return: url string
         """
-        if table == 'attachment':
-            base = self.base
-        else:
-            base = "%s/%s" % (self.base, "table")
+        base = "%s/%s" % (self.base, "table")
 
         url_str = 'https://%(fqdn)s/%(base)s/%(table)s' % (
             {
