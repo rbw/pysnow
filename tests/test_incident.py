@@ -274,6 +274,38 @@ class TestIncident(unittest.TestCase):
         self.assertTrue(second['linked'])
 
     @httpretty.activate
+    def test_get_incident_invalid_field_format(self):
+        """
+        Make sure passing fields as non-list fails
+        """
+        client = copy(self.client)
+        json_body = json.dumps({'result': []})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=404,
+                               content_type="application/json")
+
+        client.raise_on_empty = True
+
+        # If `raise_on_empty` is True and status code is 404, or 200 and empty result, an exception should be thrown.
+        try:
+            result = client.query(table='incident', query={'number': self.mock_incident['number']}).get_one()
+            self.assertNotEquals(result, {})
+        except pysnow.NoResults:
+            pass
+
+        client.raise_on_empty = False
+        r = client.query(table='incident', query={'number': self.mock_incident['number']})
+
+        try:
+            r.get_one(fields='test')
+            self.assertFalse('Fields passed as string should fail')
+        except pysnow.InvalidUsage:
+            pass
+
+
+    @httpretty.activate
     def test_get_incident_no_results(self):
         """
         Make sure empty result sets are properly handled
