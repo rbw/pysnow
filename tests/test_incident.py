@@ -38,6 +38,7 @@ class TestIncident(unittest.TestCase):
                                     password=self.mock_connection['pass'],
                                     raise_on_empty=self.mock_connection['raise_on_empty'])
 
+        # Use `nosetests -l debug` to enable this logger
         logging.basicConfig(level=logging.DEBUG)
         self.log = logging.getLogger('debug')
 
@@ -77,6 +78,39 @@ class TestIncident(unittest.TestCase):
             pass
 
     @httpretty.activate
+    def test_last_response_not_executed(self):
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        try:
+            self.client.query(table='incident', query={}).last_response
+            self.assertFalse('Getting last_response should fail when no `Request` has been executed')
+        except pysnow.NoRequestExecuted:
+            pass
+
+    @httpretty.activate
+    def test_last_response(self):
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        r.get_one()
+
+        # Make sure we get the expected status code back
+        self.assertEquals(r.status_code, 200)
+
+        # Make sure last_response is not None
+        self.assertNotEquals(r.last_response, None)
+
+    @httpretty.activate
     def test_get_incident_by_dict_query(self):
         """
         Make sure fetching by dict type query works
@@ -92,6 +126,32 @@ class TestIncident(unittest.TestCase):
 
         # Make sure we got an incident back with the expected number
         self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+
+    @httpretty.activate
+    def test_get_limited_result(self):
+        """
+        Make sure fetching by dict type query works
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+
+        # Trigger a request by fetching next element from the generator
+        next(r.get_all(limit=2))
+
+        # Get last request QS
+        qs = httpretty.last_request().querystring
+
+        # Make sure sysparm_limit equals limit
+        self.assertEqual(int(qs['sysparm_limit'][0]), 2)
+
+        # Make sure sysparm_suppress_pagination_header is True
+        self.assertTrue(qs['sysparm_suppress_pagination_header'])
 
     @httpretty.activate
     def test_get_incident_by_string_query(self):
@@ -220,8 +280,10 @@ class TestIncident(unittest.TestCase):
         client.raise_on_empty = False
         r = client.query(table='incident', query={'number': self.mock_incident['number']})
 
+        res = r.get_one()
+
         # Quietly continue if `raise_on_empty` if False
-        self.assertEquals(r.get_one(), {})
+        self.assertEquals(res, {})
         self.assertEquals(r.status_code, 404)
 
     @httpretty.activate
