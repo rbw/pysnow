@@ -8,7 +8,7 @@ import itertools
 import inspect
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 
 class UnexpectedResponse(Exception):
@@ -233,7 +233,7 @@ class QueryBuilder(object):
         elif self.current_field is None:
             raise QueryMissingField("Logical operator expects a field()")
         elif self.c_oper is None:
-            raise QueryExpressionError("field() expects a expression")
+            raise QueryExpressionError("field() expects an expression")
 
         return str().join(self._query)
 
@@ -358,14 +358,9 @@ class Request(object):
     @property
     def status_code(self):
         """Return last_response.status_code after making sure an inner `requests.request` has been performed
-        
-        :raise:
-            :NoRequestExecuted: If no request has been executed        
+  
         :return: status_code of last_response
         """
-        if self.last_response is None:
-            raise NoRequestExecuted("%s hasn't been executed" % self)
-
         return self.last_response.status_code
 
     def _all_inner(self, fields, limit):
@@ -550,10 +545,7 @@ class Request(object):
         :param sys_id: Record sys_id
         :return: url string
         """
-        if table == 'attachment':
-            base = self.base
-        else:
-            base = "%s/%s" % (self.base, "table")
+        base = "%s/%s" % (self.base, "table")
 
         url_str = 'https://%(fqdn)s/%(base)s/%(table)s' % (
             {

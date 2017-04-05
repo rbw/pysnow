@@ -5,13 +5,6 @@ from datetime import datetime as dt
 
 
 class TestIncident(unittest.TestCase):
-    def test_query_no_field(self):
-        try:
-            q = str(pysnow.QueryBuilder().equals('test'))
-            self.assertFalse(q)
-        except pysnow.QueryMissingField:
-            pass
-
     def test_query_no_expression(self):
         try:
             q = str(pysnow.QueryBuilder().field('test'))
@@ -26,7 +19,14 @@ class TestIncident(unittest.TestCase):
         except pysnow.QueryEmpty:
             pass
 
-    def test_query_multiple_expressions(self):
+    def test_query_no_field_expression(self):
+        try:
+            q = str(pysnow.QueryBuilder().field('test').equals('test').AND().field('beh'))
+            self.assertFalse(q)
+        except pysnow.QueryExpressionError:
+            pass
+
+    def test_query_field_multiple_expressions(self):
         try:
             q = str(pysnow.QueryBuilder().field('test').equals('test').between(1, 2))
             self.assertFalse(q)
