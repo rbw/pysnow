@@ -470,8 +470,15 @@ class Request(object):
         if not os.path.isfile(file):
             raise InvalidUsage("Attachment '%s' must be an existing regular file" % file)
 
+        url_str = 'https://%(fqdn)s/%(path)s' % (
+            {
+                'fqdn': self.fqdn,
+                'path': "%s/%s" % (self.base, 'attachment/upload')
+            }
+        )
+
         response = self.session.post(
-            self._get_url('attachment'),
+            url_str,
             data={
                 'table_name': self.table,
                 'table_sys_id': sys_id,
@@ -557,8 +564,6 @@ class Request(object):
 
         if sys_id:
             return "%s/%s" % (url_str, sys_id)
-        elif table == 'attachment':
-            return "%s/%s" % (url_str, "upload")
 
         return url_str
 
