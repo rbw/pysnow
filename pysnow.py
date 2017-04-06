@@ -368,7 +368,7 @@ class Request(object):
 
         :return: List of records with content
         """
-        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields, limit))
+        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit))
         yield self._get_content(response)
         while 'next' in response.links:
             self.url_link = response.links['next']['url']
@@ -392,7 +392,7 @@ class Request(object):
             :MultipleResults: if more than one match is found
         :return: Record content
         """
-        response = self.session.get(self._get_url(self.table), params=self._get_formatted_query(fields, limit=1))
+        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit=1))
         content = self._get_content(response)
         l = len(content)
         if l > 1:
@@ -406,7 +406,7 @@ class Request(object):
         :param payload: The record to create (dict)
         :return: Created record
         """
-        response = self.session.post(self._get_url(self.table), data=json.dumps(payload))
+        response = self.session.post(self._get_table_url(), data=json.dumps(payload))
         return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
     def delete(self):
@@ -424,7 +424,7 @@ class Request(object):
                 raise NoResults('Attempted to delete a non-existing record')
         except MultipleResults:
             raise NotImplementedError("Deletion of multiple records is not supported")
-        response = self.session.delete(self._get_url(self.table, sys_id))
+        response = self.session.delete(self._get_table_url(sys_id=sys_id))
         return self._get_content(response)
 
     def update(self, payload):
@@ -447,7 +447,7 @@ class Request(object):
         if not isinstance(payload, dict):
             raise InvalidUsage("Update payload must be of type dict")
 
-        response = self.session.put(self._get_url(self.table, sys_id), data=json.dumps(payload))
+        response = self.session.put(self._get_table_url(sys_id=sys_id), data=json.dumps(payload))
         return self._get_content(response)   # @TODO - update to return first key (API breakage)
 
     def attach(self, file):
@@ -470,15 +470,8 @@ class Request(object):
         if not os.path.isfile(file):
             raise InvalidUsage("Attachment '%s' must be an existing regular file" % file)
 
-        url_str = 'https://%(fqdn)s/%(path)s' % (
-            {
-                'fqdn': self.fqdn,
-                'path': "%s/%s" % (self.base, 'attachment/upload')
-            }
-        )
-
         response = self.session.post(
-            url_str,
+            self._get_attachment_url('upload'),
             data={
                 'table_name': self.table,
                 'table_sys_id': sys_id,
@@ -545,20 +538,27 @@ class Request(object):
 
         return content_json['result']
 
-    def _get_url(self, table, sys_id=None):
+    def _get_table_url(self, **kwargs):
+        return self._get_url('table', item=self.table, **kwargs)
+
+    def _get_attachment_url(self, action):
+        return self._get_url('attachment', item=action)
+
+    def _get_url(self, resource, item, sys_id=None):
         """Takes table and sys_id (if present), and returns a URL
 
-        :param table: ServiceNow table
+        :param resource: API resource
+        :param item: API resource item
         :param sys_id: Record sys_id
         :return: url string
         """
-        base = "%s/%s" % (self.base, "table")
 
-        url_str = 'https://%(fqdn)s/%(base)s/%(table)s' % (
+        url_str = 'https://%(fqdn)s/%(base)s/%(resource)s/%(item)s' % (
             {
                 'fqdn': self.fqdn,
-                'base': base,
-                'table': table
+                'base': self.base,
+                'resource': resource,
+                'item': item
             }
         )
 
