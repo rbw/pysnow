@@ -48,6 +48,7 @@ class UnexpectedResponse(Exception):
             )
 
         super(UnexpectedResponse, self).__init__(message)
+        self.status_code = code_actual
         self.error_summary = error_summary
         self.error_details = error_details
 
