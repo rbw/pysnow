@@ -471,7 +471,7 @@ class Request(object):
             raise InvalidUsage("Attachment '%s' must be an existing regular file" % file)
 
         response = self.session.post(
-            self._get_attachment_url(),
+            self._get_url('attachment'),
             data={
                 'table_name': self.table,
                 'table_sys_id': sys_id,
@@ -557,26 +557,10 @@ class Request(object):
 
         if sys_id:
             return "%s/%s" % (url_str, sys_id)
+        elif table == 'attachment':
+            return "%s/%s" % (url_str, "upload")
 
         return url_str
-
-    def _get_attachment_url(self, sys_id=None):
-        """Takes sys_id (if present), and returns an attachment URL
-
-        :param sys_id: Record sys_id
-        :return: url string
-        """
-        url_str = 'https://%(fqdn)s/%(base)s/attachment' % (
-            {
-                'fqdn': self.fqdn,
-                'base': self.base
-            }
-        )
-
-        if sys_id:
-            url_str = "%s/%s" % (url_str, sys_id)
-
-        return "%s/%s" % (url_str, "upload")
 
     def _get_formatted_query(self, fields, limit):
         """
