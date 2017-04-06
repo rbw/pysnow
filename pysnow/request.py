@@ -90,7 +90,7 @@ class Request(object):
             :MultipleResults: if more than one match is found
         :return: Record content
         """
-        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit=1))
+        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit=None))
         content = self._get_content(response)
         l = len(content)
         if l > 1:
@@ -116,13 +116,16 @@ class Request(object):
         :return: Delete response content (Generally always {'Success': True})
         """
         try:
-            try:
-                sys_id = self.get_one()['sys_id']
-            except KeyError:
-                raise NoResults('Attempted to delete a non-existing record')
+            result = self.get_one()
+            if 'sys_id' not in result:
+                raise NoResults()
         except MultipleResults:
             raise NotImplementedError("Deletion of multiple records is not supported")
-        response = self.session.delete(self._get_table_url(sys_id=sys_id))
+        except NoResults as e:
+            e.args = ('Cannot delete a non-existing record',)
+            raise
+
+        response = self.session.delete(self._get_table_url(sys_id=result['sys_id']))
         return self._get_content(response)
 
     def update(self, payload):
@@ -135,18 +138,53 @@ class Request(object):
         :return: The updated record
         """
         try:
-            try:
-                sys_id = self.get_one()['sys_id']
-            except KeyError:
-                raise InvalidUsage('Attempted to update a non-existing record')
+            result = self.get_one()
+            if 'sys_id' not in result:
+                raise NoResults()
         except MultipleResults:
             raise NotImplementedError("Update of multiple records is not supported")
+        except NoResults as e:
+            e.args = ('Cannot update a non-existing record',)
+            raise
 
         if not isinstance(payload, dict):
             raise InvalidUsage("Update payload must be of type dict")
 
-        response = self.session.put(self._get_table_url(sys_id=sys_id), data=json.dumps(payload))
+        response = self.session.put(self._get_table_url(sys_id=result['sys_id']), data=json.dumps(payload))
         return self._get_content(response)
+
+    def clone(self, reset_fields=list()):
+        """Clones a single record
+
+        :param reset_fields: Fields to reset
+        :raise:
+            :NoResults: if query returned no results
+            :NotImplementedError: if query returned more than one result (currently not supported)
+        :return: The updated record
+        """
+
+        if not isinstance(reset_fields, list):
+            raise InvalidUsage("reset_fields must be a list() of fields")
+
+        try:
+            payload = self.get_one()
+            if 'sys_id' not in payload:
+                raise NoResults()
+        except MultipleResults:
+            raise NotImplementedError('Cloning multiple records is not supported')
+        except NoResults as e:
+            e.args = ('Cannot clone a non-existing record',)
+            raise
+
+        for field in reset_fields:
+            payload.pop(field)
+
+        try:
+            return self.insert(payload)
+        except UnexpectedResponse as e:
+            if e.status_code == 403:
+                e.args = ('Unable to create clone. Make sure unique fields has been reset.',)
+            raise
 
     def attach(self, file):
         """Attaches the queried record with `file` and returns the response after validating the response
@@ -158,12 +196,13 @@ class Request(object):
         :return: The attachment record metadata
         """
         try:
-            try:
-                sys_id = self.get_one()['sys_id']
-            except KeyError:
-                raise InvalidUsage('Attempted to update a non-existing record')
+            result = self.get_one()
+            if 'sys_id' not in result:
+                raise NoResults()
         except MultipleResults:
-            raise NotImplementedError("Update of multiple records is not supported")
+            raise NotImplementedError("Attaching a file to multiple records is not supported")
+        except NoResults:
+            raise NoResults('Attempted to clone a non-existing record')
 
         if not os.path.isfile(file):
             raise InvalidUsage("Attachment '%s' must be an existing regular file" % file)
@@ -172,7 +211,7 @@ class Request(object):
             self._get_attachment_url('upload'),
             data={
                 'table_name': self.table,
-                'table_sys_id': sys_id,
+                'table_sys_id': result['sys_id'],
                 'file_name': ntpath.basename(file)
             },
             files={'file': open(file, 'rb')},
@@ -265,7 +304,7 @@ class Request(object):
 
         return url_str
 
-    def _get_formatted_query(self, fields, limit):
+    def _get_formatted_query(self, fields, limit=None):
         """
         Converts the query to a ServiceNow-interpretable format
         :return: ServiceNow query
@@ -288,7 +327,7 @@ class Request(object):
         result = {'sysparm_query': sysparm_query}
         result.update(self.default_payload)
 
-        if limit:
+        if limit is not None:
             result.update({'sysparm_limit': limit, 'sysparm_suppress_pagination_header': True})
 
         if len(fields) > 0:
