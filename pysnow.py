@@ -8,7 +8,7 @@ import itertools
 import inspect
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.3.3"
+__version__ = "0.4.0"
 
 
 class UnexpectedResponse(Exception):
