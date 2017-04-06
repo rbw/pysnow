@@ -87,7 +87,7 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         try:
-            self.client.query(table='incident', query={}).last_response
+            str(self.client.query(table='incident', query={}).last_response)
             self.assertFalse('Getting last_response should fail when no `Request` has been executed')
         except pysnow.NoRequestExecuted:
             pass
@@ -469,7 +469,7 @@ class TestIncident(unittest.TestCase):
         """
         Attempt to update a non-existent incident
         """
-        json_body = json.dumps({})
+        json_body = json.dumps({'result': {}})
         httpretty.register_uri(httpretty.GET,
                                "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
                                body=json_body,
@@ -480,14 +480,14 @@ class TestIncident(unittest.TestCase):
                                "https://%s/%s/%s" % (self.mock_connection['fqdn'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
-                               body=json_body,
+                               body={},
                                status=200,
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
         try:
             r.update({'this': 'that'})
-        except pysnow.InvalidUsage:
+        except pysnow.NoResults:
             pass
 
     @httpretty.activate
@@ -600,7 +600,7 @@ class TestIncident(unittest.TestCase):
 
         httpretty.register_uri(httpretty.GET,
                                "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
-                               body=json.dumps({}),
+                               body=json.dumps({'result': {}}),
                                status=200,
                                content_type="application/json")
 
@@ -613,7 +613,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
         try:
             r.attach('tests/example.txt')
-        except pysnow.InvalidUsage:
+        except pysnow.NoResults:
             pass
 
     @httpretty.activate
@@ -769,6 +769,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
         try:
             r.delete()
+            self.assertEquals(True, False)
         except pysnow.UnexpectedResponse:
             pass
 
@@ -777,9 +778,38 @@ class TestIncident(unittest.TestCase):
         """
         Attempt to delete a non-existing record
         """
+        client = copy(self.client)
         httpretty.register_uri(httpretty.GET,
                                "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
-                               body=json.dumps({}),
+                               body=json.dumps({'result': {}}),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.DELETE,
+                               "https://%s/%s/%s" % (self.mock_connection['fqdn'],
+                                                     self.mock_incident['path'],
+                                                     self.mock_incident['sys_id']),
+                               body=json.dumps({'success': True}),
+                               status=204,
+                               content_type="application/json")
+
+        client.raise_on_empty = False
+
+        r = client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.delete()
+            self.assertEquals(True, False)
+        except pysnow.NoResults:
+            pass
+
+    @httpretty.activate
+    def test_clone_incident_non_existent(self):
+        """
+        Attempt to clone a non-existing record
+        """
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({'result': {}}),
                                status=200,
                                content_type="application/json")
 
@@ -793,6 +823,162 @@ class TestIncident(unittest.TestCase):
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
         try:
-            r.delete()
+            r.clone()
+            self.assertEquals(True, False)
         except pysnow.NoResults:
             pass
+
+    @httpretty.activate
+    def test_clone_incident_invalid_reset_fields(self):
+        """
+        Attempt to pass reset_fields as non-list to clone()
+        """
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({'result': {}}),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.DELETE,
+                               "https://%s/%s/%s" % (self.mock_connection['fqdn'],
+                                                     self.mock_incident['path'],
+                                                     self.mock_incident['sys_id']),
+                               body=json.dumps({'success': True}),
+                               status=204,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.clone(reset_fields='test')
+            self.assertEquals(True, False)
+        except pysnow.InvalidUsage:
+            pass
+
+    @httpretty.activate
+    def test_clone_incident_multiple(self):
+        """
+        Make sure clone queries yielding more than 1 record fails
+        """
+        json_body_get = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']},
+                                               {'sys_id': self.mock_incident['sys_id']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body_get,
+                               status=200,
+                               content_type="application/json")
+
+        try:
+            r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+            r.clone()
+            self.assertEquals(True, False)
+        except NotImplementedError:
+            pass
+
+    @httpretty.activate
+    def test_clone_incident_flatten(self):
+        """
+        Make sure clone payload is properly flattened
+        """
+        json_body = json.dumps(
+            {
+                'result':
+                    [
+                        {
+                            'sys_id': self.mock_incident['sys_id'],
+                            'test': {
+                                'value': 'test_value'
+                            }
+                        }
+                    ]
+            }
+        )
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=201,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        r.clone(reset_fields=['sys_id'])
+        request_body = json.loads(httpretty.last_request().body.decode('utf-8'))
+
+        self.assertEquals(request_body['test'], 'test_value')
+
+    @httpretty.activate
+    def test_clone_incident_reset_fields(self):
+        """
+        Make sure reset fields works
+        """
+        json_body = json.dumps(
+            {
+                'result':
+                    [
+                        {
+                            'sys_id': self.mock_incident['sys_id'],
+                            'number': self.mock_incident['number']
+                        }
+                    ]
+            }
+        )
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=201,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        r.clone(reset_fields=['sys_id'])
+        request_body = json.loads(httpretty.last_request().body.decode('utf-8'))
+
+        self.assertEquals(request_body['number'], self.mock_incident['number'])
+        self.assertNotIn('sys_id', request_body)
+
+    @httpretty.activate
+    def test_clone_unexpected_response(self):
+        """
+        Make sure status code 403 is properly handled when cloning
+        """
+        json_body = json.dumps(
+            {
+                'result':
+                    [
+                        {
+                            'sys_id': self.mock_incident['sys_id'],
+                            'number': self.mock_incident['number']
+                        }
+                    ]
+            }
+        )
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=403,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        try:
+            r.clone()
+        except pysnow.UnexpectedResponse as e:
+            self.assertEquals(str(e), 'Unable to create clone. Make sure unique fields has been reset.')
+
