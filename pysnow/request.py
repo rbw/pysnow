@@ -168,8 +168,8 @@ class Request(object):
             raise InvalidUsage("reset_fields must be a list() of fields")
 
         try:
-            payload = self.get_one()
-            if 'sys_id' not in payload:
+            response = self.get_one()
+            if 'sys_id' not in response:
                 raise NoResults()
         except MultipleResults:
             raise NotImplementedError('Cloning multiple records is not supported')
@@ -177,21 +177,26 @@ class Request(object):
             e.args = ('Cannot clone a non-existing record',)
             raise
 
-        for field in reset_fields:
-            try:
-                payload.pop(field)
-            except KeyError:
-                raise InvalidUsage("Attempted to reset a non-existing field")
+        payload = {}
 
-        for field in payload:
-            item = payload[field]
+        # Iterate over fields in the result
+        for field in response:
+            # Ignore fields in reset_fields
+            if field in reset_fields:
+                continue
+
+            item = response[field]
+            # Check if the item is of type dict and has a sys_id ref (value)
             if isinstance(item, dict) and 'value' in item:
-                payload[field] = payload[field]['value']
+                payload[field] = item['value']
+            else:
+                payload[field] = item
 
         try:
             return self.insert(payload)
         except UnexpectedResponse as e:
-            if e.status_code == 4034:
+            if e.status_code == 403:
+                # User likely attempted to clone a record without resetting a unique field
                 e.args = ('Unable to create clone. Make sure unique fields has been reset.',)
             raise
 
