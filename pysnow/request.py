@@ -154,14 +154,14 @@ class Request(object):
         return self._get_content(response)
 
     def clone(self, reset_fields=list()):
-        """Clones a single record
+        """Clones the queried record
 
         :param reset_fields: Fields to reset
         :raise:
             :NoResults: if query returned no results
             :NotImplementedError: if query returned more than one result (currently not supported)
             :UnexpectedResponse: informs the user about what likely went wrong
-        :return: The updated record
+        :return: The cloned record
         """
 
         if not isinstance(reset_fields, list):
