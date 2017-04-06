@@ -147,6 +147,9 @@ Misc usage
    # Attach
    r.attach('path/to/somefile.txt')
 
+   # Clone
+   clone = r.clone()
+
    # Delete
    r.delete()
 
