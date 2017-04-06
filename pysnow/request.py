@@ -160,6 +160,7 @@ class Request(object):
         :raise:
             :NoResults: if query returned no results
             :NotImplementedError: if query returned more than one result (currently not supported)
+            :UnexpectedResponse: informs the user about what likely went wrong
         :return: The updated record
         """
 
@@ -177,12 +178,20 @@ class Request(object):
             raise
 
         for field in reset_fields:
-            payload.pop(field)
+            try:
+                payload.pop(field)
+            except KeyError:
+                raise InvalidUsage("Attempted to reset a non-existing field")
+
+        for field in payload:
+            item = payload[field]
+            if isinstance(item, dict) and 'value' in item:
+                payload[field] = payload[field]['value']
 
         try:
             return self.insert(payload)
         except UnexpectedResponse as e:
-            if e.status_code == 403:
+            if e.status_code == 4034:
                 e.args = ('Unable to create clone. Make sure unique fields has been reset.',)
             raise
 
