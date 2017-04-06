@@ -214,9 +214,9 @@ class Request(object):
             if 'sys_id' not in result:
                 raise NoResults()
         except MultipleResults:
-            raise NotImplementedError("Attaching a file to multiple records is not supported")
+            raise NotImplementedError('Attaching a file to multiple records is not supported')
         except NoResults:
-            raise NoResults('Attempted to clone a non-existing record')
+            raise NoResults('Attempted to attach file to a non-existing record')
 
         if not os.path.isfile(file):
             raise InvalidUsage("Attachment '%s' must be an existing regular file" % file)
