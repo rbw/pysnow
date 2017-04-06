@@ -19,9 +19,23 @@ class TestIncident(unittest.TestCase):
         except pysnow.QueryEmpty:
             pass
 
+    def test_query_unexpected_logical(self):
+        try:
+            q = str(pysnow.QueryBuilder().AND())
+            self.assertFalse(q)
+        except pysnow.QueryExpressionError:
+            pass
+
+    def test_query_expression_no_field(self):
+        try:
+            q = str(pysnow.QueryBuilder().equals('test'))
+            self.assertFalse(q)
+        except pysnow.QueryMissingField:
+            pass
+
     def test_query_no_field_expression(self):
         try:
-            q = str(pysnow.QueryBuilder().field('test').equals('test').AND().field('beh'))
+            q = str(pysnow.QueryBuilder().field('test').equals('test').AND().field('test'))
             self.assertFalse(q)
         except pysnow.QueryExpressionError:
             pass

@@ -304,6 +304,36 @@ class TestIncident(unittest.TestCase):
         except pysnow.InvalidUsage:
             pass
 
+    @httpretty.activate
+    def test_get_incident_field_filter(self):
+        """
+        Make sure passing fields works as intended
+        """
+        client = copy(self.client)
+        json_body = json.dumps(
+            {
+                'result':
+                    [
+                        {
+                             'sys_id': self.mock_incident['sys_id'],
+                             'number': self.mock_incident['number']
+                        }
+                    ]
+            }
+        )
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = client.query(table='incident', query={'number': self.mock_incident['number']})
+
+        result = r.get_one(fields=['sys_id', 'number'])
+
+        # Make sure we get the selected fields back
+        self.assertEquals(result['sys_id'], self.mock_incident['sys_id'])
+        self.assertEquals(result['number'], self.mock_incident['number'])
 
     @httpretty.activate
     def test_get_incident_no_results(self):
@@ -594,17 +624,19 @@ class TestIncident(unittest.TestCase):
         json_post_body = json.dumps(
             {
                 'result':
-                    {
-                         'sys_id': self.mock_attachment['sys_id'],
-                         'table_sys_id': self.mock_incident['sys_id'],
-                         'file_name': self.mock_attachment['file_name']
-                    }
+                    [
+                        {
+                             'sys_id': self.mock_attachment['sys_id'],
+                             'table_sys_id': self.mock_incident['sys_id'],
+                             'file_name': self.mock_attachment['file_name']
+                        }
+                    ]
             }
         )
 
         httpretty.register_uri(httpretty.GET,
                                "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
-                               body=json.dumps({}),
+                               body=json_post_body,
                                status=200,
                                content_type="application/json")
 
@@ -615,6 +647,7 @@ class TestIncident(unittest.TestCase):
                                content_type="multipart/form-data")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+
         try:
             r.attach('tests/non_existing_file.txt')
             self.assertEquals(True, False)
