@@ -248,8 +248,8 @@ class Client(object):
         """Sets configuration and creates a session object used in `Request` later on
 
         You must either provide a username and password or a requests session.
-        If you provide a requests session it must handle the authentication;
-        this can be used to do OAuth authentication, for example.
+        If you provide a requests session it must handle the authentication.
+        For example, providing a session can be used to do OAuth authentication.
 
         :param instance: instance name, used to resolve FQDN in `Request`
         :param user: username
