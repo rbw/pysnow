@@ -150,8 +150,8 @@ Misc usage
    # Delete
    r.delete()
 
-   # Iterate over all records with state == 2 and print out number
-   for record in s.query(table='incident', query={'state': 2}).get_all():
+   # Iterate over the first 20 records with state 2 and print out number
+   for record in s.query(table='incident', query={'state': 2}).get_all(limit=20):
        print(record['number'])
        
 Using OAuth
