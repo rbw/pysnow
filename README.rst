@@ -189,6 +189,7 @@ Contributors
 * AMMullan
 * amontalban
 * ryancurrah
+* jdugan1024
 
 Author
 ------
