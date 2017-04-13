@@ -244,16 +244,25 @@ class Query(QueryBuilder):
 
 
 class Client(object):
-    def __init__(self, instance, user, password, raise_on_empty=True, default_payload=None):
+    def __init__(self, instance, user=None, password=None, raise_on_empty=True, default_payload=None, session=None):
         """Sets configuration and creates a session object used in `Request` later on
+
+        You must either provide a username and password or a requests session.
+        If you provide a requests session it must handle the authentication.
+        For example, providing a session can be used to do OAuth authentication.
 
         :param instance: instance name, used to resolve FQDN in `Request`
         :param user: username
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
         :param default_payload: default payload to send with all requests, set i.e. 'sysparm_limit' here
+        :param session: a requests session object
         """
         # Connection properties
+
+        if ((not (user and password)) and not session) or ((user or password) and session):
+            raise InvalidUsage("You must either provide username and password or a session")
+
         self.instance = instance
         self._user = user
         self._password = password
@@ -264,16 +273,20 @@ class Client(object):
         if not isinstance(self.default_payload, dict):
             raise InvalidUsage("Payload must be of type dict")
 
-        # Create new session object
-        self.session = self._create_session()
+        self.session = self._get_session(session)
 
-    def _create_session(self):
-        """Creates and returns a new session object with the credentials passed to the constructor
+    def _get_session(self, session):
+        """Creates or updates a session and returns a new session object with
+        the credentials passed to the constructor.
 
         :return: session object
         """
-        s = requests.Session()
-        s.auth = requests.auth.HTTPBasicAuth(self._user, self._password)
+        if session:
+            s = session
+        else:
+            s = requests.Session()
+            s.auth = requests.auth.HTTPBasicAuth(self._user, self._password)
+
         s.headers.update({'content-type': 'application/json', 'accept': 'application/json'})
         return s
 
