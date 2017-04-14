@@ -28,14 +28,14 @@ Installation
 # pip install pysnow
 
 
-Documentation
--------------
-Click `here <http://pysnow.readthedocs.org/>`_ to see the documentation
-
-
 Usage examples
 --------------
 Click `here <http://pysnow.readthedocs.io/en/latest/usage>`_ for usage examples
+
+
+Documentation
+-------------
+The full documentation is available `here <http://pysnow.readthedocs.org/>`_
 
 
 Compatibility
