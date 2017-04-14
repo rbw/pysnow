@@ -18,10 +18,7 @@
 pysnow
 ======
 
-Python library for the ServiceNow REST API focused on ease of use, simple code and elegant syntax.
-
-The REST API is active by default in all instances, starting with the Eureka release.
-
+Python library for the ServiceNow REST API focused on ease of use
 
 Installation
 ------------
@@ -52,21 +49,14 @@ Contributors
 * ryancurrah
 * jdugan1024
 
+JetBrains
+---------
+Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
+
 Author
 ------
 pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
 
-Thank you JetBrains
--------------------
-Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
-
-Quick links
------------
-
-* http://wiki.servicenow.com/index.php?title=REST_API
-* http://wiki.servicenow.com/index.php?title=Table_API
-* http://wiki.servicenow.com/index.php?title=Tables_and_Classes
-* http://wiki.servicenow.com/index.php?title=Encoded_Query_Strings
 
 
 
