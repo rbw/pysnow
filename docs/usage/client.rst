@@ -1,8 +1,12 @@
-Usage examples
-==============
+Connecting
+==========
 
-Import and instantiation
-------------------------
+This shows some examples of how to connect to ServiceNow using either username and password or OAuth.
+
+See the :meth:`Client documentation <pysnow.Client>` for more info
+
+Using username and password
+---------------------------
 
 .. code-block:: python
 
@@ -11,92 +15,7 @@ Import and instantiation
     # Create client object
     s = pysnow.Client(instance='myinstance',
                       user='myusername',
-                      password='mypassword',
-                      raise_on_empty=True)
-
-
-Getting a single record
-------------------------
-
-Here we'll utilize `get_one()`, a convenience function for getting a single record without having to use a generator.
-
-.. code-block:: python
-
-    request = s.query(table='incident', query={'number': 'INC01234'})
-
-    # Fetch one record and filter out everything but 'number' and 'sys_id' from the results
-    result = request.get_one(fields=['number', 'sys_id'])
-    print(result['number'])
-
-
-Getting all records
--------------------
-
-`get_all()` returns a generator response (iterable) , also, this method chains linked responses
-
-.. code-block:: python
-
-    request = s.query(table='incident', query={'state': 2})
-
-    # Fetch all records without using a field filter,
-    # then iterate over the results and print out sys_ids
-    while record in request.get_all():
-        print(record['sys_id'])
-
-
-Updating a record
------------------
-
-.. code-block:: python
-
-    request = s.query(table='incident', query={'number': 'INC01234'})
-
-    # Update the record
-    result = request.update({'description': 'test'})
-
-    print("Record '%s' was successfully updated" % result)
-
-
-Creating a new record
----------------------
-
-.. code-block:: python
-
-    # Create a new record
-    result = s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
-
-    # Print out the number of the created record
-    print(result['number'])
-
-
-Deleting a record
----------------------
-
-.. code-block:: python
-
-    # Query the incident table by number
-    request = s.query(table='incident', query={'number': 'INC01234'})
-
-    # Delete the record
-    result = request.delete()
-
-    if result['success'] == True:
-        print("Record deleted")
-
-
-
-Catching server response errors
--------------------------------
-
-`UnexpectedResponse` can be used with all CRUD methods and contains important information of what went wrong when interfacing with the API
-
-.. code-block:: python
-
-   # Create new record and catch possible server response exceptions
-   try:
-       s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
-   except pysnow.UnexpectedResponse as e:
-       print("%s, details: %s" % (e.error_summary, e.error_details))
+                      password='mypassword')
 
 
 Using OAuth
@@ -179,4 +98,4 @@ autorefresh of the tokens. This will work for as long as the refresh_token is va
                                  auto_refresh_kwargs=refresh_kwargs,
                                  token_updater=token_updater)
 
-   s = pysnow.client(instance=instance, session=oauth_session, raise_on_empty=True)
+   s = pysnow.client(instance=instance, session=oauth_session)
