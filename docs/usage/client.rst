@@ -1,7 +1,7 @@
 Connecting
 ==========
 
-This shows some examples of how to connect to ServiceNow using either username and password or OAuth.
+Shows some examples of how to connect with pysnow using either username and password or OAuth.
 
 See the :meth:`Client documentation <pysnow.Client>` for more info
 
