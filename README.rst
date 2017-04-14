@@ -13,13 +13,6 @@
 .. image:: https://coveralls.io/repos/github/rbw0/pysnow/badge.svg?branch=master
 	:target: https://coveralls.io/github/rbw0/pysnow?branch=master
 
-.. title:: pysnow
-
-pysnow
-======
-
-Python library for the ServiceNow REST API focused on ease of use
-
 Installation
 ------------
 # pip install pysnow
