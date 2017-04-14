@@ -13,7 +13,7 @@ def get_version():
     """ Parses pysnow.py and fetches the version attribute from the syntax tree
     :return: pysnow version
     """
-    with io.open('pysnow.py') as input_file:
+    with io.open('pysnow/__init__.py') as input_file:
         for line in input_file:
             if line.startswith('__version__'):
                 return ast.parse(line).body[0].value.s
@@ -21,7 +21,7 @@ def get_version():
 with io.open('README.rst') as readme:
     setup(
         name='pysnow',
-        py_modules=['pysnow'],
+        packages=['pysnow'],
         version=get_version(),
         description='Python library for the ServiceNow REST API',
         long_description=readme.read(),

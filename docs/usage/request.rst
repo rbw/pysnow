@@ -1,18 +1,18 @@
-Usage examples
-==============
+Creating a request
+==================
 
-Import and instantiation
-------------------------
+See the :meth:`Request documentation <pysnow.Request>` for more info
+
+Creating a new record
+---------------------
 
 .. code-block:: python
 
-    import pysnow
+    # Create a new record
+    result = s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
 
-    # Create client object
-    s = pysnow.Client(instance='myinstance',
-                      user='myusername',
-                      password='mypassword',
-                      raise_on_empty=True)
+    # Print out the number of the created record
+    print(result['number'])
 
 
 Getting a single record
@@ -29,8 +29,8 @@ Here we'll utilize `get_one()`, a convenience function for getting a single reco
     print(result['number'])
 
 
-Getting all records
--------------------
+Getting multiple records
+------------------------
 
 `get_all()` returns a generator response (iterable) , also, this method chains linked responses
 
@@ -57,17 +57,6 @@ Updating a record
     print("Record '%s' was successfully updated" % result)
 
 
-Creating a new record
----------------------
-
-.. code-block:: python
-
-    # Create a new record
-    result = s.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
-
-    # Print out the number of the created record
-    print(result['number'])
-
 
 Deleting a record
 ---------------------
@@ -85,8 +74,8 @@ Deleting a record
 
 
 
-Catching server response errors
--------------------------------
+Request error handling
+----------------------
 
 `UnexpectedResponse` can be used with all CRUD methods and contains important information of what went wrong when interfacing with the API
 

@@ -12,10 +12,10 @@ The REST API is active by default in all instances, starting with the Eureka rel
 .. toctree::
    :maxdepth: 1
 
-   examples
    client
    query
    request
+   usage/index
 
 
 Installation
@@ -30,12 +30,4 @@ If there's a demand, delete_multiple() and update_multiple() will be implemented
 Compatibility
 -------------
 Python 2 and 3.
-
-Quick links
------------
-
-* http://wiki.servicenow.com/index.php?title=REST_API
-* http://wiki.servicenow.com/index.php?title=Table_API
-* http://wiki.servicenow.com/index.php?title=Tables_and_Classes
-* http://wiki.servicenow.com/index.php?title=Encoded_Query_Strings
 
