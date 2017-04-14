@@ -945,7 +945,7 @@ class TestIncident(unittest.TestCase):
         request_body = json.loads(httpretty.last_request().body.decode('utf-8'))
 
         self.assertEquals(request_body['number'], self.mock_incident['number'])
-        self.assertNotIn('sys_id', request_body)
+        self.assertFalse('sys_id' in request_body)
 
     @httpretty.activate
     def test_clone_unexpected_response(self):
