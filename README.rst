@@ -19,7 +19,7 @@ Installation
 
 Usage examples
 ^^^^^^^^^^^^^^
-Click `here <http://pysnow.readthedocs.io/en/latest/usage>`_ for usage examples
+Go `here <http://pysnow.readthedocs.io/en/latest/usage>`_ for usage examples
 
 
 Documentation
