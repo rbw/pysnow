@@ -35,7 +35,7 @@ Click `here <http://pysnow.readthedocs.org/>`_ to see the documentation
 
 Usage examples
 --------------
-Click `here <http://pysnow.readthedocs.io/en/latest/usage/index.html>`_ for usage examples
+Click `here <http://pysnow.readthedocs.io/en/latest/usage>`_ for usage examples
 
 
 Compatibility
