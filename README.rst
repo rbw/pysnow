@@ -45,5 +45,5 @@ Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
 
 Author
 ^^^^^^
-pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
+Created by Robert Wikman <rbw@vault13.org> in 2016
 
