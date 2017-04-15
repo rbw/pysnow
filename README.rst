@@ -33,10 +33,7 @@ Python 2 and 3. Tested: Python 2.6+ and Python 3.3+
 
 Contributors
 ^^^^^^^^^^^^
-.. code-block:: python
-
-	thanks = ['lingfish', 'jcpunk', 'AMMullan', 'amontalban', 'ryancurrah', 'jdugan1024']
-
+lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024
 
 
 JetBrains
