@@ -4,4 +4,5 @@
 .. automodule:: pysnow
 .. autoclass:: Request
     :members:
+.. autoexception:: pysnow.exceptions.UnexpectedResponse
 

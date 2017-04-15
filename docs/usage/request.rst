@@ -6,6 +6,8 @@ See the :meth:`Request documentation <pysnow.Request>` for more info
 Creating a new record
 ---------------------
 
+See the :meth:`pysnow.Request.insert` documentation for more details.
+
 .. code-block:: python
 
     # Create a new record
@@ -18,7 +20,9 @@ Creating a new record
 Getting a single record
 ------------------------
 
-Here we'll utilize `get_one()`, a convenience function for getting a single record without having to use a generator.
+Here we'll utilize get_one(), a convenience function for getting a single record without having to use a generator.
+
+See the :meth:`pysnow.Request.get_one` documentation for more details.
 
 .. code-block:: python
 
@@ -32,7 +36,9 @@ Here we'll utilize `get_one()`, a convenience function for getting a single reco
 Getting multiple records
 ------------------------
 
-`get_all()` returns a generator response (iterable) , also, this method chains linked responses
+get_all() returns a generator response (iterable) , also, this method chains linked responses.
+
+See the :meth:`pysnow.Request.get_all` documentation for more details.
 
 .. code-block:: python
 
@@ -47,6 +53,8 @@ Getting multiple records
 Updating a record
 -----------------
 
+See the :meth:`pysnow.Request.update` documentation for more details.
+
 .. code-block:: python
 
     request = s.query(table='incident', query={'number': 'INC01234'})
@@ -60,6 +68,8 @@ Updating a record
 
 Deleting a record
 ---------------------
+
+See the :meth:`pysnow.Request.delete` documentation for more details.
 
 .. code-block:: python
 
@@ -76,6 +86,8 @@ Deleting a record
 
 Request error handling
 ----------------------
+
+See the :meth:`pysnow.exceptions.UnexpectedResponse` documentation for more details.
 
 `UnexpectedResponse` can be used with all CRUD methods and contains important information of what went wrong when interfacing with the API
 

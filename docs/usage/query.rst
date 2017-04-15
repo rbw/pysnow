@@ -3,7 +3,6 @@ Creating a query
 
 Although optional, querying a good way to specify what you're after.
 
-Pysnow offers multiple ways to query the ServiceNow REST API.
 
 Using key-value
 ^^^^^^^^^^^^^^^
@@ -18,7 +17,8 @@ Using the query builder
 ^^^^^^^^^^^^^^^^^^^^^^^
 Perhaps a bit verbose, but pretty simple and powerful.
 
-See the :meth:`QueryBuilder documentation <pysnow.QueryBuilder>` for more info
+See the :meth:`pysnow.QueryBuilder` documentation for more details.
+
 
 .. code-block:: python
 

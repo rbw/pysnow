@@ -1,30 +1,19 @@
-Getting multiple records using the query builder
-------------------------------------------------
+Getting multiple records
+------------------------
 
-Check out the :meth:`get_all() documentation <pysnow.Request.get_all>` for more info
+See the :meth:`pysnow.Request.get_all` documentation for more details.
 
 .. code-block:: python
 
    import pysnow
-   from datetime import datetime as dt
-   from datetime import timedelta as td
 
    # Create client object
    s = pysnow.Client(instance='myinstance', user='myusername', password='mypassword')
 
-   # Set start and end range
-   start = dt(1970, 1, 1)
-   end = dt.now() - td(days=20)
+   # Get all incidents
+   r = s.query('incident', query={})
 
-   # Query incident records with number starting with 'INC0123', created between 1970-01-01 and 20 days back in time
-   qb = pysnow.QueryBuilder()\
-     .field('number').starts_with('INC0123')\
-     .AND()\
-     .field('sys_created_on').between(start, end)
-
-   r = s.query('incident', query=qb)
-
-   # Iterate over the result and print out number
-   for record in r.get_all():
+   # Set the limit of records returned from server to 20, then iterate over the result and print out number
+   for record in r.get_all(limit=20):
        print(record['number'])
 

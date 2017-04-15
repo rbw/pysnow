@@ -17,15 +17,15 @@ class QueryBuilder(object):
         self.l_oper = None
 
     def AND(self):
-        """Operator for use between expressions"""
+        """And operator"""
         return self._add_logical_operator('^')
 
     def OR(self):
-        """Operator for use between expressions"""
+        """OR operator"""
         return self._add_logical_operator('^OR')
 
     def NQ(self):
-        """Operator for use between expressions"""
+        """NQ (new query) operator"""
         return self._add_logical_operator('^NQ')
 
     def field(self, field):
