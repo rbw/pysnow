@@ -19,7 +19,7 @@ Installation
 
 Usage examples
 ^^^^^^^^^^^^^^
-Click `here <http://pysnow.readthedocs.io/en/latest/usage>`_ for usage examples
+Go `here <http://pysnow.readthedocs.io/en/latest/usage>`_ for usage examples
 
 
 Documentation
@@ -33,10 +33,7 @@ Python 2 and 3. Tested: Python 2.6+ and Python 3.3+
 
 Contributors
 ^^^^^^^^^^^^
-.. code-block:: python
-
-	thanks = ['lingfish', 'jcpunk', 'AMMullan', 'amontalban', 'ryancurrah', 'jdugan1024']
-
+lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024
 
 
 JetBrains
@@ -45,5 +42,5 @@ Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
 
 Author
 ^^^^^^
-pysnow was created by Robert Wikman <rbw@vault13.org> in 2016
+Created by Robert Wikman <rbw@vault13.org> in 2016
 

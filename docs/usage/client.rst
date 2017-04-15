@@ -1,9 +1,9 @@
 Connecting
 ==========
 
-Shows some examples of how to connect with pysnow using either username and password or OAuth.
+This shows some examples of how to connect with pysnow using either username and password or OAuth.
 
-See the :meth:`Client documentation <pysnow.Client>` for more info
+See the :meth:`documentation for `pysnow.Client` <pysnow.Client>` for more info
 
 Using username and password
 ---------------------------

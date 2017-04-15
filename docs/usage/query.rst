@@ -16,7 +16,7 @@ Simple. And sufficient in many cases.
 
 Using the query builder
 ^^^^^^^^^^^^^^^^^^^^^^^
-Perhaps a bit verbose, but pretty simple and quite powerful.
+Perhaps a bit verbose, but pretty simple and powerful.
 
 See the :meth:`QueryBuilder documentation <pysnow.QueryBuilder>` for more info
 

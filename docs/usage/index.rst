@@ -2,7 +2,7 @@ Usage examples
 ==============
 
 .. toctree::
-   :caption: Basic usage
+   :caption: Usage
 
    client
    query
@@ -10,7 +10,7 @@ Usage examples
 
 .. toctree::
    :maxdepth: 1
-   :caption: Full examples
+   :caption: Full usage examples
 
    full/get_one
    full/get_all
