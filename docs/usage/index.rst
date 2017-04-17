@@ -1,20 +1,20 @@
-Usage examples
-==============
+Usage
+^^^^^
 
 .. toctree::
-   :caption: Usage
-
    client
    query
    request
 
 .. toctree::
    :maxdepth: 1
-   :caption: Full usage examples
+   :caption: Full examples
 
    full/get_one
    full/get_all
    full/create
+   full/query_builder
    full/update
+   full/delete
    full/clone
 

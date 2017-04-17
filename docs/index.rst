@@ -10,11 +10,14 @@ Python library for the ServiceNow REST API
 .. toctree::
    :maxdepth: 1
 
-   client
-   query
    request
-   usage/index
+   query
+   client
 
+
+Usage
+-----
+Go  `here <usage>`_ for usage examples.
 
 Installation
 ------------
@@ -23,7 +26,7 @@ Installation
 Limitations
 -----------
 Currently `delete()` and `update()` operations only works for queries yielding a single result.
-If there's a demand, delete_multiple() and update_multiple() will be implemented into the API to avoid accidents.
+If there's a demand, this support will be implemented into the API along with `force_multiple` to avoid accidents.
 
 Compatibility
 -------------

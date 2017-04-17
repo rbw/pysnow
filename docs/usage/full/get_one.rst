@@ -1,7 +1,7 @@
 Getting a single record
 -----------------------
 
-Check out the :meth:`get_one() documentation <pysnow.Request.get_one>` for more info
+See the :meth:`pysnow.Request.get_one` documentation for more details.
 
 .. code-block:: python
 

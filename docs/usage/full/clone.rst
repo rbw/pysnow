@@ -1,7 +1,7 @@
 Cloning
 -------
 
-Check out the :meth:`clone() documentation <pysnow.Request.clone>` for more info
+See the :meth:`pysnow.Request.clone` documentation for more details.
 
 
 .. code-block:: python

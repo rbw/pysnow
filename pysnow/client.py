@@ -62,15 +62,15 @@ class Client(object):
         :return: `Request` object
         """
         return request.Request(method,
-                       table,
-                       default_payload=self.default_payload,
-                       raise_on_empty=self.raise_on_empty,
-                       session=self.session,
-                       instance=self.instance,
-                       **kwargs)
+                               table,
+                               default_payload=self.default_payload,
+                               raise_on_empty=self.raise_on_empty,
+                               session=self.session,
+                               instance=self.instance,
+                               **kwargs)
 
     def query(self, table, **kwargs):
-        """Query wrapper method.
+        """Query (GET) request wrapper.
 
         :param table: table to perform query on
         :param kwargs: Keyword arguments passed along to `Request`
@@ -79,7 +79,7 @@ class Client(object):
         return self._request('GET', table, **kwargs)
 
     def insert(self, table, payload, **kwargs):
-        """Creates a new `Request` object and calls insert()
+        """Insert (POST) request wrapper
 
         :param table: table to insert on
         :param payload: update payload (dict)

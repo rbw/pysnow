@@ -1,7 +1,7 @@
 Creating a new record
 ---------------------
 
-Check out the :meth:`insert() documentation <pysnow.Request.insert>` for more info
+See the :meth:`pysnow.Request.insert` documentation for more details.
 
 .. code-block:: python
 

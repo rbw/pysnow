@@ -1,7 +1,7 @@
 Updating a record
 -----------------
 
-Check out the :meth:`update() documentation <pysnow.Request.update>` for more info
+See the :meth:`pysnow.Request.update` documentation for more details.
 
 .. code-block:: python
 
