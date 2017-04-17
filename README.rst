@@ -6,12 +6,13 @@
 	 \ \_\    \/\_____\ \/\_____\ \ \_\\"\_\ \ \_____\ \ \__/".~\_\ 
 	  \/_/     \/_____/  \/_____/  \/_/ \/_/  \/_____/  \/_/   \/_/ 
 			- a Python library for the ServiceNow REST API
-
 .. image:: https://travis-ci.org/rbw0/pysnow.svg?branch=master
     :target: https://travis-ci.org/rbw0/pysnow
 .. image:: https://coveralls.io/repos/github/rbw0/pysnow/badge.svg?branch=master
-	:target: https://coveralls.io/github/rbw0/pysnow?branch=master
-
+    :target: https://coveralls.io/github/rbw0/pysnow?branch=master
+.. image:: https://badge.fury.io/py/pysnow.svg
+    :target: https://pypi.python.org/pypi/pysnow
+    
 Installation
 ^^^^^^^^^^^^
 # pip install pysnow
