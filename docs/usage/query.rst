@@ -58,5 +58,5 @@ This is a pass-through equivalent of the QB example above.
 	start = dt(1970, 1, 1)
 	end = dt.now() - td(days=20)
 
-	# Query incident records starting with 'INC012' or short_description containing 'test'
+	# Query incident records with number starting with 'INC0123', created between 1970-01-01 and 20 days back in time
 	r = s.query(table='incident', query='numberSTARTSWITHINC0150^sys_created_onBETWEENjavascript:gs.dateGenerate("%s")@javascript:gs.dateGenerate("%s")' % (start, end))
