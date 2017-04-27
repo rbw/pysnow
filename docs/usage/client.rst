@@ -34,7 +34,7 @@ In this example regular user / pass authentication is used, but with SSL verific
     s.auth = requests.auth.HTTPBasicAuth('myusername', 'mypassword')
 
     # Create client object
-    s = pysnow.Client(instance='myinstance', session=s)
+    sn = pysnow.Client(instance='myinstance', session=s)
 
 
 Using OAuth
