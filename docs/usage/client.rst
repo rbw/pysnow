@@ -3,7 +3,7 @@ Connecting
 
 This shows some examples of how to connect with pysnow using either username and password or OAuth.
 
-See the :meth:`documentation for `pysnow.Client` <pysnow.Client>` for more info
+See the :meth:`pysnow.Client` documentation for details.
 
 Using username and password
 ---------------------------
@@ -16,6 +16,25 @@ Using username and password
     s = pysnow.Client(instance='myinstance',
                       user='myusername',
                       password='mypassword')
+
+
+Using a custom session object
+-----------------------------
+
+You can pass a custom session object to `Client`.
+In this example regular user / pass authentication is used, but with SSL verification disabled.
+
+.. code-block:: python
+
+    import pysnow
+    import requests
+
+    s = requests.Session()
+    s.verify = False
+    s.auth = requests.auth.HTTPBasicAuth('myusername', 'mypassword')
+
+    # Create client object
+    s = pysnow.Client(instance='myinstance', session=s)
 
 
 Using OAuth
