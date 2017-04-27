@@ -15,7 +15,8 @@ Simple. And sufficient in many cases.
 
 Using the query builder
 ^^^^^^^^^^^^^^^^^^^^^^^
-Perhaps a bit verbose, but pretty simple and powerful.
+
+The recommended way to create complex queries.
 
 See the :meth:`pysnow.QueryBuilder` documentation for more details.
 
@@ -41,7 +42,12 @@ See the :meth:`pysnow.QueryBuilder` documentation for more details.
 
 SN Pass-through
 ^^^^^^^^^^^^^^^
-The SN pass-through equivalent can get a little obscure.
+
+It's recommended to use the query builder for complex queries, as it offers a cleaner way to create queries.
+
+However, you can still use SN pass-through queries should the query builder not satisfy your needs for some reason.
+
+This is a pass-through equivalent of the QB example above.
 
 .. code-block:: python
 
