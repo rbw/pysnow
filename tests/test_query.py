@@ -6,83 +6,56 @@ from datetime import datetime as dt
 
 class TestIncident(unittest.TestCase):
     def test_query_no_expression(self):
-        try:
-            q = str(pysnow.QueryBuilder().field('test'))
-            self.assertFalse(q)
-        except pysnow.QueryEmpty:
-            pass
+        q = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryEmpty, q.__str__)
 
     def test_query_no_query(self):
-        try:
-            q = str(pysnow.QueryBuilder())
-            self.assertFalse(q)
-        except pysnow.QueryEmpty:
-            pass
+        q = pysnow.QueryBuilder()
+        self.assertRaises(pysnow.QueryEmpty, q.__str__)
 
     def test_query_unexpected_logical(self):
-        try:
-            q = str(pysnow.QueryBuilder().AND())
-            self.assertFalse(q)
-        except pysnow.QueryExpressionError:
-            pass
+        q = pysnow.QueryBuilder()
+        self.assertRaises(pysnow.QueryExpressionError, q.AND)
 
     def test_query_expression_no_field(self):
-        try:
-            q = str(pysnow.QueryBuilder().equals('test'))
-            self.assertFalse(q)
-        except pysnow.QueryMissingField:
-            pass
+        q = pysnow.QueryBuilder()
+        self.assertRaises(pysnow.QueryMissingField, q.equals, 'test')
 
     def test_query_no_field_expression(self):
-        try:
-            q = str(pysnow.QueryBuilder().field('test').equals('test').AND().field('test'))
-            self.assertFalse(q)
-        except pysnow.QueryExpressionError:
-            pass
+        q = pysnow.QueryBuilder().field('test').equals('test').AND().field('test')
+        self.assertRaises(pysnow.QueryExpressionError, q.__str__)
 
     def test_query_field_multiple_expressions(self):
-        try:
-            q = str(pysnow.QueryBuilder().field('test').equals('test').between(1, 2))
-            self.assertFalse(q)
-        except pysnow.QueryMultipleExpressions:
-            pass
+        q = pysnow.QueryBuilder().field('test').equals('test')
+        self.assertRaises(pysnow.QueryMultipleExpressions, q.between, 1, 2)
 
     def test_query_unfinished_logical(self):
-        try:
-            q = str(pysnow.QueryBuilder().field('test').equals('test').AND())
-            self.assertFalse(q)
-        except pysnow.QueryMissingField:
-            pass
+        q = pysnow.QueryBuilder().field('test').equals('test').AND()
+        self.assertRaises(pysnow.QueryMissingField, q.__str__)
 
     def test_query_logical_and(self):
         # Make sure AND() operator between expressions works
         q = pysnow.QueryBuilder().field('test').equals('test').AND().field('test2').equals('test')
-
         self.assertEquals(str(q), 'test=test^test2=test')
 
     def test_query_logical_or(self):
         # Make sure OR() operator between expressions works
         q = pysnow.QueryBuilder().field('test').equals('test').OR().field('test2').equals('test')
-
         self.assertEquals(str(q), 'test=test^ORtest2=test')
 
     def test_query_logical_nq(self):
         # Make sure NQ() operator between expressions works
         q = pysnow.QueryBuilder().field('test').equals('test').NQ().field('test2').equals('test')
-
         self.assertEquals(str(q), 'test=test^NQtest2=test')
 
     def test_query_cond_between(self):
         # Make sure between with str arguments fails
-        try:
-            q = pysnow.QueryBuilder().field('test').between('test', 'test')
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.between, 'test', 'test')
 
         # Make sure between with int arguments works
-        q1 = str(pysnow.QueryBuilder().field('test').between(1, 2))
-        self.assertEquals(str(q1), 'testBETWEEN1@2')
+        q2 = str(pysnow.QueryBuilder().field('test').between(1, 2))
+        self.assertEquals(str(q2), 'testBETWEEN1@2')
 
         start = dt(1970, 1, 1)
         end = dt(1970, 1, 2)
@@ -94,55 +67,39 @@ class TestIncident(unittest.TestCase):
 
     def test_query_cond_starts_with(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').starts_with(1)
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.starts_with, 1)
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').starts_with('val')
-
-        self.assertEquals(str(q), 'testSTARTSWITHval')
+        q2 = pysnow.QueryBuilder().field('test').starts_with('val')
+        self.assertEquals(str(q2), 'testSTARTSWITHval')
 
     def test_query_cond_ends_with(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').ends_with(1)
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.ends_with, 1)
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').ends_with('val')
-
-        self.assertEquals(str(q), 'testENDSWITHval')
+        q2 = pysnow.QueryBuilder().field('test').ends_with('val')
+        self.assertEquals(str(q2), 'testENDSWITHval')
 
     def test_query_cond_contains(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').contains(1)
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.contains, 1)
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').contains('val')
-
-        self.assertEquals(str(q), 'testLIKEval')
+        q2 = pysnow.QueryBuilder().field('test').contains('val')
+        self.assertEquals(str(q2), 'testLIKEval')
 
     def test_query_cond_not_contains(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').not_contains(1)
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.not_contains, 1)
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').not_contains('val')
-
-        self.assertEquals(str(q), 'testNOTLIKEval')
+        q2 = pysnow.QueryBuilder().field('test').not_contains('val')
+        self.assertEquals(str(q2), 'testNOTLIKEval')
 
     def test_query_cond_is_empty(self):
         # Make sure a valid operation works
@@ -152,59 +109,45 @@ class TestIncident(unittest.TestCase):
 
     def test_query_cond_equals(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').equals(dt)
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.equals, dt)
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').equals('test')
-
-        self.assertEquals(str(q), 'test=test')
+        q2 = pysnow.QueryBuilder().field('test').equals('test')
+        self.assertEquals(str(q2), 'test=test')
 
     def test_query_cond_not_equals(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').not_equals(dt)
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.not_equals, dt)
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').not_equals('test')
-
-        self.assertEquals(str(q), 'test!=test')
+        q2 = pysnow.QueryBuilder().field('test').not_equals('test')
+        self.assertEquals(str(q2), 'test!=test')
 
     def test_query_cond_greater_than(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').greater_than('a')
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.greater_than, 'a')
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').greater_than(1)
-        self.assertEquals(str(q), 'test>1')
+        q2 = pysnow.QueryBuilder().field('test').greater_than(1)
+        self.assertEquals(str(q2), 'test>1')
 
-        q = pysnow.QueryBuilder().field('test').greater_than(dt(2016, 2, 1))
-        self.assertEquals(str(q), 'test>2016-02-01 00:00:00')
+        q3 = pysnow.QueryBuilder().field('test').greater_than(dt(2016, 2, 1))
+        self.assertEquals(str(q3), 'test>2016-02-01 00:00:00')
 
     def test_query_cond_less_than(self):
         # Make sure type checking works
-        try:
-            q = pysnow.QueryBuilder().field('test').less_than('a')
-            self.assertFalse(q)
-        except pysnow.QueryTypeError:
-            pass
+        q1 = pysnow.QueryBuilder().field('test')
+        self.assertRaises(pysnow.QueryTypeError, q1.less_than, 'a')
 
         # Make sure a valid operation works
-        q = pysnow.QueryBuilder().field('test').less_than(1)
-        self.assertEquals(str(q), 'test<1')
+        q2 = pysnow.QueryBuilder().field('test').less_than(1)
+        self.assertEquals(str(q2), 'test<1')
 
-        q = pysnow.QueryBuilder().field('test').less_than(dt(2016, 2, 1))
-        self.assertEquals(str(q), 'test<2016-02-01 00:00:00')
+        q3 = pysnow.QueryBuilder().field('test').less_than(dt(2016, 2, 1))
+        self.assertEquals(str(q3), 'test<2016-02-01 00:00:00')
 
     def test_complex_query(self):
         start = dt(2016, 2, 1)
