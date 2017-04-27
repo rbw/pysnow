@@ -31,12 +31,12 @@ See the :meth:`pysnow.QueryBuilder` documentation for more details.
 	end = dt.now() - td(days=20)
 
 	# Query incident records with number starting with 'INC0123', created between 1970-01-01 and 20 days back in time
-    qb = (
-        pysnow.QueryBuilder()
-        .field('number').starts_with('INC0123')
-        .AND()
-        .field('sys_created_on').between(start, end)
-    )
+        qb = (
+            pysnow.QueryBuilder()
+            .field('number').starts_with('INC0123')
+            .AND()
+            .field('sys_created_on').between(start, end)
+        )
 
 	r = s.query('incident', query=qb)
 
