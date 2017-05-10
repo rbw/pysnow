@@ -43,7 +43,7 @@ See the :meth:`pysnow.QueryBuilder` documentation for more details.
 SN Pass-through
 ^^^^^^^^^^^^^^^
 
-It's recommended to use the query builder for complex queries, as it offers a cleaner way to create queries.
+It's recommended to use the query builder for complex queries, as it offers error handling and a cleaner way to create queries.
 
 However, you can still use SN pass-through queries should the query builder not satisfy your needs for some reason.
 
