@@ -39,7 +39,7 @@ In this example regular user / pass authentication is used, but with SSL verific
 
 Setting Query Parameters
 ------------------------
-You can use the default_payload to set query parameters. This example returns names from fields with linked tables
+You can use a default_payload dictionary to set query parameters. This example returns names from fields with linked tables, instead of the standard URL for ServiceNow dot walking. 
 
 .. code-block:: python
     
@@ -48,12 +48,11 @@ You can use the default_payload to set query parameters. This example returns na
 
     s = requests.Session()
     s.verify = False
-    s.auth = requests.auth.HTTPBasicAuth('myusername', 'mypassword', {default_payload="sysparm_display_value"="true", )
+    s.auth = requests.auth.HTTPBasicAuth('myusername', 'mypassword', default_payload={"sysparm_display_value"="true"})
 
     # Create client object
     sn = pysnow.Client(instance='myinstance', session=s)
     
-
 
 Using OAuth
 -----------
