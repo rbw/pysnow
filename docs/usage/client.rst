@@ -37,6 +37,24 @@ In this example regular user / pass authentication is used, but with SSL verific
     sn = pysnow.Client(instance='myinstance', session=s)
 
 
+Setting Query Parameters
+------------------------
+You can use the default_payload to set query parameters. This example returns names from fields with linked tables
+
+.. code-block:: python
+    
+    import pysnow
+    import requests
+
+    s = requests.Session()
+    s.verify = False
+    s.auth = requests.auth.HTTPBasicAuth('myusername', 'mypassword', {default_payload="sysparm_display_value"="true", )
+
+    # Create client object
+    sn = pysnow.Client(instance='myinstance', session=s)
+    
+
+
 Using OAuth
 -----------
 
