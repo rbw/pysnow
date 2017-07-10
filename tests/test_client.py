@@ -26,3 +26,11 @@ class TestClient(unittest.TestCase):
         session = requests.Session()
         Client("snow.example.com", session=session)
 
+    def test_client_with_default_payload(self):
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload=0)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload="a string")
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo",
+                          default_payload=['item0', 'item1'])
+
+
+
