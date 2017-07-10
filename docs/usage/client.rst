@@ -37,22 +37,34 @@ In this example regular user / pass authentication is used, but with SSL verific
     sn = pysnow.Client(instance='myinstance', session=s)
 
 
-Setting Query Parameters
+Setting Query Request Parameters
 ------------------------
 You can use a default_payload dictionary to set query parameters. This example returns names from fields with linked tables, instead of the standard URL for ServiceNow dot walking. 
 
 .. code-block:: python
     
     import pysnow
-    import requests
 
+    # create your client object with sn request parameters
+    sn_client = pysnow.Client(instance=instance,
+                                       user=username,
+                                       password=password,
+                                       default_payload={"sysparm_display_value": "true"})
+   
+or with a custom session object
+
+.. code-block:: python
+
+    import psynow
+    import requests
     s = requests.Session()
     s.verify = False
-    s.auth = requests.auth.HTTPBasicAuth('myusername', 'mypassword', default_payload={"sysparm_display_value"="true"})
+    s.auth = requests.auth.HTTPBasicAuth('myusername', 'mypassword')
 
-    # Create client object
-    sn = pysnow.Client(instance='myinstance', session=s)
-    
+    sn = pysnow.Client(instance='myinstance', 
+                       session=s,
+                       default_payload={'sysparm_display_value': True})
+                       
 
 Using OAuth
 -----------
