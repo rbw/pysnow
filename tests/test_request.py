@@ -4,6 +4,7 @@ import pysnow
 import logging
 import json
 import httpretty
+from urllib.parse import parse_qsl, urlparse
 from copy import copy
 
 
@@ -59,6 +60,29 @@ class TestIncident(unittest.TestCase):
         self.assertEqual(self.client._password, self.mock_connection['pass'])
         self.assertEqual(self.client.raise_on_empty, self.mock_connection['raise_on_empty'])
         self.assertEqual(self.client.request_params, {})
+
+    @httpretty.activate
+    def test_client_request_params(self):
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({'result': ''}),
+                               status=200,
+                               content_type="application/json")
+        client = pysnow.Client(instance=self.mock_connection['instance'],
+                               user=self.mock_connection['user'],
+                               password=self.mock_connection['pass'],
+                               raise_on_empty=self.mock_connection['raise_on_empty'],
+                               request_params={'foo1': 'bar1', 'foo2': 'bar2'})
+
+        r = client.query(table='incident', query={})
+        r.get_one()
+
+        # Parse QS and make sure `request_params` actually ended up in the request
+        qs_str = urlparse(r.last_response.url).query
+        qs = dict(parse_qsl(qs_str))
+
+        self.assertEqual(qs['foo1'], 'bar1')
+        self.assertEqual(qs['foo2'], 'bar2')
 
     @httpretty.activate
     def test_invalid_query_type(self):
