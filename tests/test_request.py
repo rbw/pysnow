@@ -42,7 +42,7 @@ class TestIncident(unittest.TestCase):
         logging.basicConfig(level=logging.DEBUG)
         self.log = logging.getLogger('debug')
 
-    def test_invalid_default_payload(self):
+    def test_invalid_request_params(self):
         """
         Make sure passing an invalid payload doesn't work
         """
@@ -51,14 +51,37 @@ class TestIncident(unittest.TestCase):
                           user=self.mock_connection['user'],
                           password=self.mock_connection['pass'],
                           raise_on_empty=self.mock_connection['raise_on_empty'],
-                          default_payload='invalid payload')
+                          request_params='invalid payload')
 
     def test_connection(self):
         self.assertEqual(self.client.instance, self.mock_connection['instance'])
         self.assertEqual(self.client._user, self.mock_connection['user'])
         self.assertEqual(self.client._password, self.mock_connection['pass'])
         self.assertEqual(self.client.raise_on_empty, self.mock_connection['raise_on_empty'])
-        self.assertEqual(self.client.default_payload, {})
+        self.assertEqual(self.client.request_params, {})
+
+    @httpretty.activate
+    def test_client_request_params(self):
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json.dumps({'result': ''}),
+                               status=200,
+                               content_type="application/json")
+        client = pysnow.Client(instance=self.mock_connection['instance'],
+                               user=self.mock_connection['user'],
+                               password=self.mock_connection['pass'],
+                               raise_on_empty=self.mock_connection['raise_on_empty'],
+                               request_params={'foo1': 'bar1', 'foo2': 'bar2'})
+
+        r = client.query(table='incident', query={})
+        r.get_one()
+
+        # Parse QS and make sure `request_params` actually ended up in the request
+        qs_str = r.last_response.url.split("?")[1]
+        qs = {x[0]: x[1] for x in [x.split("=") for x in qs_str.split("&")]}
+
+        self.assertEqual(qs['foo1'], 'bar1')
+        self.assertEqual(qs['foo2'], 'bar2')
 
     @httpretty.activate
     def test_invalid_query_type(self):
@@ -100,10 +123,10 @@ class TestIncident(unittest.TestCase):
         r.get_one()
 
         # Make sure we get the expected status code back
-        self.assertEquals(r.status_code, 200)
+        self.assertEqual(r.status_code, 200)
 
         # Make sure last_response is not None
-        self.assertNotEquals(r.last_response, None)
+        self.assertNotEqual(r.last_response, None)
 
     @httpretty.activate
     def test_get_incident_by_qb(self):
@@ -121,7 +144,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query=q)
 
         # Make sure we got an incident back with the expected number
-        self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+        self.assertEqual(r.get_one()['number'], self.mock_incident['number'])
 
     @httpretty.activate
     def test_get_incident_by_dict_query(self):
@@ -138,7 +161,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
 
         # Make sure we got an incident back with the expected number
-        self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+        self.assertEqual(r.get_one()['number'], self.mock_incident['number'])
 
     @httpretty.activate
     def test_get_limited_result(self):
@@ -181,7 +204,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query='nameINincident,task^elementLIKEstate')
 
         # Make sure we got an incident back with the expected number
-        self.assertEquals(r.get_one()['number'], self.mock_incident['number'])
+        self.assertEqual(r.get_one()['number'], self.mock_incident['number'])
 
     @httpretty.activate
     def test_get_incident_content_error(self):
@@ -251,13 +274,13 @@ class TestIncident(unittest.TestCase):
 
         # Return the first result from the container
         first = next(result)
-        self.assertEquals(first['number'], self.mock_incident['number'])
+        self.assertEqual(first['number'], self.mock_incident['number'])
         # Make sure it's the record we're after
         self.assertFalse(first['linked'])
 
         # Return the second result from the container (linked)
         second = next(result)
-        self.assertEquals(second['number'], self.mock_incident['number'])
+        self.assertEqual(second['number'], self.mock_incident['number'])
         # Make sure it's the record we're after
         self.assertTrue(second['linked'])
 
@@ -312,8 +335,8 @@ class TestIncident(unittest.TestCase):
         result = r.get_one(fields=['sys_id', 'number'])
 
         # Make sure we get the selected fields back
-        self.assertEquals(result['sys_id'], self.mock_incident['sys_id'])
-        self.assertEquals(result['number'], self.mock_incident['number'])
+        self.assertEqual(result['sys_id'], self.mock_incident['sys_id'])
+        self.assertEqual(result['number'], self.mock_incident['number'])
 
     @httpretty.activate
     def test_get_incident_no_results(self):
@@ -340,8 +363,8 @@ class TestIncident(unittest.TestCase):
         res = r.get_one()
 
         # Quietly continue if `raise_on_empty` if False
-        self.assertEquals(res, {})
-        self.assertEquals(r.status_code, 404)
+        self.assertEqual(res, {})
+        self.assertEqual(r.status_code, 404)
 
     @httpretty.activate
     def test_insert_incident(self):
@@ -358,7 +381,7 @@ class TestIncident(unittest.TestCase):
         result = self.client.insert(table='incident', payload={'field1': 'value1', 'field2': 'value2'})
 
         # Make sure we got an incident back
-        self.assertEquals(result[0]['sys_id'], self.mock_incident['sys_id'])
+        self.assertEqual(result[0]['sys_id'], self.mock_incident['sys_id'])
 
     @httpretty.activate
     def test_insert_incident_status(self):
@@ -376,7 +399,7 @@ class TestIncident(unittest.TestCase):
         r.insert(payload={'field1': 'value1', 'field2': 'value2'})
 
         # Make sure we got code 201 back
-        self.assertEquals(r.status_code, 201)
+        self.assertEqual(r.status_code, 201)
 
     @httpretty.activate
     def test_insert_incident_invalid_status(self):
@@ -409,8 +432,8 @@ class TestIncident(unittest.TestCase):
             r.insert(payload={'field1': 'value1', 'field2': 'value2'})
         except pysnow.UnexpectedResponse as e:
             # Make sure the exception object contains summary and details
-            self.assertEquals(e.error_summary, json_body['error']['message'])
-            self.assertEquals(e.error_details, json_body['error']['detail'])
+            self.assertEqual(e.error_summary, json_body['error']['message'])
+            self.assertEqual(e.error_details, json_body['error']['detail'])
             pass
 
     @httpretty.activate
@@ -437,9 +460,9 @@ class TestIncident(unittest.TestCase):
         result = r.update({'this': 'that'})
 
         # Make sure we got an incident back with the expected sys_id
-        self.assertEquals(result[0]['sys_id'], self.mock_incident['sys_id'])
-        self.assertEquals(result[0]['this'], 'that')
-        self.assertEquals(r.status_code, 200)
+        self.assertEqual(result[0]['sys_id'], self.mock_incident['sys_id'])
+        self.assertEqual(result[0]['this'], 'that')
+        self.assertEqual(r.status_code, 200)
 
     @httpretty.activate
     def test_update_incident_non_existent(self):
@@ -545,9 +568,9 @@ class TestIncident(unittest.TestCase):
         result = r.attach('tests/example.txt')
 
         # Make sure we got an incident back with the expected sys_id
-        self.assertEquals(result['table_sys_id'], self.mock_incident['sys_id'])
-        self.assertEquals(result['file_name'], self.mock_attachment['file_name'])
-        self.assertEquals(r.status_code, 201)
+        self.assertEqual(result['table_sys_id'], self.mock_incident['sys_id'])
+        self.assertEqual(result['file_name'], self.mock_attachment['file_name'])
+        self.assertEqual(r.status_code, 201)
 
     @httpretty.activate
     def test_attach_incident_non_existent(self):
@@ -669,8 +692,8 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
         result = r.delete()
 
-        self.assertEquals(result['success'], True)
-        self.assertEquals(r.status_code, 204)
+        self.assertEqual(result['success'], True)
+        self.assertEqual(r.status_code, 204)
 
     @httpretty.activate
     def test_delete_incident_multiple(self):
@@ -839,7 +862,7 @@ class TestIncident(unittest.TestCase):
         r.clone(reset_fields=['sys_id'])
         request_body = json.loads(httpretty.last_request().body.decode('utf-8'))
 
-        self.assertEquals(request_body['test'], 'test_value')
+        self.assertEqual(request_body['test'], 'test_value')
 
     @httpretty.activate
     def test_clone_incident_reset_fields(self):
@@ -874,7 +897,7 @@ class TestIncident(unittest.TestCase):
         r.clone(reset_fields=['sys_id'])
         request_body = json.loads(httpretty.last_request().body.decode('utf-8'))
 
-        self.assertEquals(request_body['number'], self.mock_incident['number'])
+        self.assertEqual(request_body['number'], self.mock_incident['number'])
         self.assertFalse('sys_id' in request_body)
 
     @httpretty.activate

@@ -37,6 +37,22 @@ In this example regular user / pass authentication is used, but with SSL verific
     sn = pysnow.Client(instance='myinstance', session=s)
 
 
+Setting request parameters
+------------------------
+The `request_params` dict argument can be used to set request parameters. This example returns names from fields with linked tables, instead of the standard URL for ServiceNow dot walking.
+Check out the `Table API documentation <http://wiki.servicenow.com/index.php?title=Table_API#gsc.tab=0>`_ for more info.
+
+.. code-block:: python
+    
+    import pysnow
+
+    # create your client object with sn request parameters
+    sn = pysnow.Client(instance=instance,
+                       user=username,
+                       password=password,
+                       default_payload={"sysparm_display_value": True})
+
+
 Using OAuth
 -----------
 

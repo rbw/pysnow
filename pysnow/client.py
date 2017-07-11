@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import requests
+import warnings
 from pysnow import request
 from pysnow.exceptions import InvalidUsage
 
+warnings.simplefilter("always", DeprecationWarning)
+
 
 class Client(object):
-    def __init__(self, instance, user=None, password=None, raise_on_empty=True, default_payload=None, session=None):
+    def __init__(self, instance, user=None, password=None, raise_on_empty=True,
+                 default_payload=None, request_params=None, session=None):
         """Sets configuration and creates a session object used in `Request` later on
 
         You must either provide a username and password or a requests session.
@@ -17,7 +21,7 @@ class Client(object):
         :param user: username
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
-        :param default_payload: default payload to send with all requests, set i.e. 'sysparm_limit' here
+        :param request_params: request params to send with requests
         :param session: a requests session object
         """
 
@@ -29,10 +33,18 @@ class Client(object):
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
-        self.default_payload = default_payload or dict()
+        self.request_params = self.default_payload = {}
 
-        # Sets default payload for all requests, i.e. sysparm_limit, sysparm_offset etc
-        if not isinstance(self.default_payload, dict):
+        # default_payload is deprecated, let user know
+        if default_payload is not None:
+            warnings.warn("default_payload is deprecated, please use request_params instead", DeprecationWarning)
+            self.request_params = self.default_payload = default_payload
+
+        if request_params is not None:
+            self.request_params = request_params
+
+        # Sets request parameters for requests
+        if not isinstance(self.request_params, dict):
             raise InvalidUsage("Payload must be of type dict")
 
         # Create new session object
@@ -63,7 +75,7 @@ class Client(object):
         """
         return request.Request(method,
                                table,
-                               default_payload=self.default_payload,
+                               request_params=self.request_params,
                                raise_on_empty=self.raise_on_empty,
                                session=self.session,
                                instance=self.instance,
