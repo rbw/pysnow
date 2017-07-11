@@ -78,7 +78,10 @@ class TestIncident(unittest.TestCase):
 
         # Parse QS and make sure `request_params` actually ended up in the request
         qs_str = r.last_response.url.split("?")[1]
-        qs = {x[0]: x[1] for x in [x.split("=") for x in qs_str.split("&")]}
+
+        self.log.critical(qs_str)
+
+        qs = dict((x[0], x[1]) for x in [x.split("=") for x in qs_str.split("&")])
 
         self.assertEqual(qs['foo1'], 'bar1')
         self.assertEqual(qs['foo2'], 'bar2')
