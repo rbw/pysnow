@@ -21,7 +21,7 @@ class Client(object):
         :param user: username
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
-        :param default_payload: default payload to send with all requests, set i.e. 'sysparm_limit' here
+        :param request_params: request params to send with requests
         :param session: a requests session object
         """
 
