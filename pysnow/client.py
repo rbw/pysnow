@@ -21,6 +21,7 @@ class Client(object):
         :param user: username
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
+        :param default_payload: deprecated, use request_params
         :param request_params: request params to send with requests
         :param session: a requests session object
         """
