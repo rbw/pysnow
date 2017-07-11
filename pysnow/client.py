@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import requests
+import warnings
 from pysnow import request
 from pysnow.exceptions import InvalidUsage
 
+warnings.simplefilter("always", DeprecationWarning)
+
 
 class Client(object):
-    def __init__(self, instance, user=None, password=None, raise_on_empty=True, default_payload=None, session=None):
+    def __init__(self, instance, user=None, password=None, raise_on_empty=True,
+                 default_payload=None, request_params=None, session=None):
         """Sets configuration and creates a session object used in `Request` later on
 
         You must either provide a username and password or a requests session.
@@ -29,16 +33,18 @@ class Client(object):
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
+        self.request_params = self.default_payload = {}
 
-        # Make sure that default_payload isn't set to zero
-        if default_payload == 0:
-            raise InvalidUsage("Payload must be of type dict")
+        # default_payload is deprecated, let user know
+        if default_payload is not None:
+            warnings.warn("default_payload is deprecated, please use request_params instead", DeprecationWarning)
+            self.request_params = self.default_payload = default_payload
 
-        # Read in default payload if exists and != 0
-        self.default_payload = default_payload or dict()
+        if request_params is not None:
+            self.request_params = request_params
 
-        # Sets default payload for all requests, i.e. sysparm_limit, sysparm_offset etc
-        if not isinstance(self.default_payload, dict):
+        # Sets request parameters for requests
+        if not isinstance(self.request_params, dict):
             raise InvalidUsage("Payload must be of type dict")
 
         # Create new session object
@@ -69,7 +75,7 @@ class Client(object):
         """
         return request.Request(method,
                                table,
-                               default_payload=self.default_payload,
+                               request_params=self.request_params,
                                raise_on_empty=self.raise_on_empty,
                                session=self.session,
                                instance=self.instance,

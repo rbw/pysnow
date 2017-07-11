@@ -26,7 +26,7 @@ class Request(object):
         self.table = table
         self.url_link = None  # Updated when a linked request is iterated on
         self.fqdn = "%s.service-now.com" % kwargs.pop('instance')
-        self.default_payload = kwargs.pop('default_payload')
+        self.request_params = kwargs.pop('request_params')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
         self._last_response = None
@@ -339,7 +339,7 @@ class Request(object):
             raise InvalidUsage("Query must be instance of %s, %s or %s" % (query.QueryBuilder, str, dict))
 
         result = {'sysparm_query': sysparm_query}
-        result.update(self.default_payload)
+        result.update(self.request_params)
 
         if limit is not None:
             result.update({'sysparm_limit': limit, 'sysparm_suppress_pagination_header': True})
