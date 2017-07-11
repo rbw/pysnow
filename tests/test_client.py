@@ -26,3 +26,17 @@ class TestClient(unittest.TestCase):
         session = requests.Session()
         Client("snow.example.com", session=session)
 
+    def test_client_with_request_params(self):
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params="a string")
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo",
+                          request_params=['item0', 'item1'])
+
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=3)
+
+        # test if request_params == 0 (evaluates to true but is not valid)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=0)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=(1, "2"))
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=True)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=2.89)
+
+
