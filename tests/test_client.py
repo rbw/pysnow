@@ -31,7 +31,12 @@ class TestClient(unittest.TestCase):
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload="a string")
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo",
                           default_payload=['item0', 'item1'])
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload=3)
+        # test if default_payload == 0 (evaluates to true but is not valid)
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload=0)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload=(1, "2"))
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload=True)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", default_payload=2.89)
 
 
 
