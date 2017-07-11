@@ -4,7 +4,6 @@ import pysnow
 import logging
 import json
 import httpretty
-from urllib.parse import parse_qsl, urlparse
 from copy import copy
 
 
@@ -78,8 +77,8 @@ class TestIncident(unittest.TestCase):
         r.get_one()
 
         # Parse QS and make sure `request_params` actually ended up in the request
-        qs_str = urlparse(r.last_response.url).query
-        qs = dict(parse_qsl(qs_str))
+        qs_str = r.last_response.url.split("?")[1]
+        qs = {x[0]: x[1] for x in [x.split("=") for x in qs_str.split("&")]}
 
         self.assertEqual(qs['foo1'], 'bar1')
         self.assertEqual(qs['foo2'], 'bar2')
