@@ -29,6 +29,12 @@ class Client(object):
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
+
+        # Make sure that default_payload isn't set to zero
+        if default_payload == 0:
+            raise InvalidUsage("Payload must be of type dict")
+
+        # Read in default payload if exists and != 0
         self.default_payload = default_payload or dict()
 
         # Sets default payload for all requests, i.e. sysparm_limit, sysparm_offset etc
