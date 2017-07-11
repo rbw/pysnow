@@ -46,11 +46,11 @@ Check out the `Table API documentation <http://wiki.servicenow.com/index.php?tit
     
     import pysnow
 
-    # create your client object with sn request parameters
+    # Create new client with SN request parameters
     sn = pysnow.Client(instance=instance,
                        user=username,
                        password=password,
-                       default_payload={"sysparm_display_value": True})
+                       request_params={'sysparm_display_value': 'true'})
 
 
 Using OAuth
