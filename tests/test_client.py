@@ -26,7 +26,8 @@ class TestClient(unittest.TestCase):
         session = requests.Session()
         Client("snow.example.com", session=session)
 
-    def test_client_with_request_params(self):
+    def test_client_invalid_request_params(self):
+        """Client should raise an exception if `request_params` is of an invalid type """
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params="a string")
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo",
                           request_params=['item0', 'item1'])
@@ -38,5 +39,15 @@ class TestClient(unittest.TestCase):
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=(1, "2"))
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=True)
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=2.89)
+
+    def test_client_valid_request_params(self):
+        """Client `request_params` property should match what was passed as an argument"""
+        params = {'foo': 'bar'}
+        c = Client(instance="test", user="foo", password="foo", request_params=params)
+        self.assertEquals(c.request_params, params)
+
+        # Remove tests below when `default_payload` has been removed from `Client`
+        c = Client(instance="test", user="foo", password="foo", default_payload=params)
+        self.assertEquals(c.default_payload, params)
 
 
