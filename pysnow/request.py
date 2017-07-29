@@ -89,9 +89,15 @@ class Request(object):
     def get_multiple(self, fields=list(), limit=None, order_by=list()):
         """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
 
+        The response can be sorted by passing a list of fields to order_by.
+
+        Example:
+        get_multiple(order_by=['category', '-created_on']) would sort the category field in ascending order,
+        with a secondary sort by created_on in descending order.
+
         :param fields: List of fields to return in the result
         :param limit: Limits the number of records returned
-        :param order_by: Sort response based on certain fields (dict)
+        :param order_by: Sort response based on certain fields
         :return: Iterable chain object
         """
         return itertools.chain.from_iterable(self._all_inner(fields, limit, order_by))
