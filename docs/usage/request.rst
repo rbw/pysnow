@@ -46,7 +46,7 @@ See the :meth:`pysnow.Request.get_multiple` documentation for more details.
 
     # Fetch multiple records sorted by the category field in ascending order, with a secondary sort by created_on in descending order.
     # Finally, iterate over the results and print out sys_id for each record.
-    while record in request.get_multiple(order_by=['category', '-created_on']):
+    for record in request.get_multiple(order_by=['category', '-created_on']):
         print(record['sys_id'])
 
 
