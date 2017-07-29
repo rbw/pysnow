@@ -33,20 +33,20 @@ See the :meth:`pysnow.Request.get_one` documentation for more details.
     print(result['number'])
 
 
-Getting multiple records
-------------------------
+Getting multiple sorted records
+-------------------------------
 
-get_all() returns a generator response (iterable) , also, this method chains linked responses.
+get_multiple() returns a generator response (iterable) , also, this method chains linked responses.
 
-See the :meth:`pysnow.Request.get_all` documentation for more details.
+See the :meth:`pysnow.Request.get_multiple` documentation for more details.
 
 .. code-block:: python
 
     request = s.query(table='incident', query={'state': 2})
 
-    # Fetch all records without using a field filter,
-    # then iterate over the results and print out sys_ids
-    while record in request.get_all():
+    # Fetch multiple records sorted by the category field in ascending order, with a secondary sort by created_on in descending order.
+    # Finally, iterate over the results and print out sys_id for each record.
+    while record in request.get_multiple(order_by=['category', '-created_on']):
         print(record['sys_id'])
 
 

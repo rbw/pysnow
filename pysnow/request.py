@@ -4,8 +4,10 @@ import itertools
 import json
 import os
 import ntpath
+import warnings
 
 from pysnow import query
+
 from pysnow.exceptions import (NoRequestExecuted,
                                MultipleResults,
                                NoResults,
@@ -39,7 +41,7 @@ class Request(object):
         """Return _last_response after making sure an inner `requests.request` has been performed
 
         :raise:
-            :NoRequestExecuted: If no request has been executed    
+            :NoRequestExecuted: If no request has been executed
         :return: last response
         """
         if self._last_response is None:
@@ -48,7 +50,7 @@ class Request(object):
 
     @last_response.setter
     def last_response(self, response):
-        """ Sets last_response property        
+        """ Sets last_response property
         :param response: `requests.request` response
         """
         self._last_response = response
@@ -61,26 +63,44 @@ class Request(object):
         """
         return self.last_response.status_code
 
-    def _all_inner(self, fields, limit):
+    def _all_inner(self, fields, limit, order_by):
         """Yields all records for the query and follows links if present on the response after validating
 
         :return: List of records with content
         """
-        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit))
+        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit, order_by))
         yield self._get_content(response)
         while 'next' in response.links:
             self.url_link = response.links['next']['url']
             response = self.session.get(self.url_link)
             yield self._get_content(response)
 
-    def get_all(self, fields=list(), limit=None):
+    def get_all(self, fields=list(), limit=None, order_by=list()):
         """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
 
         :param fields: List of fields to return in the result
         :param limit: Limits the number of records returned
+        :param order_by: Sort response based on certain fields (dict)
         :return: Iterable chain object
         """
-        return itertools.chain.from_iterable(self._all_inner(fields, limit))
+        warnings.warn("get_all() is deprecated, please use get_multiple() instead", DeprecationWarning)
+        return self.get_multiple(fields, limit, order_by)
+
+    def get_multiple(self, fields=list(), limit=None, order_by=list()):
+        """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
+
+        The response can be sorted by passing a list of fields to order_by.
+
+        Example:
+        get_multiple(order_by=['category', '-created_on']) would sort the category field in ascending order,
+        with a secondary sort by created_on in descending order.
+
+        :param fields: List of fields to return in the result
+        :param limit: Limits the number of records returned
+        :param order_by: Sort response based on certain fields
+        :return: Iterable chain object
+        """
+        return itertools.chain.from_iterable(self._all_inner(fields, limit, order_by))
 
     def get_one(self, fields=list()):
         """Convenience function for queries returning only one result. Validates response before returning.
@@ -90,11 +110,13 @@ class Request(object):
             :MultipleResults: if more than one match is found
         :return: Record content
         """
-        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit=None))
+        response = self.session.get(self._get_table_url(),
+                                    params=self._get_formatted_query(fields, limit=None, order_by=list()))
+
         content = self._get_content(response)
         l = len(content)
         if l > 1:
-            raise MultipleResults('Multiple results for one()')
+            raise MultipleResults('Multiple results for get_one()')
 
         return content[0]
 
@@ -318,11 +340,17 @@ class Request(object):
 
         return url_str
 
-    def _get_formatted_query(self, fields, limit=None):
+    def _get_formatted_query(self, fields, limit, order_by):
         """
         Converts the query to a ServiceNow-interpretable format
         :return: ServiceNow query
         """
+
+        if not isinstance(order_by, list):
+            raise InvalidUsage("Argument order_by must be of type list()")
+
+        if not isinstance(fields, list):
+            raise InvalidUsage("Argument fields must be of type list()")
 
         if isinstance(self.query, query.QueryBuilder):
             sysparm_query = str(self.query)
@@ -338,6 +366,12 @@ class Request(object):
         else:
             raise InvalidUsage("Query must be instance of %s, %s or %s" % (query.QueryBuilder, str, dict))
 
+        for field in order_by:
+            if field[0] == '-':
+                sysparm_query += "^ORDERBYDESC%s" % field[1:]
+            else:
+                sysparm_query += "^ORDERBY%s" % field
+
         params = {'sysparm_query': sysparm_query}
         params.update(self.request_params)
 
@@ -345,9 +379,6 @@ class Request(object):
             params.update({'sysparm_limit': limit, 'sysparm_suppress_pagination_header': True})
 
         if len(fields) > 0:
-            if isinstance(fields, list):
-                params.update({'sysparm_fields': ",".join(fields)})
-            else:
-                raise InvalidUsage("You must pass the fields as a list")
+            params.update({'sysparm_fields': ",".join(fields)})
 
         return params

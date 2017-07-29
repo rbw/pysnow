@@ -208,6 +208,43 @@ class TestIncident(unittest.TestCase):
         self.assertEqual(r.get_one()['number'], self.mock_incident['number'])
 
     @httpretty.activate
+    def test_get_sorted(self):
+        """
+        Make sure order_by generates the expected sysparm_query string
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        next(r.get_multiple(order_by=['-number', 'category']))
+
+        qs_str = r.last_response.url.split("?")[1]
+        qs = dict((x[0], x[1]) for x in [x.split("=") for x in qs_str.split("&")])
+
+        self.assertEqual(str(qs['sysparm_query']), '%5EORDERBYDESCnumber%5EORDERBYcategory')
+
+    @httpretty.activate
+    def test_get_sorted_invalid(self):
+        """
+        Make sure get_multiple fails if order_by is not of type list()
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        self.assertRaises(pysnow.InvalidUsage, next, r.get_multiple(order_by='number'))
+        self.assertRaises(pysnow.InvalidUsage, next, r.get_multiple(order_by={'number': 1}))
+        self.assertRaises(pysnow.InvalidUsage, next, r.get_multiple(order_by=1))
+
+    @httpretty.activate
     def test_get_incident_content_error(self):
         """
         Make sure error in content is properly handled
@@ -271,7 +308,7 @@ class TestIncident(unittest.TestCase):
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
 
-        result = r.get_all()
+        result = r.get_multiple()
 
         # Return the first result from the container
         first = next(result)
