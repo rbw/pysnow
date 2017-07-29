@@ -79,8 +79,6 @@ class TestIncident(unittest.TestCase):
         # Parse QS and make sure `request_params` actually ended up in the request
         qs_str = r.last_response.url.split("?")[1]
 
-        self.log.critical(qs_str)
-
         qs = dict((x[0], x[1]) for x in [x.split("=") for x in qs_str.split("&")])
 
         self.assertEqual(qs['foo1'], 'bar1')
@@ -208,6 +206,26 @@ class TestIncident(unittest.TestCase):
 
         # Make sure we got an incident back with the expected number
         self.assertEqual(r.get_one()['number'], self.mock_incident['number'])
+
+    @httpretty.activate
+    def test_get_sorted(self):
+        """
+        Make sure order_by generates the expected sysparm_query string
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        next(r.get_all(order_by=['-number', 'category']))
+
+        qs_str = r.last_response.url.split("?")[1]
+        qs = dict((x[0], x[1]) for x in [x.split("=") for x in qs_str.split("&")])
+
+        self.assertEqual(str(qs['sysparm_query']), '%5EORDERBYDESCnumber%5EORDERBYcategory')
 
     @httpretty.activate
     def test_get_incident_content_error(self):
