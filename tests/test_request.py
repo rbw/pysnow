@@ -179,7 +179,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={})
 
         # Trigger a request by fetching next element from the generator
-        next(r.get_all(limit=2))
+        next(r.get_multiple(limit=2))
 
         # Get last request QS
         qs = httpretty.last_request().querystring
@@ -220,7 +220,7 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={})
-        next(r.get_all(order_by=['-number', 'category']))
+        next(r.get_multiple(order_by=['-number', 'category']))
 
         qs_str = r.last_response.url.split("?")[1]
         qs = dict((x[0], x[1]) for x in [x.split("=") for x in qs_str.split("&")])
@@ -291,7 +291,7 @@ class TestIncident(unittest.TestCase):
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
 
-        result = r.get_all()
+        result = r.get_multiple()
 
         # Return the first result from the container
         first = next(result)

@@ -4,6 +4,7 @@ import itertools
 import json
 import os
 import ntpath
+import warnings
 
 from pysnow import query
 
@@ -40,7 +41,7 @@ class Request(object):
         """Return _last_response after making sure an inner `requests.request` has been performed
 
         :raise:
-            :NoRequestExecuted: If no request has been executed    
+            :NoRequestExecuted: If no request has been executed
         :return: last response
         """
         if self._last_response is None:
@@ -49,7 +50,7 @@ class Request(object):
 
     @last_response.setter
     def last_response(self, response):
-        """ Sets last_response property        
+        """ Sets last_response property
         :param response: `requests.request` response
         """
         self._last_response = response
@@ -75,6 +76,17 @@ class Request(object):
             yield self._get_content(response)
 
     def get_all(self, fields=list(), limit=None, order_by=list()):
+        """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
+
+        :param fields: List of fields to return in the result
+        :param limit: Limits the number of records returned
+        :param order_by: Sort response based on certain fields (dict)
+        :return: Iterable chain object
+        """
+        warnings.warn("get_all() is deprecated, please use get_multiple() instead", DeprecationWarning)
+        return self.get_multiple(fields, limit, order_by)
+
+    def get_multiple(self, fields=list(), limit=None, order_by=list()):
         """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
 
         :param fields: List of fields to return in the result

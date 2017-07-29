@@ -11,7 +11,7 @@ Usage
    :caption: Full examples
 
    full/get_one
-   full/get_all
+   full/get_multiple
    full/create
    full/query_builder
    full/update
