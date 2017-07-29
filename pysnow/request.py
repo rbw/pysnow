@@ -116,7 +116,7 @@ class Request(object):
         content = self._get_content(response)
         l = len(content)
         if l > 1:
-            raise MultipleResults('Multiple results for one()')
+            raise MultipleResults('Multiple results for get_one()')
 
         return content[0]
 
