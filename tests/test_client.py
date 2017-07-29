@@ -44,10 +44,10 @@ class TestClient(unittest.TestCase):
         """Client `request_params` property should match what was passed as an argument"""
         params = {'foo': 'bar'}
         c = Client(instance="test", user="foo", password="foo", request_params=params)
-        self.assertEquals(c.request_params, params)
+        self.assertEqual(c.request_params, params)
 
         # Remove tests below when `default_payload` has been removed from `Client`
         c = Client(instance="test", user="foo", password="foo", default_payload=params)
-        self.assertEquals(c.default_payload, params)
+        self.assertEqual(c.default_payload, params)
 
 

@@ -1,7 +1,7 @@
 Using the query builder
 -----------------------
 
-See the :meth:`pysnow.Request.get_all` and :meth:`pysnow.QueryBuilder` documentation for more details.
+See the :meth:`pysnow.Request.get_multiple` and :meth:`pysnow.QueryBuilder` documentation for more details.
 
 .. code-block:: python
 
@@ -27,6 +27,6 @@ See the :meth:`pysnow.Request.get_all` and :meth:`pysnow.QueryBuilder` documenta
    r = s.query('incident', query=qb)
 
    # Iterate over the result and print out number
-   for record in r.get_all():
+   for record in r.get_multiple():
        print(record['number'])
 
