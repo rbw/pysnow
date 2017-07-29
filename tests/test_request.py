@@ -179,7 +179,7 @@ class TestIncident(unittest.TestCase):
         r = self.client.query(table='incident', query={})
 
         # Trigger a request by fetching next element from the generator
-        next(r.get_multiple(limit=2))
+        next(r.get_all(limit=2))
 
         # Get last request QS
         qs = httpretty.last_request().querystring
@@ -226,6 +226,23 @@ class TestIncident(unittest.TestCase):
         qs = dict((x[0], x[1]) for x in [x.split("=") for x in qs_str.split("&")])
 
         self.assertEqual(str(qs['sysparm_query']), '%5EORDERBYDESCnumber%5EORDERBYcategory')
+
+    @httpretty.activate
+    def test_get_sorted_invalid(self):
+        """
+        Make sure get_multiple fails if order_by is not of type list()
+        """
+        json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        self.assertRaises(pysnow.InvalidUsage, next, r.get_multiple(order_by='number'))
+        self.assertRaises(pysnow.InvalidUsage, next, r.get_multiple(order_by={'number': 1}))
+        self.assertRaises(pysnow.InvalidUsage, next, r.get_multiple(order_by=1))
 
     @httpretty.activate
     def test_get_incident_content_error(self):
