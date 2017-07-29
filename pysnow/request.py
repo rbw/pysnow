@@ -381,5 +381,4 @@ class Request(object):
         if len(fields) > 0:
             params.update({'sysparm_fields': ",".join(fields)})
 
-
         return params
