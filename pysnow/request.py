@@ -76,13 +76,7 @@ class Request(object):
             yield self._get_content(response)
 
     def get_all(self, fields=list(), limit=None, order_by=list()):
-        """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
-
-        :param fields: List of fields to return in the result
-        :param limit: Limits the number of records returned
-        :param order_by: Sort response based on certain fields (dict)
-        :return: Iterable chain object
-        """
+        """DEPRECATED - see get_multiple()"""
         warnings.warn("get_all() is deprecated, please use get_multiple() instead", DeprecationWarning)
         return self.get_multiple(fields, limit, order_by)
 
