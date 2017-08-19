@@ -107,7 +107,7 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={})
-        self.assertEquals(r.count, 30)
+        self.assertEqual(r.count, 30)
 
     @httpretty.activate
     def test_last_response_not_executed(self):
@@ -585,6 +585,32 @@ class TestIncident(unittest.TestCase):
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
         self.assertRaises(NotImplementedError, r.update, {'foo': 'bar'})
+
+    @httpretty.activate
+    def test_get_multiple_with_offset(self):
+        """
+        Make sure offset works properly
+        """
+        json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id'], 'this': 'that'},
+                                           {'sys_id': self.mock_incident['sys_id'], 'this': 'that'}]})
+
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
+        list(r.get_multiple(limit=100, offset=50))
+
+        qs = httpretty.last_request().querystring
+
+        # Make sure sysparm_offset is set to the expected value
+        self.assertEqual(int(qs['sysparm_offset'][0]), 50)
+
+        # Make sure sysparm_limit is set to the expected value
+        self.assertEqual(int(qs['sysparm_limit'][0]), 100)
+
 
     @httpretty.activate
     def test_attach_incident(self):

@@ -1,5 +1,5 @@
-Getting multiple records
-------------------------
+Multiple records with limit and offset (pagination)
+---------------------------------------------------
 
 See the :meth:`pysnow.Request.get_multiple` documentation for more details.
 
@@ -13,7 +13,7 @@ See the :meth:`pysnow.Request.get_multiple` documentation for more details.
    # Get all incidents
    r = s.query('incident', query={})
 
-   # order by 'created_on' descending, then iterate over the result and print out number
-   for record in r.get_multiple(order_by=['-created_on']):
+   # Order by 'created_on' desc, skip the first 60 records and limit the number of records returned to 20
+   for record in r.get_multiple(offset=60, limit=20, order_by=['-created_on']):
        print(record['number'])
 
