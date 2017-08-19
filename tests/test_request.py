@@ -107,7 +107,7 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={})
-        self.assertEquals(r.count, '30')
+        self.assertEquals(r.count, 30)
 
     @httpretty.activate
     def test_last_response_not_executed(self):

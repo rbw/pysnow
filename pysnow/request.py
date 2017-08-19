@@ -64,7 +64,7 @@ class Request(object):
 
         content = self._get_content(response)
 
-        return content['stats']['count']
+        return int(content['stats']['count'])
 
     @property
     def status_code(self):
