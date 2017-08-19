@@ -56,6 +56,17 @@ class Request(object):
         self._last_response = response
 
     @property
+    def count(self):
+        """ Returns the number of records the query would yield"""
+        self.request_params.update({'sysparm_count': True})
+        response = self.session.get(self._get_stats_url(),
+                                    params=self._get_formatted_query(fields=list(), limit=None, order_by=list()))
+
+        content = self._get_content(response)
+
+        return content['stats']['count']
+
+    @property
     def status_code(self):
         """Return last_response.status_code after making sure an inner `requests.request` has been performed
 
@@ -310,6 +321,9 @@ class Request(object):
 
     def _get_attachment_url(self, action):
         return self._get_url('attachment', item=action)
+
+    def _get_stats_url(self):
+        return self._get_url('stats', item=self.table)
 
     def _get_url(self, resource, item, sys_id=None):
         """Takes table and sys_id (if present), and returns a URL
