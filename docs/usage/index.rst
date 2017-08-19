@@ -16,5 +16,6 @@ Usage
    full/query_builder
    full/update
    full/delete
+   full/count
    full/clone
 
