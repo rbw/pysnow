@@ -56,10 +56,10 @@ Check out the `Table API documentation <http://wiki.servicenow.com/index.php?tit
 Using OAuth
 -----------
 
-You will need to enable OAuth inside ServiceNow which is beyond the scope of this
+In order to use OAuth, it needs to be enabled inside ServiceNow, which is beyond the scope of this
 document. You can find the details in the `ServiceNow documentation <https://docs.servicenow.com/bundle/istanbul-servicenow-platform/page/integrate/inbound-rest/task/t_EnableOAuthWithREST.html>`_.
 
-You will need to install
+Once this has been done, you will need to install
 `Requests-OAuthlib <https://requests-oauthlib.readthedocs.io/en/latest/>`_ in order to
 follow this example.
 
@@ -70,7 +70,7 @@ You will need an access_token and a refresh_token. The ServiceNow OAuth document
 provides one way to get the initial tokens but here is a simple example of obtaining
 them using Python.
 
-You will need a username and password to obtain the initial access and refresh tokens.
+Username and password is required to obtain the initial access and refresh tokens.
 Once you have these you will not need the username and password again until the
 refresh token expires. This expiration is controlled in your ServiceNow setup.
 
@@ -133,4 +133,4 @@ autorefresh of the tokens. This will work for as long as the refresh_token is va
                                  auto_refresh_kwargs=refresh_kwargs,
                                  token_updater=token_updater)
 
-   s = pysnow.client(instance=instance, session=oauth_session)
+   s = pysnow.Client(instance=instance, session=oauth_session)
