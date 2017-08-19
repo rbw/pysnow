@@ -20,6 +20,7 @@ class TestIncident(unittest.TestCase):
 
         # Mock incident attributes
         self.mock_incident = {
+            'stats': 'api/now/stats/incident',
             'path': 'api/now/table/incident',
             'number': 'INC01234',
             'sys_id': '98ace1a537ea2a00cf5c9c9953990e19',
@@ -95,6 +96,18 @@ class TestIncident(unittest.TestCase):
 
         r = self.client.query(table='incident', query=1)
         self.assertRaises(pysnow.InvalidUsage, r.get_one)
+
+    @httpretty.activate
+    def test_get_count(self):
+        json_body = json.dumps({'result': {'stats': {'count': '30'}}})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['fqdn'], self.mock_incident['stats']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+        self.assertEquals(r.count, '30')
 
     @httpretty.activate
     def test_last_response_not_executed(self):
