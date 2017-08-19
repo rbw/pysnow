@@ -13,7 +13,7 @@ See the :meth:`pysnow.Request.get_multiple` documentation for more details.
    # Get all incidents
    r = s.query('incident', query={})
 
-   # Skip the first 60 records, limit the number of records returned to 20 and order by 'created_on' desc.
+   # Order by 'created_on' desc, skip the first 60 records and limit the number of records returned to 20
    for record in r.get_multiple(offset=60, limit=20, order_by=['-created_on']):
        print(record['number'])
 
