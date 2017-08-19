@@ -60,7 +60,10 @@ class Request(object):
         """ Returns the number of records the query would yield"""
         self.request_params.update({'sysparm_count': True})
         response = self.session.get(self._get_stats_url(),
-                                    params=self._get_formatted_query(fields=list(), limit=None, order_by=list()))
+                                    params=self._get_formatted_query(fields=list(),
+                                                                     limit=None,
+                                                                     order_by=list(),
+                                                                     offset=None))
 
         content = self._get_content(response)
 
@@ -74,24 +77,26 @@ class Request(object):
         """
         return self.last_response.status_code
 
-    def _all_inner(self, fields, limit, order_by):
+    def _all_inner(self, fields, limit, order_by, offset):
         """Yields all records for the query and follows links if present on the response after validating
 
         :return: List of records with content
         """
-        response = self.session.get(self._get_table_url(), params=self._get_formatted_query(fields, limit, order_by))
+        response = self.session.get(self._get_table_url(),
+                                    params=self._get_formatted_query(fields, limit, order_by, offset))
+
         yield self._get_content(response)
         while 'next' in response.links:
             self.url_link = response.links['next']['url']
             response = self.session.get(self.url_link)
             yield self._get_content(response)
 
-    def get_all(self, fields=list(), limit=None, order_by=list()):
+    def get_all(self, fields=list(), limit=None, order_by=list(), offset=None):
         """DEPRECATED - see get_multiple()"""
         warnings.warn("get_all() is deprecated, please use get_multiple() instead", DeprecationWarning)
-        return self.get_multiple(fields, limit, order_by)
+        return self.get_multiple(fields, limit, order_by, offset)
 
-    def get_multiple(self, fields=list(), limit=None, order_by=list()):
+    def get_multiple(self, fields=list(), limit=None, order_by=list(), offset=None):
         """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
 
         The response can be sorted by passing a list of fields to order_by.
@@ -103,9 +108,10 @@ class Request(object):
         :param fields: List of fields to return in the result
         :param limit: Limits the number of records returned
         :param order_by: Sort response based on certain fields
+        :param offset: A number of records to skip before returning records (for pagination)
         :return: Iterable chain object
         """
-        return itertools.chain.from_iterable(self._all_inner(fields, limit, order_by))
+        return itertools.chain.from_iterable(self._all_inner(fields, limit, order_by, offset))
 
     def get_one(self, fields=list()):
         """Convenience function for queries returning only one result. Validates response before returning.
@@ -116,7 +122,7 @@ class Request(object):
         :return: Record content
         """
         response = self.session.get(self._get_table_url(),
-                                    params=self._get_formatted_query(fields, limit=None, order_by=list()))
+                                    params=self._get_formatted_query(fields, limit=None, order_by=list(), offset=None))
 
         content = self._get_content(response)
         l = len(content)
@@ -348,7 +354,7 @@ class Request(object):
 
         return url_str
 
-    def _get_formatted_query(self, fields, limit, order_by):
+    def _get_formatted_query(self, fields, limit, order_by, offset):
         """
         Converts the query to a ServiceNow-interpretable format
         :return: ServiceNow query
@@ -385,6 +391,9 @@ class Request(object):
 
         if limit is not None:
             params.update({'sysparm_limit': limit, 'sysparm_suppress_pagination_header': True})
+
+        if offset is not None:
+            params.update({'sysparm_offset': offset})
 
         if len(fields) > 0:
             params.update({'sysparm_fields': ",".join(fields)})
