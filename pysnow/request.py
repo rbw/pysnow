@@ -129,6 +129,9 @@ class Request(object):
         if l > 1:
             raise MultipleResults('Multiple results for get_one()')
 
+        if len(content) == 0:
+            return {}
+
         return content[0]
 
     def insert(self, payload):
@@ -310,9 +313,7 @@ class Request(object):
             )
         # It seems that Helsinki and later returns status 200 instead of 404 on empty result sets
         if ('result' in content_json and len(content_json['result']) == 0) or response.status_code == 404:
-            if self.raise_on_empty is False:
-                content_json['result'] = [{}]
-            else:
+            if self.raise_on_empty is True:
                 raise NoResults('Query yielded no results')
         elif 'error' in content_json:
             raise UnexpectedResponse(
