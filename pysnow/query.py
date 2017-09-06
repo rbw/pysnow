@@ -137,7 +137,7 @@ class QueryBuilder(object):
         return self
 
     def _add_logical_operator(self, operator):
-        """ Adds a logical operator between expressions in query
+        """ Adds a logical operator between conditions in query
 
         :param operator: logical operator (str)
         :raise:
@@ -145,7 +145,7 @@ class QueryBuilder(object):
         :return: self
         """
         if not self.c_oper:
-            raise QueryExpressionError("Logical operators must be preceded by a expression")
+            raise QueryExpressionError("Logical operators must be preceded by an expression")
 
         self.current_field = None
         self.c_oper = None
@@ -157,13 +157,13 @@ class QueryBuilder(object):
     def __str__(self):
         """ String representation of the query object
         :raise:
-            :QueryEmpty: if there's no expression defined
+            :QueryEmpty: if there's no conditions defined
             :QueryMissingField: if field() hasn't been set
             :QueryExpressionError: if a expression hasn't been set
         :return: Query string
         """
         if len(self._query) == 0:
-            raise QueryEmpty("At least one expression is required")
+            raise QueryEmpty("At least one condition is required")
         elif self.current_field is None:
             raise QueryMissingField("Logical operator expects a field()")
         elif self.c_oper is None:

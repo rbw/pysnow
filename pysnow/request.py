@@ -27,7 +27,7 @@ class Request(object):
         self.method = method
         self.table = table
         self.url_link = None  # Updated when a linked request is iterated on
-        self.fqdn = "%s.service-now.com" % kwargs.pop('instance')
+        self.host = self.fqdn = kwargs.pop('host')  # self.fqdn for backward compatibility
         self.request_params = kwargs.pop('request_params')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
@@ -128,6 +128,9 @@ class Request(object):
         l = len(content)
         if l > 1:
             raise MultipleResults('Multiple results for get_one()')
+
+        if len(content) == 0:
+            return {}
 
         return content[0]
 
@@ -310,9 +313,7 @@ class Request(object):
             )
         # It seems that Helsinki and later returns status 200 instead of 404 on empty result sets
         if ('result' in content_json and len(content_json['result']) == 0) or response.status_code == 404:
-            if self.raise_on_empty is False:
-                content_json['result'] = [{}]
-            else:
+            if self.raise_on_empty is True:
                 raise NoResults('Query yielded no results')
         elif 'error' in content_json:
             raise UnexpectedResponse(
@@ -340,9 +341,9 @@ class Request(object):
         :return: url string
         """
 
-        url_str = 'https://%(fqdn)s/%(base)s/%(resource)s/%(item)s' % (
+        url_str = 'https://%(host)s/%(base)s/%(resource)s/%(item)s' % (
             {
-                'fqdn': self.fqdn,
+                'host': self.host,
                 'base': self.base,
                 'resource': resource,
                 'item': item
