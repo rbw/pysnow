@@ -26,6 +26,26 @@ class TestClient(unittest.TestCase):
         session = requests.Session()
         Client("snow.example.com", session=session)
 
+    def test_client_with_host_and_instance(self):
+        """Client should raise an exception if it receives both host and instance"""
+        self.assertRaises(InvalidUsage, Client, instance="test", host="test", user="foo", password="bar")
+
+    def test_client_without_host_or_instance(self):
+        """Client should raise an exception if it doesn't receive instance nor host"""
+        self.assertRaises(InvalidUsage, Client, user="foo", password="bar")
+
+    def test_client_host(self):
+        """Client host property should match host passed to constructor"""
+        host = "123.123.123.123"
+        c = Client(user="foo", password="foo", host=host)
+        self.assertEqual(c.host, host)
+
+    def test_client_instance(self):
+        """Client instance property should match instance passed to constructor"""
+        instance = "foo"
+        c = Client(user="foo", password="foo", instance=instance)
+        self.assertEqual(c.instance, instance)
+
     def test_client_invalid_request_params(self):
         """Client should raise an exception if `request_params` is of an invalid type """
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params="a string")
