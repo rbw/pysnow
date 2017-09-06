@@ -1,5 +1,5 @@
-Creating a request
-==================
+Creating requests
+=================
 
 See the :meth:`Request documentation <pysnow.Request>` for more info
 
@@ -33,8 +33,8 @@ See the :meth:`pysnow.Request.get_one` documentation for more details.
     print(result['number'])
 
 
-Getting multiple sorted records
--------------------------------
+Getting multiple records
+------------------------
 
 get_multiple() returns a generator response (iterable) , also, this method chains linked responses.
 
