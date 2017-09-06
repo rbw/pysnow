@@ -27,7 +27,7 @@ class Request(object):
         self.method = method
         self.table = table
         self.url_link = None  # Updated when a linked request is iterated on
-        self.fqdn = "%s.service-now.com" % kwargs.pop('instance')
+        self.fqdn = kwargs.pop('fqdn')
         self.request_params = kwargs.pop('request_params')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')

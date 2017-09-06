@@ -9,8 +9,15 @@ warnings.simplefilter("always", DeprecationWarning)
 
 
 class Client(object):
-    def __init__(self, instance, user=None, password=None, raise_on_empty=True,
-                 default_payload=None, request_params=None, session=None):
+    def __init__(self,
+                 instance=None,
+                 fqdn=None,
+                 user=None,
+                 password=None,
+                 raise_on_empty=True,
+                 default_payload=None,
+                 request_params=None,
+                 session=None):
         """Sets configuration and creates a session object used in `Request` later on
 
         You must either provide a username and password or a requests session.
@@ -18,6 +25,7 @@ class Client(object):
         For example, providing a session can be used to do OAuth authentication.
 
         :param instance: instance name, used to resolve FQDN in `Request`
+        :param fqdn: FQDN can be passed as an alternative to instance
         :param user: username
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
@@ -26,8 +34,18 @@ class Client(object):
         :param session: a requests session object
         """
 
+        if (fqdn and instance) is not None:
+            raise InvalidUsage("Arguments 'fqdn' and 'instance' are mutually exclusive, you cannot use both.")
+
         if ((not (user and password)) and not session) or ((user or password) and session):
             raise InvalidUsage("You must either provide username and password or a session")
+
+        if instance:
+            self.fqdn = "%s.service-now.com" % instance
+        elif fqdn:
+            self.fqdn = fqdn
+        else:
+            raise InvalidUsage("You must pass either 'instance' or 'FQDN' to connect")
 
         # Connection properties
         self.instance = instance
@@ -80,6 +98,7 @@ class Client(object):
                                raise_on_empty=self.raise_on_empty,
                                session=self.session,
                                instance=self.instance,
+                               fqdn=self.fqdn,
                                **kwargs)
 
     def query(self, table, **kwargs):
