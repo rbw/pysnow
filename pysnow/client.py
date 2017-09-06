@@ -11,7 +11,7 @@ warnings.simplefilter("always", DeprecationWarning)
 class Client(object):
     def __init__(self,
                  instance=None,
-                 fqdn=None,
+                 host=None,
                  user=None,
                  password=None,
                  raise_on_empty=True,
@@ -24,8 +24,8 @@ class Client(object):
         If you provide a requests session it must handle the authentication.
         For example, providing a session can be used to do OAuth authentication.
 
-        :param instance: instance name, used to resolve FQDN in `Request`
-        :param fqdn: FQDN can be passed as an alternative to instance
+        :param instance: instance name, used to construct host
+        :param host: host can be passed as an alternative to instance
         :param user: username
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
@@ -34,18 +34,18 @@ class Client(object):
         :param session: a requests session object
         """
 
-        if (fqdn and instance) is not None:
-            raise InvalidUsage("Arguments 'fqdn' and 'instance' are mutually exclusive, you cannot use both.")
+        if (host and instance) is not None:
+            raise InvalidUsage("Arguments 'host' and 'instance' are mutually exclusive, you cannot use both.")
 
         if ((not (user and password)) and not session) or ((user or password) and session):
             raise InvalidUsage("You must either provide username and password or a session")
 
         if instance:
-            self.fqdn = "%s.service-now.com" % instance
-        elif fqdn:
-            self.fqdn = fqdn
+            self.host = "%s.service-now.com" % instance
+        elif host:
+            self.host = host
         else:
-            raise InvalidUsage("You must pass either 'instance' or 'FQDN' to connect")
+            raise InvalidUsage("You must pass either 'instance' or 'host' to connect")
 
         # Connection properties
         self.instance = instance
@@ -98,7 +98,7 @@ class Client(object):
                                raise_on_empty=self.raise_on_empty,
                                session=self.session,
                                instance=self.instance,
-                               fqdn=self.fqdn,
+                               host=self.host,
                                **kwargs)
 
     def query(self, table, **kwargs):

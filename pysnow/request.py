@@ -27,7 +27,7 @@ class Request(object):
         self.method = method
         self.table = table
         self.url_link = None  # Updated when a linked request is iterated on
-        self.fqdn = kwargs.pop('fqdn')
+        self.host = self.fqdn = kwargs.pop('host')  # self.fqdn for backward compatibility
         self.request_params = kwargs.pop('request_params')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
@@ -341,9 +341,9 @@ class Request(object):
         :return: url string
         """
 
-        url_str = 'https://%(fqdn)s/%(base)s/%(resource)s/%(item)s' % (
+        url_str = 'https://%(host)s/%(base)s/%(resource)s/%(item)s' % (
             {
-                'fqdn': self.fqdn,
+                'host': self.host,
                 'base': self.base,
                 'resource': resource,
                 'item': item
