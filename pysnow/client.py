@@ -17,6 +17,7 @@ class Client(object):
                  raise_on_empty=True,
                  default_payload=None,
                  request_params=None,
+                 use_ssl=True,
                  session=None):
         """Sets configuration and creates a session object used in `Request` later on
 
@@ -34,18 +35,28 @@ class Client(object):
         :param session: a requests session object
         """
 
+        # We allow either host or instance, not both
         if (host and instance) is not None:
-            raise InvalidUsage("Arguments 'host' and 'instance' are mutually exclusive, you cannot use both.")
+            raise InvalidUsage("Got both 'instance' and 'host'. Panic.")
 
         if ((not (user and password)) and not session) or ((user or password) and session):
             raise InvalidUsage("You must either provide username and password or a session")
 
+        # Check if host or instance was passed
         if instance:
             self.host = "%s.service-now.com" % instance
         elif host:
             self.host = host
         else:
-            raise InvalidUsage("You must pass either 'instance' or 'host' to connect")
+            raise InvalidUsage("You must pass 'instance' or 'host' to create a client")
+
+        # Check if SSL was requested
+        if use_ssl is True:
+            self.base_url = "https://%s" % self.host
+        elif use_ssl is False:
+            self.base_url = "http://%s" % self.host
+        else:
+            raise InvalidUsage("use_ssl: boolean value expected")
 
         # Connection properties
         self.instance = instance
@@ -98,7 +109,7 @@ class Client(object):
                                raise_on_empty=self.raise_on_empty,
                                session=self.session,
                                instance=self.instance,
-                               host=self.host,
+                               base_url=self.base_url,
                                **kwargs)
 
     def query(self, table, **kwargs):

@@ -60,6 +60,28 @@ class TestClient(unittest.TestCase):
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=True)
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=2.89)
 
+    def test_client_invalid_use_ssl(self):
+        """ Invalid use_ssl type should fail """
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", use_ssl="a string")
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", use_ssl=1)
+
+    def test_client_use_ssl(self):
+        """ Client should construct base URL with correct scheme depending on use_ssl """
+        instance = "foo"
+        host = "foo.bar.com"
+
+        # Test with instance
+        c = Client(user="foo", password="foo", instance=instance, use_ssl=False)
+        self.assertEqual(c.base_url, "http://foo.service-now.com")
+        c = Client(user="foo", password="foo", instance=instance, use_ssl=True)
+        self.assertEqual(c.base_url, "https://foo.service-now.com")
+
+        # Test with host
+        c = Client(user="foo", password="foo", host=host, use_ssl=False)
+        self.assertEqual(c.base_url, "http://foo.bar.com")
+        c = Client(user="foo", password="foo", host=host, use_ssl=True)
+        self.assertEqual(c.base_url, "https://foo.bar.com")
+
     def test_client_valid_request_params(self):
         """Client `request_params` property should match what was passed as an argument"""
         params = {'foo': 'bar'}

@@ -16,7 +16,7 @@ from pysnow.exceptions import (NoRequestExecuted,
 
 
 class Request(object):
-    base = "api/now"
+    base_path = "api/now"
 
     def __init__(self, method, table, **kwargs):
         """Takes arguments used to perform a HTTP request
@@ -27,7 +27,7 @@ class Request(object):
         self.method = method
         self.table = table
         self.url_link = None  # Updated when a linked request is iterated on
-        self.host = self.fqdn = kwargs.pop('host')  # self.fqdn for backward compatibility
+        self.base_url = kwargs.pop('base_url')
         self.request_params = kwargs.pop('request_params')
         self.raise_on_empty = kwargs.pop('raise_on_empty')
         self.session = kwargs.pop('session')
@@ -341,10 +341,10 @@ class Request(object):
         :return: url string
         """
 
-        url_str = 'https://%(host)s/%(base)s/%(resource)s/%(item)s' % (
+        url_str = '%(base_url)s/%(base_path)s/%(resource)s/%(item)s' % (
             {
-                'host': self.host,
-                'base': self.base,
+                'base_url': self.base_url,
+                'base_path': self.base_path,
                 'resource': resource,
                 'item': item
             }
