@@ -12,7 +12,8 @@ from pysnow.exceptions import (NoRequestExecuted,
                                MultipleResults,
                                NoResults,
                                InvalidUsage,
-                               UnexpectedResponse)
+                               UnexpectedResponse,
+                               MissingResult)
 
 
 class Request(object):
@@ -320,6 +321,9 @@ class Request(object):
                 200, response.status_code, method,
                 server_error['summary'], server_error['details']
             )
+
+        if 'result' not in content_json:
+            raise MissingResult("The request was successful but the content didn't contain the expected 'result'")
 
         return content_json['result']
 

@@ -25,6 +25,10 @@ class QueryMultipleExpressions(Exception):
     pass
 
 
+class MissingResult(Exception):
+    pass
+
+
 class UnexpectedResponse(Exception):
     """Informs the user about what went wrong when interfacing with the API
 

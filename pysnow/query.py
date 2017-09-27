@@ -58,12 +58,32 @@ class QueryBuilder(object):
         return self._add_condition('ISEMPTY', '', types=[str, int])
 
     def equals(self, value):
-        """Query records with the given field equalling the value specified"""
-        return self._add_condition('=', value, types=[int, str])
+        """
+        Query records with the given field equalling either:
+        - the value passed (str)
+        - any of the values passed (list)
+        """
+
+        if isinstance(value, str):
+            return self._add_condition('=', value, types=[int, str])
+        elif isinstance(value, list):
+            return self._add_condition('IN', ",".join(value), types=[str])
+
+        raise QueryTypeError('Expected value of type `str` or `list`, not %s' % type(value))
 
     def not_equals(self, value):
-        """Query records with the given field not equalling the value specified"""
-        return self._add_condition('!=', value, types=[int, str])
+        """
+        Query records with the given field not equalling:
+        - the value specified
+        - any of the values specified (list)
+        """
+
+        if isinstance(value, str):
+            return self._add_condition('!=', value, types=[int, str])
+        elif isinstance(value, list):
+            return self._add_condition('NOT IN', ",".join(value), types=[str])
+
+        raise QueryTypeError('Expected value of type `str` or `list`, not %s' % type(value))
 
     def greater_than(self, value):
         """Query records with the given field greater than the value specified"""

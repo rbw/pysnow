@@ -178,6 +178,22 @@ class TestIncident(unittest.TestCase):
         self.assertEqual(r.get_one()['number'], self.mock_incident['number'])
 
     @httpretty.activate
+    def test_get_content_without_result(self):
+        """
+        Make sure content without `result` fails
+        """
+        json_body = json.dumps({})
+        httpretty.register_uri(httpretty.GET,
+                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               body=json_body,
+                               status=200,
+                               content_type="application/json")
+
+        r = self.client.query(table='incident', query={})
+
+        self.assertRaises(pysnow.MissingResult, r.get_one)
+
+    @httpretty.activate
     def test_get_limited_result(self):
         """
         Make sure fetching by dict type query works

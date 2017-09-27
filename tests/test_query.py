@@ -112,18 +112,26 @@ class TestIncident(unittest.TestCase):
         q1 = pysnow.QueryBuilder().field('test')
         self.assertRaises(pysnow.QueryTypeError, q1.equals, dt)
 
-        # Make sure a valid operation works
+        # Make sure a valid operation works (str)
         q2 = pysnow.QueryBuilder().field('test').equals('test')
         self.assertEqual(str(q2), 'test=test')
+
+        # Make sure a valid operation works (list)
+        q3 = pysnow.QueryBuilder().field('test').equals(['foo', 'bar'])
+        self.assertEqual(str(q3), 'testINfoo,bar')
 
     def test_query_cond_not_equals(self):
         # Make sure type checking works
         q1 = pysnow.QueryBuilder().field('test')
         self.assertRaises(pysnow.QueryTypeError, q1.not_equals, dt)
 
-        # Make sure a valid operation works
+        # Make sure a valid operation works (str)
         q2 = pysnow.QueryBuilder().field('test').not_equals('test')
         self.assertEqual(str(q2), 'test!=test')
+
+        # Make sure a valid operation works (list)
+        q3 = pysnow.QueryBuilder().field('test').not_equals(['foo', 'bar'])
+        self.assertEqual(str(q3), 'testNOT INfoo,bar')
 
     def test_query_cond_greater_than(self):
         # Make sure type checking works
