@@ -10,7 +10,7 @@ except ImportError:
 
 
 def get_version():
-    """ Parses pysnow.py and fetches the version attribute from the syntax tree
+    """ Parses the pysnow package __init__ file and fetches the version attribute from the syntax tree
     :return: pysnow version
     """
     with io.open('pysnow/__init__.py') as input_file:
