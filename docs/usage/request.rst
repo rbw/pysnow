@@ -33,6 +33,17 @@ See the :meth:`pysnow.Request.get_one` documentation for more details.
     print(result['number'])
 
 
+Creating multiple records
+---------------------
+
+Creating multiple records is similar to creating a single record.  The primary difference is multiple records have to be grouped in a list under the `records` key.
+
+.. code-block:: python
+
+    # Create multiple records
+    result = s.insert(table='incident', payload={'records': [{'record1_field1': 'value1', 'field2': 'value2'}, {'record2_field1': 'value1', 'field2': 'value2'}]})
+
+
 Getting multiple records
 ------------------------
 
