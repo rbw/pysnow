@@ -57,19 +57,19 @@ class QueryBuilder(object):
         """Query records with the given field empty"""
         return self._add_condition('ISEMPTY', '', types=[str, int])
 
-    def equals(self, value):
+    def equals(self, data):
         """
         Query records with the given field equalling either:
         - the value passed (str)
         - any of the values passed (list)
         """
 
-        if isinstance(value, str):
-            return self._add_condition('=', value, types=[int, str])
-        elif isinstance(value, list):
-            return self._add_condition('IN', ",".join(value), types=[str])
+        if isinstance(data, str):
+            return self._add_condition('=', data, types=[int, str])
+        elif isinstance(data, list):
+            return self._add_condition('IN', ",".join(map(str, data)), types=[str])
 
-        raise QueryTypeError('Expected value of type `str` or `list`, not %s' % type(value))
+        raise QueryTypeError('Expected value of type `str` or `list`, not %s' % type(data))
 
     def not_equals(self, value):
         """
