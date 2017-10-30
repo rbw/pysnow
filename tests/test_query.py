@@ -117,8 +117,8 @@ class TestIncident(unittest.TestCase):
         self.assertEqual(str(q2), 'test=test')
 
         # Make sure a valid operation works (list)
-        q3 = pysnow.QueryBuilder().field('test').equals(['foo', 'bar'])
-        self.assertEqual(str(q3), 'testINfoo,bar')
+        q3 = pysnow.QueryBuilder().field('test').equals(['foo', 'bar', 1])
+        self.assertEqual(str(q3), 'testINfoo,bar,1')
 
     def test_query_cond_not_equals(self):
         # Make sure type checking works
