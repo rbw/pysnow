@@ -88,8 +88,4 @@ class TestClient(unittest.TestCase):
         c = Client(instance="test", user="foo", password="foo", request_params=params)
         self.assertEqual(c.request_params, params)
 
-        # Remove tests below when `default_payload` has been removed from `Client`
-        c = Client(instance="test", user="foo", password="foo", default_payload=params)
-        self.assertEqual(c.default_payload, params)
-
 
