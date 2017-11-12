@@ -149,7 +149,7 @@ class OAuthClient(Client):
     token = None
 
     def __init__(self, client_id=None, client_secret=None, token_updater=None, *args, **kwargs):
-        if (client_id or client_secret) is None:
+        if not (client_secret and client_id):
             raise InvalidUsage('You must supply a client_id and client_secret')
 
         if token_updater is None:
@@ -180,10 +180,7 @@ class OAuthClient(Client):
 
         return OAuth2Session(
             client_id=self.client_id,
-            token={
-                "refresh_token": self.token['refresh_token'],
-                "access_token": self.token['access_token']
-            },
+            token=self.token,
             token_updater=self.token_updater,
             auto_refresh_url=self.token_url,
             auto_refresh_kwargs={
