@@ -109,7 +109,6 @@ class TestOAuthClient(unittest.TestCase):
 
         self.assertEqual(token['access_token'], self.mock_token['access_token'])
         self.assertEqual(token['refresh_token'], self.mock_token['refresh_token'])
-        self.assertEqual(int(token['expires_at']), self.mock_token['expires_at'])
 
     @httpretty.activate
     def test_token_refresh(self):
