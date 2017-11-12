@@ -157,7 +157,7 @@ class Request(object):
             if 'sys_id' not in result:
                 raise NoResults()
         except MultipleResults:
-            raise NotImplementedError("Deletion of multiple records is not supported")
+            raise MultipleResults("Deletion of multiple records is not supported")
         except NoResults as e:
             e.args = ('Cannot delete a non-existing record',)
             raise
@@ -171,7 +171,7 @@ class Request(object):
         :param payload: Payload to update the record with
         :raise:
             :NoResults: if query returned no results
-            :NotImplementedError: if query returned more than one result (currently not supported)
+            :MultipleResults: if query returned more than one result (currently not supported)
         :return: The updated record
         """
         try:
@@ -179,7 +179,7 @@ class Request(object):
             if 'sys_id' not in result:
                 raise NoResults()
         except MultipleResults:
-            raise NotImplementedError("Update of multiple records is not supported")
+            raise MultipleResults("Update of multiple records is not supported")
         except NoResults as e:
             e.args = ('Cannot update a non-existing record',)
             raise
@@ -196,7 +196,7 @@ class Request(object):
         :param reset_fields: Fields to reset
         :raise:
             :NoResults: if query returned no results
-            :NotImplementedError: if query returned more than one result (currently not supported)
+            :MultipleResults: if query returned more than one result (currently not supported)
             :UnexpectedResponse: informs the user about what likely went wrong
         :return: The cloned record
         """
@@ -209,7 +209,7 @@ class Request(object):
             if 'sys_id' not in response:
                 raise NoResults()
         except MultipleResults:
-            raise NotImplementedError('Cloning multiple records is not supported')
+            raise MultipleResults('Cloning multiple records is not supported')
         except NoResults as e:
             e.args = ('Cannot clone a non-existing record',)
             raise
@@ -243,7 +243,7 @@ class Request(object):
         :param file: File to attach to the record
         :raise:
             :NoResults: if query returned no results
-            :NotImplementedError: if query returned more than one result (currently not supported)
+            :MultipleResults: if query returned more than one result (currently not supported)
         :return: The attachment record metadata
         """
         try:
@@ -251,7 +251,7 @@ class Request(object):
             if 'sys_id' not in result:
                 raise NoResults()
         except MultipleResults:
-            raise NotImplementedError('Attaching a file to multiple records is not supported')
+            raise MultipleResults('Attaching a file to multiple records is not supported')
         except NoResults:
             raise NoResults('Attempted to attach file to a non-existing record')
 
