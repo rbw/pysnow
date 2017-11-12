@@ -1,7 +1,7 @@
 Connecting
 ==========
 
-This shows some examples of how to connect with pysnow using either username and password or OAuth.
+This shows some examples of how to connect with pysnow using either username and password or a custom session object
 
 See the :meth:`pysnow.Client` documentation for details.
 
@@ -38,7 +38,7 @@ In this example regular user / pass authentication is used, but with SSL verific
 
 
 Setting request parameters
-------------------------
+--------------------------
 The `request_params` dict argument can be used to set request parameters. This example returns names from fields with linked tables, instead of the standard URL for ServiceNow dot walking.
 Check out the `Table API documentation <http://wiki.servicenow.com/index.php?title=Table_API#gsc.tab=0>`_ for more info.
 
@@ -52,85 +52,57 @@ Check out the `Table API documentation <http://wiki.servicenow.com/index.php?tit
                        password=password,
                        request_params={'sysparm_display_value': 'true'})
 
+Using the OAuthClient
+---------------------
 
-Using OAuth
------------
+Pysnow provides the :meth:`pysnow.OAuthClient` to simplify the process of obtaining initial tokens, refreshing tokens and keeping tokens in sync with your storage.
 
-In order to use OAuth, it needs to be enabled inside ServiceNow, which is beyond the scope of this
-document. You can find the details in the `ServiceNow documentation <https://docs.servicenow.com/bundle/istanbul-servicenow-platform/page/integrate/inbound-rest/task/t_EnableOAuthWithREST.html>`_.
+Should the :meth:`pysnow.OAuthClient` not be sufficient for your requirements some reason, you can always create a custom `Requests` compatible OAuth session and pass along to :meth:`pysnow.Client`
 
-Once this has been done, you will need to install
-`Requests-OAuthlib <https://requests-oauthlib.readthedocs.io/en/latest/>`_ in order to
-follow this example.
+Enabling OAuth in ServiceNow is fairly simple but beyond the scope of this
+document. Details on how to do this can be found in the `official ServiceNow documentation <https://docs.servicenow.com/bundle/istanbul-servicenow-platform/page/integrate/inbound-rest/task/t_EnableOAuthWithREST.html>`_.
+
 
 Initial tokens
 ^^^^^^^^^^^^^^
 
-You will need an access_token and a refresh_token. The ServiceNow OAuth documentation
-provides one way to get the initial tokens but here is a simple example of obtaining
-them using Python.
-
-Username and password is required to obtain the initial access and refresh tokens.
-Once you have these you will not need the username and password again until the
-refresh token expires. This expiration is controlled in your ServiceNow setup.
+In order to use the :meth:`pysnow.OAuthClient` you first need to obtain a new token from ServiceNow.
+Creating a new token bound to a certain user is easy, simply call :meth:`pysnow.OAuthClient.generate_token()` and keep it in your storage (e.g. in session or database)
 
 .. code-block:: python
 
+    import pysnow
+    import session
 
-   import json
-   from oauthlib.oauth2 import LegacyApplicationClient
-   from requests_oauthlib import OAuth2Session
+    s = pysnow.OAuthClient(client_id='<client_id_from_servicenow>', client_secret='<client_secret_from_servicenow>', instance='<instance_name>')
 
-   client_id = 'CLIENT_ID'         # from the ServiceNow setup
-   client_secret = 'CLIENT_SECRET' # also from ServiceNow setup
-   username = 'USER_NAME'          # a valid ServiceNow user
-   password = 'USER_PASSWORD'      # a valid ServiceNow password
-   instance = 'SNOW_INSTANCE'      # the name of your ServiceNow instance
+    if not session['token']:
+        # No previous token exists. Generate new.
+        session['token'] = s.generate_token('<username>', '<password>')
 
-   oauth_url = 'https://{}.service-now.com/oauth_token.do'.format(instance)
 
-   oauth = OAuth2Session(client=LegacyApplicationClient(client_id=client_id))
-   token = oauth.fetch_token(token_url=oauth_url,
-                             username=username,
-                             password=password,
-                             client_id=client_id,
-                             client_secret=client_secret)
-
-   print json.dumps(token, indent=4)
-
-Save the contents of the ``token`` dictionary you get back. You'll need that that in
-the following steps.
 
 Using the tokens
 ^^^^^^^^^^^^^^^^
 
-You will need the token dictionary created in the above step. This example sets up
-autorefresh of the tokens. This will work for as long as the refresh_token is valid.
+Once an initial token has been obtained it will be refreshed automatically upon usage, provided its refresh_token hasn't expired.
+
+After a token has been refreshed, the provided :attr:`pysnow.OAuthClient.token_updater` function will be called with the refreshed token as first argument.
 
 .. code-block:: python
 
-   import pysnow
-   from oauthlib.oauth2 import LegacyApplicationClient
-   from requests_oauthlib import OAuth2Session
+    import pysnow
+    import session
 
-   client_id = 'CLIENT_ID'         # from the ServiceNow setup
-   client_secret = 'CLIENT_SECRET' # also from ServiceNow setup
-   username = 'USER_NAME'          # a valid ServiceNow user
+    def updater(new_token):
+        print("OAuth token refreshed!")
+        session['token'] = new_token
 
-   oauth_url = 'https://{}.service-now.com/oauth_token.do'.format(instance)
+    s = pysnow.OAuthClient(client_id='<client_id_from_servicenow>', client_secret='<client_secret_from_servicenow>', token_updater=updater, instance='<instance_name>')
+    s.set_token(session['token'])
 
-   token = ... # token dict from the previous step
+    response = s.query(table='incident', query={'number': 'INC012345'}).get_one()
 
-   refresh_kwargs = { "client_id": client_id, "client_secret": client_secret }
+    print(response['number'])
 
-   def token_updater(new_token):
-       # callback to update/store the new tokens
-       pass
 
-   oauth_session = OAuth2Session(client=LegacyApplicationClient(client_id=client_id),
-                                 token=token,
-                                 auto_refresh_url=oauth_url,
-                                 auto_refresh_kwargs=refresh_kwargs,
-                                 token_updater=token_updater)
-
-   s = pysnow.Client(instance=instance, session=oauth_session)
