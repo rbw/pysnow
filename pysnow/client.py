@@ -148,10 +148,12 @@ class OAuthClient(Client):
     """
     token = None
 
-    def __init__(self, client_id, client_secret, token_updater=None, *args, **kwargs):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.token_updater = token_updater
+    def __init__(self, client_id=None, client_secret=None, token_updater=None, *args, **kwargs):
+        if (client_id or client_secret) is None:
+            raise InvalidUsage('You must supply a client_id and client_secret')
+
+        if token_updater is None:
+            warnings.warn("No token_updater was supplied to OauthClient, you won't be notified of refreshes")
 
         if kwargs.get('session') or kwargs.get('user'):
             warnings.warn('pysnow.OAuthClient manages sessions internally, '
@@ -163,6 +165,10 @@ class OAuthClient(Client):
         kwargs['password'] = None
 
         super(OAuthClient, self).__init__(*args, **kwargs)
+
+        self.token_updater = token_updater
+        self.client_id = client_id
+        self.client_secret = client_secret
 
         self.token_url = "%s/oauth_token.do" % self._get_base_url()
 
