@@ -92,7 +92,7 @@ class TestOAuthClient(unittest.TestCase):
         """OauthClient should raise MissingToken when creating query if no token has been set"""
         c = self.client
 
-        self.assertRaises(MissingToken, c.query, table='incident', query={''})
+        self.assertRaises(MissingToken, c.query, table='incident', query={})
 
     @httpretty.activate
     def test_generate_token(self):
