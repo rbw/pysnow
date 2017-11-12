@@ -18,6 +18,7 @@ def get_version():
             if line.startswith('__version__'):
                 return ast.parse(line).body[0].value.s
 
+
 with io.open('README.rst') as readme:
     setup(
         name='pysnow',
