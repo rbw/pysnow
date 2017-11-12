@@ -25,7 +25,7 @@ with io.open('README.rst') as readme:
         version=get_version(),
         description='Python library for the ServiceNow REST API',
         long_description=readme.read(),
-        install_requires=['requests', 'oauthlib'],
+        install_requires=['requests', 'oauthlib', 'httpretty'],
         author='Robert Wikman',
         author_email='rbw@vault13.org',
         maintainer='Robert Wikman',
