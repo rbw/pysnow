@@ -65,6 +65,12 @@ class TestClient(unittest.TestCase):
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", use_ssl="a string")
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", use_ssl=1)
 
+    def test_client_invalid_raise_on_empty(self):
+        """ Non-bool type to raise_on_empty should fail """
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", raise_on_empty=0)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", raise_on_empty='test')
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", raise_on_empty=None)
+
     def test_client_use_ssl(self):
         """ Client should construct base URL with correct scheme depending on use_ssl """
         instance = "foo"

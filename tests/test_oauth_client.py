@@ -113,7 +113,7 @@ class TestOAuthClient(unittest.TestCase):
 
     @httpretty.activate
     def test_token_refresh(self):
-        """expired tokens should refresh automatically"""
+        """expired tokens should refresh automatically, the new token should be passed to token_updater()"""
 
         def token_updater(token):
             self.assertEqual(int(token['expires_in']), self.mock_token['expires_in'])

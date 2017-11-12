@@ -594,14 +594,14 @@ class TestIncident(unittest.TestCase):
 
         httpretty.register_uri(httpretty.PUT,
                                "http://%s/%s/%s" % (self.mock_connection['host'],
-                                                     self.mock_incident['path'],
-                                                     self.mock_incident['sys_id']),
+                                                    self.mock_incident['path'],
+                                                    self.mock_incident['sys_id']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.update, {'foo': 'bar'})
+        self.assertRaises(pysnow.MultipleResults, r.update, {'foo': 'bar'})
 
     @httpretty.activate
     def test_get_multiple_with_offset(self):
@@ -762,7 +762,7 @@ class TestIncident(unittest.TestCase):
                                content_type="multipart/form-data")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.attach, 'tests/example.txt')
+        self.assertRaises(pysnow.MultipleResults, r.attach, 'tests/example.txt')
 
     @httpretty.activate
     def test_delete_incident(self):
@@ -812,7 +812,7 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.delete)
+        self.assertRaises(pysnow.MultipleResults, r.delete)
 
     @httpretty.activate
     def test_delete_incident_invalid_response(self):
@@ -919,7 +919,7 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.clone)
+        self.assertRaises(pysnow.MultipleResults, r.clone)
 
     @httpretty.activate
     def test_clone_incident_flatten(self):
