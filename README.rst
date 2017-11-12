@@ -13,7 +13,9 @@
     :target: https://coveralls.io/github/rbw0/pysnow?branch=master
 .. image:: https://badge.fury.io/py/pysnow.svg
     :target: https://pypi.python.org/pypi/pysnow
-    
+.. image:: https://img.shields.io/badge/License-MIT-green.svg
+    :target: https://opensource.org/licenses/MIT
+
 Installation
 ------------
 $ pip install pysnow
