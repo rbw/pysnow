@@ -5,7 +5,7 @@ import httpretty
 import json
 from requests_oauthlib import OAuth2Session
 
-from pysnow.client import OAuthClient
+from pysnow import OAuthClient
 from pysnow.exceptions import InvalidUsage, MissingToken
 
 
