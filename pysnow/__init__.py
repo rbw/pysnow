@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pysnow.client import *
+from pysnow.oauth_client import *
 from pysnow.query import *
 from pysnow.request import *
 from pysnow.exceptions import *
