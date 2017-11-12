@@ -115,8 +115,6 @@ class TestOAuthClient(unittest.TestCase):
         """expired tokens should refresh automatically, the new token should be passed to token_updater()"""
 
         def token_updater(token):
-            self.assertEqual(int(token['expires_in']), self.mock_token['expires_in'])
-            self.assertEqual(int(token['expires_at']), self.mock_token['expires_at'])
             self.assertEqual(token['access_token'], self.mock_token['access_token'])
             self.assertEqual(token['refresh_token'], self.mock_token['refresh_token'])
 
