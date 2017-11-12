@@ -12,6 +12,7 @@ Usage
 
    full/get_one
    full/get_multiple
+   full/oauth
    full/pagination
    full/create
    full/query_builder

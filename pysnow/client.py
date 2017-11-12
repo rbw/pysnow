@@ -2,8 +2,10 @@
 
 import requests
 import warnings
+from oauthlib.oauth2 import LegacyApplicationClient
+from requests_oauthlib import OAuth2Session
 from pysnow import request
-from pysnow.exceptions import InvalidUsage
+from pysnow.exceptions import InvalidUsage, MissingToken
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -15,85 +17,75 @@ class Client(object):
                  user=None,
                  password=None,
                  raise_on_empty=True,
-                 default_payload=None,
                  request_params=None,
                  use_ssl=True,
                  session=None):
-        """Sets configuration and creates a session object used in `Request` later on
-
-        You must either provide a username and password or a requests session.
-        If you provide a requests session it must handle the authentication.
-        For example, providing a session can be used to do OAuth authentication.
+        """Creates a client ready to handle requests
 
         :param instance: instance name, used to construct host
         :param host: host can be passed as an alternative to instance
         :param user: username
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
-        :param default_payload: deprecated, use request_params
         :param request_params: request params to send with requests
         :param use_ssl: Enable or disable SSL
         :param session: a requests session object
         """
 
-        # We allow either host or instance, not both
         if (host and instance) is not None:
-            raise InvalidUsage("Got both 'instance' and 'host'. Panic.")
+            raise InvalidUsage("Instance and host are mutually exclusive, you cannot use both.")
 
-        if ((not (user and password)) and not session) or ((user or password) and session):
-            raise InvalidUsage("You must either provide username and password or a session")
+        if type(use_ssl) is not bool:
+            raise InvalidUsage("Argument use_ssl must be of type bool")
 
-        # Check if host or instance was passed
-        if instance:
-            self.host = "%s.service-now.com" % instance
-        elif host:
-            self.host = host
+        if type(raise_on_empty) is not bool:
+            raise InvalidUsage("Argument raise_on_empty must be of type bool")
+
+        if not (host or instance):
+            raise InvalidUsage("You must supply an instance name or a host")
+
+        if not (user and password) and not session:
+            raise InvalidUsage("You must provide either username and password or a session object")
+        elif (user and session) is not None:
+            raise InvalidUsage("Provide either username and password or a session, not both.")
+
+        if request_params is not None:
+            if isinstance(request_params, dict):
+                self.request_params = request_params
+            else:
+                raise InvalidUsage("Request params must be of type dict")
         else:
-            raise InvalidUsage("You must pass 'instance' or 'host' to create a client")
+            self.request_params = {}
 
-        # Check if SSL was requested
-        if use_ssl is True:
-            self.base_url = "https://%s" % self.host
-        elif use_ssl is False:
-            self.base_url = "http://%s" % self.host
-        else:
-            raise InvalidUsage("use_ssl: boolean value expected")
-
-        # Connection properties
         self.instance = instance
+        self.host = host
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
-        self.request_params = self.default_payload = {}
+        self.use_ssl = use_ssl
 
-        # default_payload is deprecated, let user know
-        if default_payload is not None:
-            warnings.warn("default_payload is deprecated, please use request_params instead", DeprecationWarning)
-            self.request_params = self.default_payload = default_payload
-
-        if request_params is not None:
-            self.request_params = request_params
-
-        # Sets request parameters for requests
-        if not isinstance(self.request_params, dict):
-            raise InvalidUsage("Payload must be of type dict")
-
-        # Create new session object
+        self.base_url = self._get_base_url()
         self.session = self._get_session(session)
 
     def _get_session(self, session):
-        """Creates and returns a new session object with the credentials passed to the constructor
-
-        :return: session object
-        """
-        if session:
-            s = session
-        else:
+        if not session:
             s = requests.Session()
             s.auth = requests.auth.HTTPBasicAuth(self._user, self._password)
+        else:
+            s = session
 
         s.headers.update({'content-type': 'application/json', 'accept': 'application/json'})
+
         return s
+
+    def _get_base_url(self):
+        if self.instance is not None:
+            self.host = "%s.service-now.com" % self.instance
+
+        if self.use_ssl is True:
+            return "https://%s" % self.host
+
+        return "http://%s" % self.host
 
     def _request(self, method, table, **kwargs):
         """Creates and returns a new `Request` object, takes some basic settings from the `Client` object and

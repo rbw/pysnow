@@ -37,6 +37,7 @@ class TestIncident(unittest.TestCase):
         self.client = pysnow.Client(instance=self.mock_connection['instance'],
                                     user=self.mock_connection['user'],
                                     password=self.mock_connection['pass'],
+                                    use_ssl=False,
                                     raise_on_empty=self.mock_connection['raise_on_empty'])
 
         # Use `nosetests -l debug` to enable this logger
@@ -56,22 +57,22 @@ class TestIncident(unittest.TestCase):
 
     def test_connection(self):
         self.assertEqual(self.client.instance, self.mock_connection['instance'])
-        self.assertEqual(self.client._user, self.mock_connection['user'])
-        self.assertEqual(self.client._password, self.mock_connection['pass'])
         self.assertEqual(self.client.raise_on_empty, self.mock_connection['raise_on_empty'])
         self.assertEqual(self.client.request_params, {})
 
     @httpretty.activate
     def test_client_request_params(self):
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'result': ''}),
                                status=200,
                                content_type="application/json")
+
         client = pysnow.Client(instance=self.mock_connection['instance'],
                                user=self.mock_connection['user'],
                                password=self.mock_connection['pass'],
                                raise_on_empty=self.mock_connection['raise_on_empty'],
+                               use_ssl=False,
                                request_params={'foo1': 'bar1', 'foo2': 'bar2'})
 
         r = client.query(table='incident', query={})
@@ -89,7 +90,7 @@ class TestIncident(unittest.TestCase):
     def test_invalid_query_type(self):
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -101,7 +102,7 @@ class TestIncident(unittest.TestCase):
     def test_get_count(self):
         json_body = json.dumps({'result': {'stats': {'count': '30'}}})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['stats']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['stats']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -113,7 +114,7 @@ class TestIncident(unittest.TestCase):
     def test_last_response_not_executed(self):
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -128,7 +129,7 @@ class TestIncident(unittest.TestCase):
     def test_last_response(self):
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -149,7 +150,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -167,7 +168,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -184,7 +185,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -200,7 +201,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -226,7 +227,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -243,7 +244,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -263,7 +264,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -279,7 +280,7 @@ class TestIncident(unittest.TestCase):
         Make sure error in content is properly handled
         """
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'error': {'message': 'test'}}),
                                status=200,
                                content_type="application/json")
@@ -294,7 +295,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -309,7 +310,7 @@ class TestIncident(unittest.TestCase):
         Fetch multiple incident records from a linked result
         """
 
-        link_header = "<https://%s/%s/%s>; rel='next'" % (
+        link_header = "<http://%s/%s/%s>; rel='next'" % (
             self.mock_connection['host'],
             self.mock_incident['path'],
             self.mock_incident['link_arg']
@@ -319,14 +320,14 @@ class TestIncident(unittest.TestCase):
         json_body_second = json.dumps({'result': [{'number': self.mock_incident['number'], 'linked': True}]})
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body_first,
                                status=200,
                                content_type="application/json",
                                adding_headers={'Link': link_header})
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s/%s" % (
+                               "http://%s/%s/%s" % (
                                    self.mock_connection['host'],
                                    self.mock_incident['path'],
                                    self.mock_incident['link_arg']
@@ -359,7 +360,7 @@ class TestIncident(unittest.TestCase):
         client = copy(self.client)
         json_body = json.dumps({'result': []})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=404,
                                content_type="application/json")
@@ -392,7 +393,7 @@ class TestIncident(unittest.TestCase):
             }
         )
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -413,7 +414,7 @@ class TestIncident(unittest.TestCase):
         client = copy(self.client)
         json_body = json.dumps({'result': []})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=404,
                                content_type="application/json")
@@ -440,7 +441,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=201,
                                content_type="application/json")
@@ -457,7 +458,7 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]})
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=201,
                                content_type="application/json")
@@ -488,7 +489,7 @@ class TestIncident(unittest.TestCase):
         }
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps(json_body),
                                status=403,
                                content_type="application/json")
@@ -510,13 +511,13 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id'], 'this': 'that'}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.PUT,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json_body,
@@ -538,13 +539,13 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': {}})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.PUT,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body={},
@@ -561,13 +562,13 @@ class TestIncident(unittest.TestCase):
         """
         json_body = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id'], 'this': 'that'}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.PUT,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json_body,
@@ -586,21 +587,21 @@ class TestIncident(unittest.TestCase):
                                            {'sys_id': self.mock_incident['sys_id'], 'this': 'that'}]})
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.PUT,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
-                                                     self.mock_incident['path'],
-                                                     self.mock_incident['sys_id']),
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
+                                                    self.mock_incident['path'],
+                                                    self.mock_incident['sys_id']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.update, {'foo': 'bar'})
+        self.assertRaises(pysnow.MultipleResults, r.update, {'foo': 'bar'})
 
     @httpretty.activate
     def test_get_multiple_with_offset(self):
@@ -611,7 +612,7 @@ class TestIncident(unittest.TestCase):
                                            {'sys_id': self.mock_incident['sys_id'], 'this': 'that'}]})
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
@@ -646,13 +647,13 @@ class TestIncident(unittest.TestCase):
         )
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_get_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
                                body=json_post_body,
                                status=201,
                                content_type="multipart/form-data")
@@ -682,13 +683,13 @@ class TestIncident(unittest.TestCase):
         )
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'result': {}}),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
                                body=json_post_body,
                                status=201,
                                content_type="multipart/form-data")
@@ -715,13 +716,13 @@ class TestIncident(unittest.TestCase):
         )
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_post_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
                                body=json_post_body,
                                status=201,
                                content_type="multipart/form-data")
@@ -749,19 +750,19 @@ class TestIncident(unittest.TestCase):
         )
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_get_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_attachment['path']),
                                body=json_post_body,
                                status=201,
                                content_type="multipart/form-data")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.attach, 'tests/example.txt')
+        self.assertRaises(pysnow.MultipleResults, r.attach, 'tests/example.txt')
 
     @httpretty.activate
     def test_delete_incident(self):
@@ -769,13 +770,13 @@ class TestIncident(unittest.TestCase):
         Delete an incident, make sure we get a 204 back along with expected body
         """
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]}),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.DELETE,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json.dumps({'success': True}),
@@ -796,14 +797,14 @@ class TestIncident(unittest.TestCase):
         json_body_get = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']},
                                                {'sys_id': self.mock_incident['sys_id']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body_get,
                                status=200,
                                content_type="application/json")
 
         json_body_delete = json.dumps({'success': True})
         httpretty.register_uri(httpretty.DELETE,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json_body_delete,
@@ -811,7 +812,7 @@ class TestIncident(unittest.TestCase):
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.delete)
+        self.assertRaises(pysnow.MultipleResults, r.delete)
 
     @httpretty.activate
     def test_delete_incident_invalid_response(self):
@@ -819,13 +820,13 @@ class TestIncident(unittest.TestCase):
         Make sure non-204 responses are properly handled
         """
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']}]}),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.DELETE,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json.dumps({'success': True}),
@@ -842,13 +843,13 @@ class TestIncident(unittest.TestCase):
         """
         client = copy(self.client)
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'result': {}}),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.DELETE,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json.dumps({'success': True}),
@@ -866,13 +867,13 @@ class TestIncident(unittest.TestCase):
         Attempt to clone a non-existing record
         """
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'result': {}}),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.DELETE,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json.dumps({'success': True}),
@@ -888,13 +889,13 @@ class TestIncident(unittest.TestCase):
         Attempt to pass reset_fields as non-list to clone()
         """
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json.dumps({'result': {}}),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.DELETE,
-                               "https://%s/%s/%s" % (self.mock_connection['host'],
+                               "http://%s/%s/%s" % (self.mock_connection['host'],
                                                      self.mock_incident['path'],
                                                      self.mock_incident['sys_id']),
                                body=json.dumps({'success': True}),
@@ -912,13 +913,13 @@ class TestIncident(unittest.TestCase):
         json_body_get = json.dumps({'result': [{'sys_id': self.mock_incident['sys_id']},
                                                {'sys_id': self.mock_incident['sys_id']}]})
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body_get,
                                status=200,
                                content_type="application/json")
 
         r = self.client.query(table='incident', query={'number': self.mock_incident['number']})
-        self.assertRaises(NotImplementedError, r.clone)
+        self.assertRaises(pysnow.MultipleResults, r.clone)
 
     @httpretty.activate
     def test_clone_incident_flatten(self):
@@ -940,13 +941,13 @@ class TestIncident(unittest.TestCase):
         )
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=201,
                                content_type="application/json")
@@ -975,13 +976,13 @@ class TestIncident(unittest.TestCase):
         )
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=201,
                                content_type="application/json")
@@ -1011,13 +1012,13 @@ class TestIncident(unittest.TestCase):
         )
 
         httpretty.register_uri(httpretty.GET,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.POST,
-                               "https://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
+                               "http://%s/%s" % (self.mock_connection['host'], self.mock_incident['path']),
                                body=json_body,
                                status=403,
                                content_type="application/json")

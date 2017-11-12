@@ -16,7 +16,7 @@
     
 Installation
 ------------
-# pip install pysnow
+$ pip install pysnow
 
 
 Usage examples

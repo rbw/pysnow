@@ -1,5 +1,5 @@
-``pysnow.Client`` --- Creates a new client object
-=================================================
+``pysnow.Client`` --- Creates a new client
+==========================================
 
 .. automodule:: pysnow
 .. autoclass:: Client
