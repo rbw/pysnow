@@ -37,9 +37,6 @@ class OAuthClient(Client):
         if not (client_secret and client_id):
             raise InvalidUsage('You must supply a client_id and client_secret')
 
-        if token_updater is None:
-            warnings.warn("No token_updater was supplied to OauthClient, you won't be notified of refreshes")
-
         if kwargs.get('session') or kwargs.get('user'):
             warnings.warn('pysnow.OAuthClient manages sessions internally, '
                           'provided user / password credentials or sessions will be ignored.')
@@ -82,6 +79,9 @@ class OAuthClient(Client):
         expected_keys = set(("token_type", "refresh_token", "access_token", "scope", "expires_in", "expires_at"))
         if not expected_keys <= set(token):
             raise InvalidUsage("Token should contain a dictionary obtained from generate_token()")
+
+        if self.token_updater is None:
+            warnings.warn("No token_updater was supplied to OauthClient, you won't be notified of refreshes")
 
         self.token = token
         self.session = self._get_oauth_session()
