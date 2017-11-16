@@ -2,9 +2,10 @@
 
 import warnings
 from oauthlib.oauth2 import LegacyApplicationClient
+from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from requests_oauthlib import OAuth2Session
 from pysnow import Client
-from pysnow.exceptions import InvalidUsage, MissingToken
+from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -104,10 +105,12 @@ class OAuthClient(Client):
         :param password: password
         :return: dictionary containing token data
         """
-        return dict(self.session.fetch_token(token_url=self.token_url,
-                                             username=user,
-                                             password=password,
-                                             client_id=self.client_id,
-                                             client_secret=self.client_secret))
-
+        try:
+            return dict(self.session.fetch_token(token_url=self.token_url,
+                                                 username=user,
+                                                 password=password,
+                                                 client_id=self.client_id,
+                                                 client_secret=self.client_secret))
+        except OAuth2Error as e:
+            raise TokenCreateError(error=e.error, description=e.description)
 

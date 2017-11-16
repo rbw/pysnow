@@ -33,8 +33,16 @@ class MissingToken(Exception):
     pass
 
 
+class TokenCreateError(Exception):
+    def __init__(self, error, description):
+        message = "Error creating new user token"
+        super(TokenCreateError, self).__init__(message)
+        self.error = error
+        self.description = description
+
+
 class UnexpectedResponse(Exception):
-    """Informs the user about what went wrong when interfacing with the API
+    """Provides detailed information about a server error response
 
     :param code_expected: Expected HTTP status code
     :param code_actual: Actual HTTP status code
