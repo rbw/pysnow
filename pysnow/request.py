@@ -64,7 +64,8 @@ class Request(object):
                                     params=self._get_formatted_query(fields=list(),
                                                                      limit=None,
                                                                      order_by=list(),
-                                                                     offset=None))
+                                                                     offset=None,
+                                                                     display_value=None))
 
         content = self._get_content(response)
 
@@ -78,13 +79,13 @@ class Request(object):
         """
         return self.last_response.status_code
 
-    def _all_inner(self, fields, limit, order_by, offset):
+    def _all_inner(self, fields, limit, order_by, offset, display_value):
         """Yields all records for the query and follows links if present on the response after validating
 
         :return: List of records with content
         """
         response = self.session.get(self._get_table_url(),
-                                    params=self._get_formatted_query(fields, limit, order_by, offset))
+                                    params=self._get_formatted_query(fields, limit, order_by, offset, display_value))
 
         yield self._get_content(response)
         while 'next' in response.links:
@@ -97,7 +98,7 @@ class Request(object):
         warnings.warn("get_all() is deprecated, please use get_multiple() instead", DeprecationWarning)
         return self.get_multiple(fields, limit, order_by, offset)
 
-    def get_multiple(self, fields=list(), limit=None, order_by=list(), offset=None):
+    def get_multiple(self, fields=list(), limit=None, order_by=list(), offset=None, display_value=None):
         """Wrapper method that takes whatever was returned by the _all_inner() generators and chains it in one result
 
         The response can be sorted by passing a list of fields to order_by.
@@ -110,20 +111,22 @@ class Request(object):
         :param limit: Limits the number of records returned
         :param order_by: Sort response based on certain fields
         :param offset: A number of records to skip before returning records (for pagination)
+        :param display_value: Bool to display values for all of the fields (reference and choice fields)
         :return: Iterable chain object
         """
-        return itertools.chain.from_iterable(self._all_inner(fields, limit, order_by, offset))
+        return itertools.chain.from_iterable(self._all_inner(fields, limit, order_by, offset, display_value))
 
-    def get_one(self, fields=list()):
+    def get_one(self, fields=list(), display_value=None):
         """Convenience function for queries returning only one result. Validates response before returning.
 
         :param fields: List of fields to return in the result
+        :param display_value: Bool to display values for all of the fields (reference and choice fields)
         :raise:
             :MultipleResults: if more than one match is found
         :return: Record content
         """
         response = self.session.get(self._get_table_url(),
-                                    params=self._get_formatted_query(fields, limit=None, order_by=list(), offset=None))
+                                    params=self._get_formatted_query(fields, limit=None, order_by=list(), offset=None, display_value=display_value))
 
         content = self._get_content(response)
         l = len(content)
@@ -359,7 +362,7 @@ class Request(object):
 
         return url_str
 
-    def _get_formatted_query(self, fields, limit, order_by, offset):
+    def _get_formatted_query(self, fields, limit, order_by, offset, display_value):
         """
         Converts the query to a ServiceNow-interpretable format
         :return: ServiceNow query
@@ -399,6 +402,9 @@ class Request(object):
 
         if offset is not None:
             params.update({'sysparm_offset': offset})
+
+        if display_value:
+            params.update({'sysparm_display_value': True})
 
         if len(fields) > 0:
             params.update({'sysparm_fields': ",".join(fields)})
