@@ -77,6 +77,10 @@ class OAuthClient(Client):
         :param token: dict containing the information required to create an OAuth2Session
         """
 
+        if not token:
+            self.token = None
+            return
+
         expected_keys = set(("token_type", "refresh_token", "access_token", "scope", "expires_in", "expires_at"))
         if not isinstance(token, dict) or not expected_keys <= set(token):
             raise InvalidUsage("Token should contain a dictionary obtained using fetch_token()")
