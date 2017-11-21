@@ -78,8 +78,8 @@ class OAuthClient(Client):
         """
 
         expected_keys = set(("token_type", "refresh_token", "access_token", "scope", "expires_in", "expires_at"))
-        if not expected_keys <= set(token):
-            raise InvalidUsage("Token should contain a dictionary obtained from generate_token()")
+        if not isinstance(token, dict) or not expected_keys <= set(token):
+            raise InvalidUsage("Token should contain a dictionary obtained using fetch_token()")
 
         if self.token_updater is None:
             warnings.warn("No token_updater was supplied to OauthClient, you won't be notified of refreshes")
