@@ -15,14 +15,6 @@ class OAuthClient(Client):
 
     This API exposes two extra public methods:
 
-    - generate_token(user, pass)
-        - This method takes user and password credentials to generate a new OAuth token that can be stored outside the context of pysnow, e.g. in a session or database.
-
-
-    - set_token(token)
-        - Takes an OAuth token (dict) and internally creates a new pysnow-compatible session, enabling pysnow.OAuthClient to create requests.
-
-
     :param client_id: client_id from ServiceNow
     :param client_secret: client_secret from ServiceNow
     :param token_updater: callback function called when a token has been refreshed
@@ -32,7 +24,7 @@ class OAuthClient(Client):
     :param request_params: request params to send with requests
     :param use_ssl: Enable or disable SSL
     """
-    token = None
+    _token = None
 
     def __init__(self, client_id=None, client_secret=None, token_updater=None, *args, **kwargs):
         if not (client_secret and client_id):
@@ -71,14 +63,19 @@ class OAuthClient(Client):
                 "client_secret": self.client_secret
             })
 
-    def set_token(self, token):
-        """Validates token and creates a pysnow compatible session
+    @property
+    def token(self):
+        return self._token
+
+    @token.setter
+    def token(self, token):
+        """Sets token property after validating
 
         :param token: dict containing the information required to create an OAuth2Session
         """
 
         if not token:
-            self.token = None
+            self._token = None
             return
 
         expected_keys = set(("token_type", "refresh_token", "access_token", "scope", "expires_in", "expires_at"))
@@ -88,19 +85,19 @@ class OAuthClient(Client):
         if self.token_updater is None:
             warnings.warn("No token_updater was supplied to OauthClient, you won't be notified of refreshes")
 
-        self.token = token
-        self.session = self._get_oauth_session()
+        self._token = token
 
     def _request(self, *args, **kwargs):
-        """Checks if token has been set then calls parent
+        """Ensures token has been set, creates a requests compatible session then calls parent
 
         :return: pysnow.Request object
         """
 
         if isinstance(self.token, dict):
+            self.session = self._get_oauth_session()
             return super(OAuthClient, self)._request(*args, **kwargs)
 
-        raise MissingToken("You must set_token() before creating a request with pysnow.OAuthClient")
+        raise MissingToken("OAuthClient.token must be set before creating a request")
 
     def generate_token(self, user, password):
         """Takes user and password credentials and generates a new token
