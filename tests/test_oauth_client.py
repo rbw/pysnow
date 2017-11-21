@@ -49,7 +49,7 @@ class TestOAuthClient(unittest.TestCase):
         self.mock_token_url = "https://test.service-now.com/oauth_token.do"
 
         self.client = OAuthClient(instance="test", client_id="test1",
-                                  client_secret="test2")
+                                  client_secret="test2", token_updater=self.token_updater)
 
     def token_updater(self, token):
         self.assertEqual(token['expires_in'], False)
@@ -73,17 +73,17 @@ class TestOAuthClient(unittest.TestCase):
         self.assertEqual(c._password, None)
 
     def test_set_token_malformed(self):
-        """set_token() should raise InvalidUsage if the token is not of the expected schema"""
+        """token setter should raise InvalidUsage if the token is not of the expected format"""
 
         c = self.client
         token = self.mock_token.pop('refresh_token')
 
-        self.assertRaises(InvalidUsage, c.set_token, token)
+        self.assertRaises(InvalidUsage, setattr, c, 'token', token)
 
-    def test_set_token(self):
-        """set_token() should set token property and create an OAuth2Session"""
+    def test_token_setter(self):
+        """token setter should set token property and create an OAuth2Session"""
         c = self.client
-        c.set_token(self.mock_token)
+        c.token = self.mock_token
 
         self.assertEqual(c.token, self.mock_token)
         self.assertEqual(isinstance(c.session, OAuth2Session), True)
@@ -94,18 +94,11 @@ class TestOAuthClient(unittest.TestCase):
 
         self.assertRaises(MissingToken, c.query, table='incident', query={})
 
-    def test_set_token_without_token_updater(self):
-        """OAuthClient.set_token() should raise a UserWarning if no token_updater has been set"""
-        c = self.client
-
-        self.assertRaises(UserWarning, c.set_token(self.mock_token))
-
     def test_reset_token(self):
         """OAuthClient should set token property to None and bypass validation if passed token is `False`"""
         c = self.client
-        c.set_token(self.mock_token)
-
-        c.set_token(None)
+        c.token = self.mock_token
+        c.token = None
 
         self.assertEqual(c.token, None)
 
@@ -162,7 +155,7 @@ class TestOAuthClient(unittest.TestCase):
 
         c = self.client
         c.token_updater = token_updater
-        c.set_token(self.mock_token_expired)
+        c.token = self.mock_token_expired
 
         r = c.query(table='incident', query={}).get_one()
         number = r['number']
