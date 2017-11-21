@@ -6,7 +6,7 @@ import json
 from requests_oauthlib import OAuth2Session
 
 from pysnow import OAuthClient
-from pysnow.exceptions import InvalidUsage, MissingToken
+from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 
 class TestOAuthClient(unittest.TestCase):
@@ -73,17 +73,17 @@ class TestOAuthClient(unittest.TestCase):
         self.assertEqual(c._password, None)
 
     def test_set_token_malformed(self):
-        """set_token() should raise InvalidUsage if the token is not of the expected schema"""
+        """token setter should raise InvalidUsage if the token is not of the expected format"""
 
         c = self.client
         token = self.mock_token.pop('refresh_token')
 
-        self.assertRaises(InvalidUsage, c.set_token, token)
+        self.assertRaises(InvalidUsage, setattr, c, 'token', token)
 
-    def test_set_token(self):
-        """set_token() should set token property and create an OAuth2Session"""
+    def test_token_setter(self):
+        """token setter should set token property and create an OAuth2Session"""
         c = self.client
-        c.set_token(self.mock_token)
+        c.token = self.mock_token
 
         self.assertEqual(c.token, self.mock_token)
         self.assertEqual(isinstance(c.session, OAuth2Session), True)
@@ -93,6 +93,27 @@ class TestOAuthClient(unittest.TestCase):
         c = self.client
 
         self.assertRaises(MissingToken, c.query, table='incident', query={})
+
+    def test_reset_token(self):
+        """OAuthClient should set token property to None and bypass validation if passed token is `False`"""
+        c = self.client
+        c.token = self.mock_token
+        c.token = None
+
+        self.assertEqual(c.token, None)
+
+    @httpretty.activate
+    def test_generate_token_error(self):
+        """generate_token() should raise a TokenCreateError exception if OAuth2Error was raised"""
+        httpretty.register_uri(httpretty.POST,
+                               self.mock_token_url,
+                               body={},
+                               status=400,
+                               content_type="application/json")
+
+        c = self.client
+
+        self.assertRaises(TokenCreateError, c.generate_token, 'foo', 'bar')
 
     @httpretty.activate
     def test_generate_token(self):
@@ -134,7 +155,7 @@ class TestOAuthClient(unittest.TestCase):
 
         c = self.client
         c.token_updater = token_updater
-        c.set_token(self.mock_token_expired)
+        c.token = self.mock_token_expired
 
         r = c.query(table='incident', query={}).get_one()
         number = r['number']
