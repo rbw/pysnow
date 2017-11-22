@@ -1,15 +1,28 @@
 # -*- coding: utf-8 -*-
 import unittest
+import warnings
 import datetime
 import httpretty
 import json
 from requests_oauthlib import OAuth2Session
 
 from pysnow import OAuthClient
-from pysnow.exceptions import InvalidUsage, MissingToken
+from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 
-class TestOAuthClient(unittest.TestCase):
+class WarningTestMixin(object):
+    """A test which checks if the specified warning was raised"""
+
+    def assert_warns(self, warning, tested_function, *args, **kwargs):
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter('always')
+
+            tested_function(*args, **kwargs)
+
+            self.assertTrue(any(item.category == warning for item in warning_list))
+
+
+class TestOAuthClient(unittest.TestCase, WarningTestMixin):
     def setUp(self):
         seconds = 3600
 
@@ -49,7 +62,7 @@ class TestOAuthClient(unittest.TestCase):
         self.mock_token_url = "https://test.service-now.com/oauth_token.do"
 
         self.client = OAuthClient(instance="test", client_id="test1",
-                                  client_secret="test2", token_updater=self.token_updater)
+                                  client_secret="test2")
 
     def token_updater(self, token):
         self.assertEqual(token['expires_in'], False)
@@ -93,6 +106,34 @@ class TestOAuthClient(unittest.TestCase):
         c = self.client
 
         self.assertRaises(MissingToken, c.query, table='incident', query={})
+
+    def test_set_token_without_token_updater(self):
+        """OAuthClient.set_token() should raise a UserWarning if no token_updater has been set"""
+        c = self.client
+
+        self.assert_warns(UserWarning, c.set_token, self.mock_token)
+
+    def test_reset_token(self):
+        """OAuthClient should set token property to None and bypass validation if passed token is `False`"""
+        c = self.client
+        c.set_token(self.mock_token)
+
+        c.set_token(None)
+
+        self.assertEqual(c.token, None)
+
+    @httpretty.activate
+    def test_generate_token_error(self):
+        """generate_token() should raise a TokenCreateError exception if OAuth2Error was raised"""
+        httpretty.register_uri(httpretty.POST,
+                               self.mock_token_url,
+                               body={},
+                               status=400,
+                               content_type="application/json")
+
+        c = self.client
+
+        self.assertRaises(TokenCreateError, c.generate_token, 'foo', 'bar')
 
     @httpretty.activate
     def test_generate_token(self):
