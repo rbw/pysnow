@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
+import warnings
 import datetime
 import httpretty
 import json
@@ -9,7 +10,19 @@ from pysnow import OAuthClient
 from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 
-class TestOAuthClient(unittest.TestCase):
+class WarningTestMixin(object):
+    """A test which checks if the specified warning was raised"""
+
+    def assert_warns(self, warning, tested_function, *args, **kwargs):
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter('always')
+
+            tested_function(*args, **kwargs)
+
+            self.assertTrue(any(item.category == warning for item in warning_list))
+
+
+class TestOAuthClient(unittest.TestCase, WarningTestMixin):
     def setUp(self):
         seconds = 3600
 
@@ -98,7 +111,7 @@ class TestOAuthClient(unittest.TestCase):
         """OAuthClient.set_token() should raise a UserWarning if no token_updater has been set"""
         c = self.client
 
-        self.assertRaises(UserWarning, c.set_token(self.mock_token))
+        self.assert_warns(UserWarning, c.set_token, self.mock_token)
 
     def test_reset_token(self):
         """OAuthClient should set token property to None and bypass validation if passed token is `False`"""
