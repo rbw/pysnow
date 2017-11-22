@@ -2,9 +2,10 @@
 
 import warnings
 from oauthlib.oauth2 import LegacyApplicationClient
+from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from requests_oauthlib import OAuth2Session
 from pysnow import Client
-from pysnow.exceptions import InvalidUsage, MissingToken
+from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -36,9 +37,6 @@ class OAuthClient(Client):
     def __init__(self, client_id=None, client_secret=None, token_updater=None, *args, **kwargs):
         if not (client_secret and client_id):
             raise InvalidUsage('You must supply a client_id and client_secret')
-
-        if token_updater is None:
-            warnings.warn("No token_updater was supplied to OauthClient, you won't be notified of refreshes")
 
         if kwargs.get('session') or kwargs.get('user'):
             warnings.warn('pysnow.OAuthClient manages sessions internally, '
@@ -79,12 +77,15 @@ class OAuthClient(Client):
         :param token: dict containing the information required to create an OAuth2Session
         """
 
+        if not token:
+            self.token = None
+            return
+
         expected_keys = set(("token_type", "refresh_token", "access_token", "scope", "expires_in", "expires_at"))
-        if not expected_keys <= set(token):
-            raise InvalidUsage("Token should contain a dictionary obtained from generate_token()")
+        if not isinstance(token, dict) or not expected_keys <= set(token):
+            raise InvalidUsage("Token should contain a dictionary obtained using fetch_token()")
 
         self.token = token
-        self.session = self._get_oauth_session()
 
     def _request(self, *args, **kwargs):
         """Checks if token has been set then calls parent
@@ -93,6 +94,7 @@ class OAuthClient(Client):
         """
 
         if isinstance(self.token, dict):
+            self.session = self._get_oauth_session()
             return super(OAuthClient, self)._request(*args, **kwargs)
 
         raise MissingToken("You must set_token() before creating a request with pysnow.OAuthClient")
@@ -104,10 +106,12 @@ class OAuthClient(Client):
         :param password: password
         :return: dictionary containing token data
         """
-        return dict(self.session.fetch_token(token_url=self.token_url,
-                                             username=user,
-                                             password=password,
-                                             client_id=self.client_id,
-                                             client_secret=self.client_secret))
-
+        try:
+            return dict(self.session.fetch_token(token_url=self.token_url,
+                                                 username=user,
+                                                 password=password,
+                                                 client_id=self.client_id,
+                                                 client_secret=self.client_secret))
+        except OAuth2Error as e:
+            raise TokenCreateError(error=e.error, description=e.description)
 
