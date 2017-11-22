@@ -94,12 +94,6 @@ class TestOAuthClient(unittest.TestCase):
 
         self.assertRaises(MissingToken, c.query, table='incident', query={})
 
-    def test_set_token_without_token_updater(self):
-        """OAuthClient.set_token() should raise a UserWarning if no token_updater has been set"""
-        c = self.client
-
-        self.assertRaises(UserWarning, c.set_token(self.mock_token))
-
     def test_reset_token(self):
         """OAuthClient should set token property to None and bypass validation if passed token is `False`"""
         c = self.client
