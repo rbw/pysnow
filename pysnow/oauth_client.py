@@ -89,7 +89,6 @@ class OAuthClient(Client):
             warnings.warn("No token_updater was supplied to OauthClient, you won't be notified of refreshes")
 
         self.token = token
-        self.session = self._get_oauth_session()
 
     def _request(self, *args, **kwargs):
         """Checks if token has been set then calls parent
@@ -98,6 +97,7 @@ class OAuthClient(Client):
         """
 
         if isinstance(self.token, dict):
+            self.session = self._get_oauth_session()
             return super(OAuthClient, self)._request(*args, **kwargs)
 
         raise MissingToken("You must set_token() before creating a request with pysnow.OAuthClient")
