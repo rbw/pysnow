@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import requests
 import warnings
-from pysnow import request
+import re
+import inspect
+
+import requests
+from requests.auth import HTTPBasicAuth
+
+import pysnow
 from pysnow.exceptions import InvalidUsage
 
 warnings.simplefilter("always", DeprecationWarning)
@@ -17,33 +22,49 @@ class Client(object):
                  raise_on_empty=True,
                  request_params=None,
                  use_ssl=True,
+                 enable_response_logger=True,
+                 generator_size=500,
                  session=None):
         """Creates a client ready to handle requests
 
+        Note on `generator_size` and `limit` : both of these parameters sets sysparm_limit,
+        setting `limit` for a request effectively disables the advantages of using generators, as this sets
+        `sysparm_suppress_pagination_header` to True (disables link headers), which the request generators relies on.
+        This is a limitation in the ServiceNow API and can't be fixed in the pysnow library.
+
         :param instance: instance name, used to construct host
         :param host: host can be passed as an alternative to instance
-        :param user: username
+        :param user: user name
         :param password: password
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
         :param request_params: request params to send with requests
         :param use_ssl: Enable or disable SSL
+        :param enable_response_logger: Enables or disables :meth:`Request.get_response_log`
+        :param generator_size: Decides the size of each yield, a higher value might increases performance some but
+        will cause pysnow to consume more memory.
         :param session: a requests session object
         """
 
         if (host and instance) is not None:
-            raise InvalidUsage("Instance and host are mutually exclusive, you cannot use both.")
+            raise InvalidUsage("Arguments 'instance' and 'host' are mutually exclusive, you cannot use both.")
+
+        if type(generator_size) is not int:
+            raise InvalidUsage("Argument 'generator_size' must be of type int")
 
         if type(use_ssl) is not bool:
-            raise InvalidUsage("Argument use_ssl must be of type bool")
+            raise InvalidUsage("Argument 'use_ssl' must be of type bool")
+
+        if type(enable_response_logger) is not bool:
+            raise InvalidUsage("Argument 'enable_response_logger' must be of type bool")
 
         if type(raise_on_empty) is not bool:
-            raise InvalidUsage("Argument raise_on_empty must be of type bool")
+            raise InvalidUsage("Argument 'raise_on_empty' must be of type bool")
 
         if not (host or instance):
-            raise InvalidUsage("You must supply an instance name or a host")
+            raise InvalidUsage("You must supply either 'instance' or 'host'")
 
         if not (user and password) and not session:
-            raise InvalidUsage("You must provide either username and password or a session object")
+            raise InvalidUsage("You must supply either username and password or a session object")
         elif (user and session) is not None:
             raise InvalidUsage("Provide either username and password or a session, not both.")
 
@@ -60,7 +81,9 @@ class Client(object):
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
+        self.enable_response_logger = enable_response_logger
         self.use_ssl = use_ssl
+        self.generator_size = generator_size
 
         self.base_url = self._get_base_url()
         self.session = self._get_session(session)
@@ -68,7 +91,7 @@ class Client(object):
     def _get_session(self, session):
         if not session:
             s = requests.Session()
-            s.auth = requests.auth.HTTPBasicAuth(self._user, self._password)
+            s.auth = HTTPBasicAuth(self._user, self._password)
         else:
             s = session
 
@@ -85,23 +108,48 @@ class Client(object):
 
         return "http://%s" % self.host
 
-    def _request(self, method, table, **kwargs):
-        """Creates and returns a new `Request` object, takes some basic settings from the `Client` object and
-        passes along to the `Request` constructor
+    def _legacy_request(self, method, table, **kwargs):
+        """Returns a LegacyRequest object. Uses old Request, compatible with Client.query and Client.insert
 
         :param method: HTTP method
         :param table: Table to operate on
-        :param kwargs: Keyword arguments passed along to `Request`
         :return: `Request` object
         """
-        return request.Request(method,
-                               table,
-                               request_params=self.request_params,
-                               raise_on_empty=self.raise_on_empty,
-                               session=self.session,
-                               instance=self.instance,
-                               base_url=self.base_url,
-                               **kwargs)
+
+        warnings.warn("Using `%s` is deprecated and will be removed in a future release. "
+                      "Please use `request()` instead." % inspect.stack()[1][3])
+
+        return pysnow.LegacyRequest(method,
+                                    table,
+                                    request_params=self.request_params,
+                                    raise_on_empty=self.raise_on_empty,
+                                    session=self.session,
+                                    instance=self.instance,
+                                    base_url=self.base_url,
+                                    **kwargs)
+
+    def request(self, api_path=None, **kwargs):
+        """Validates the api_path before passing it along to pysnow.Request
+
+        :param api_path: Path to the API to operate on
+        :return: pysnow.Request
+        """
+
+        if not isinstance(api_path, str) or not re.match('^/[/.a-zA-Z0-9-]+$', api_path):
+            raise InvalidUsage(
+                "request() requires the 'api_path' argument in the format of /<api>/[collection]. Examples:  "
+                "'/table/incident', '/table/sys_user_group', '/attachment'."
+            )
+
+        return pysnow.Request(api_path=api_path,
+                              request_params=self.request_params,
+                              raise_on_empty=self.raise_on_empty,
+                              enable_response_logger=self.enable_response_logger,
+                              session=self.session,
+                              instance=self.instance,
+                              base_url=self.base_url,
+                              generator_size=self.generator_size,
+                              **kwargs)
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.
@@ -110,7 +158,7 @@ class Client(object):
         :param kwargs: Keyword arguments passed along to `Request`
         :return: `Request` object
         """
-        return self._request('GET', table, **kwargs)
+        return self._legacy_request('GET', table, **kwargs)
 
     def insert(self, table, payload, **kwargs):
         """Insert (POST) request wrapper
@@ -120,6 +168,6 @@ class Client(object):
         :param kwargs: Keyword arguments passed along to `Request`
         :return: New record content
         """
-        r = self._request('POST', table, **kwargs)
+        r = self._legacy_request('POST', table, **kwargs)
         return r.insert(payload)
 
