@@ -22,7 +22,6 @@ class Client(object):
                  raise_on_empty=True,
                  request_params=None,
                  use_ssl=True,
-                 enable_response_logger=True,
                  generator_size=500,
                  session=None):
         """Creates a client ready to handle requests
@@ -39,7 +38,6 @@ class Client(object):
         :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
         :param request_params: request params to send with requests
         :param use_ssl: Enable or disable SSL
-        :param enable_response_logger: Enables or disables :meth:`Request.get_response_log`
         :param generator_size: Decides the size of each yield, a higher value might increases performance some but
         will cause pysnow to consume more memory.
         :param session: a requests session object
@@ -53,9 +51,6 @@ class Client(object):
 
         if type(use_ssl) is not bool:
             raise InvalidUsage("Argument 'use_ssl' must be of type bool")
-
-        if type(enable_response_logger) is not bool:
-            raise InvalidUsage("Argument 'enable_response_logger' must be of type bool")
 
         if type(raise_on_empty) is not bool:
             raise InvalidUsage("Argument 'raise_on_empty' must be of type bool")
@@ -81,7 +76,6 @@ class Client(object):
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
-        self.enable_response_logger = enable_response_logger
         self.use_ssl = use_ssl
         self.generator_size = generator_size
 
@@ -106,7 +100,13 @@ class Client(object):
         if self.use_ssl is True:
             return "https://%s" % self.host
 
-        return "http://%s" % self.host
+        return "http://%s" % self.host.rstrip('/')
+
+    def _validate_path(self, path):
+        if not isinstance(path, str) or not re.match('^/(?:[._a-zA-Z0-9-]/?)+[^/]$', path):
+            raise InvalidUsage(
+                "Path validation failed - Expected: '/<component>[/component], got: %s" % path
+            )
 
     def _legacy_request(self, method, table, **kwargs):
         """Returns a LegacyRequest object. Uses old Request, compatible with Client.query and Client.insert
@@ -116,7 +116,7 @@ class Client(object):
         :return: `Request` object
         """
 
-        warnings.warn("Using `%s` is deprecated and will be removed in a future release. "
+        warnings.warn("`%s` is deprecated and will be removed in a future release. "
                       "Please use `request()` instead." % inspect.stack()[1][3])
 
         return pysnow.LegacyRequest(method,
@@ -128,28 +128,25 @@ class Client(object):
                                     base_url=self.base_url,
                                     **kwargs)
 
-    def request(self, api_path=None, **kwargs):
+    def resource(self, api_path=None, base_path='/api/now', **kwargs):
         """Validates the api_path before passing it along to pysnow.Request
 
         :param api_path: Path to the API to operate on
         :return: pysnow.Request
         """
 
-        if not isinstance(api_path, str) or not re.match('^/[/.a-zA-Z0-9-]+$', api_path):
-            raise InvalidUsage(
-                "request() requires the 'api_path' argument in the format of /<api>/[collection]. Examples:  "
-                "'/table/incident', '/table/sys_user_group', '/attachment'."
-            )
+        for path in [api_path, base_path]:
+            self._validate_path(path)
 
-        return pysnow.Request(api_path=api_path,
-                              request_params=self.request_params,
-                              raise_on_empty=self.raise_on_empty,
-                              enable_response_logger=self.enable_response_logger,
-                              session=self.session,
-                              instance=self.instance,
-                              base_url=self.base_url,
-                              generator_size=self.generator_size,
-                              **kwargs)
+        return pysnow.Resource(api_path=api_path,
+                               base_path=base_path,
+                               request_params=self.request_params,
+                               raise_on_empty=self.raise_on_empty,
+                               session=self.session,
+                               instance=self.instance,
+                               base_url=self.base_url,
+                               generator_size=self.generator_size,
+                               **kwargs)
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.

@@ -6,7 +6,7 @@ import os
 import ntpath
 import warnings
 
-from pysnow import query
+from .query_builder import QueryBuilder
 
 from pysnow.exceptions import (NoRequestExecuted,
                                MultipleResults,
@@ -371,7 +371,7 @@ class LegacyRequest(object):
         if not isinstance(fields, list):
             raise InvalidUsage("Argument fields must be of type list()")
 
-        if isinstance(self.query, query.QueryBuilder):
+        if isinstance(self.query, QueryBuilder):
             sysparm_query = str(self.query)
         elif isinstance(self.query, dict):  # Dict-type query
             try:
@@ -383,7 +383,7 @@ class LegacyRequest(object):
         elif isinstance(self.query, str):  # String-type query
             sysparm_query = self.query
         else:
-            raise InvalidUsage("Query must be instance of %s, %s or %s" % (query.QueryBuilder, str, dict))
+            raise InvalidUsage("Query must be instance of %s, %s or %s" % (QueryBuilder, str, dict))
 
         for field in order_by:
             if field[0] == '-':

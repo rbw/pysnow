@@ -51,6 +51,10 @@ class UnexpectedResponseFormat(Exception):
     pass
 
 
+class ReportUnavailable(Exception):
+    pass
+
+
 class TokenCreateError(Exception):
     def __init__(self, error, description):
         message = "Error creating new user token"
