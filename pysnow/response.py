@@ -21,7 +21,10 @@ class Response(object):
         if 'X-Total-Count' in response.headers:
             self.records = int(response.headers['X-Total-Count'])
 
-        self._content = self._parse_response(response)
+        if self.method == 'DELETE' and self.status_code == 204:
+            self._content = {'result': {'status': 'record deleted'}}
+        else:
+            self._content = self._parse_response(response)
 
     def _parse_response(self, response):
         try:
