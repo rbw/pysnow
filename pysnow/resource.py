@@ -8,8 +8,8 @@ class Resource(object):
 
     Resources enables a natural way of interfacing with ServiceNow APIs.
 
-    :param base_path: Base path (string)
-    :param api_path: API path (string)
+    :param base_path: Base path
+    :param api_path: API path
     :param \*\*kwargs: Arguments to pass along to :class:`Request`
     """
 
@@ -26,14 +26,6 @@ class Resource(object):
     def path(self):
         """Returns full API path"""
         return "%s" % self._base_path + self._api_path
-
-    @property
-    def report(self):
-        """Returns a report for the last operation
-
-        :return: :class:`Report <Report>` object
-        """
-        return self._request.get_report()
 
     def get_multiple(self, query=None, limit=None, fields=list(), order_by=list(), offset=None):
         """Queries the API resource

@@ -165,7 +165,6 @@ class Client(object):
                                request_params=request_params,
                                raise_on_empty=self.raise_on_empty,
                                session=self.session,
-                               instance=self.instance,
                                base_url=self.base_url,
                                generator_size=self.generator_size,
                                **kwargs)

@@ -5,26 +5,40 @@ from requests.exceptions import HTTPError
 from pysnow.exceptions import (ResponseError,
                                NoResults,
                                UnexpectedResponseFormat,
-                               MissingResult)
+                               MissingResult,
+                               ReportUnavailable)
 
 
 class Response(object):
-    records = -1
-
-    def __init__(self, response, raise_on_empty):
+    def __init__(self, response, raise_on_empty, report):
         self.method = response.request.method
         self.status_code = response.status_code
         self._raise_on_empty = raise_on_empty
-
-        self.response = response
+        self._response = response
+        self._report = report
 
         if 'X-Total-Count' in response.headers:
-            self.records = int(response.headers['X-Total-Count'])
+            self._report.set_count(int(response.headers['X-Total-Count']))
 
         if self.method == 'DELETE' and self.status_code == 204:
             self._content = {'result': {'status': 'record deleted'}}
-        else:
+
+        if response:
             self._content = self._parse_response(response)
+
+        self.responses = []
+
+    @property
+    def report(self):
+        """Returns a report containing information about the resource-request-response stack.
+
+        :return: :class:`Report <Report>` object
+        """
+
+        if not self._report:
+            raise ReportUnavailable("Report not available.")
+
+        return self._report
 
     def _parse_response(self, response):
         try:
@@ -43,7 +57,7 @@ class Response(object):
                                 'Cannot continue')
 
         try:
-            self.response.raise_for_status()
+            self._response.raise_for_status()
         except HTTPError:
             # Versions prior to Helsinki returns 404 on empty result sets
             if self.status_code == 404:
