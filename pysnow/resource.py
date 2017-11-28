@@ -16,6 +16,7 @@ class Resource(object):
     def __init__(self, **kwargs):
         self._base_path = kwargs.get('base_path')
         self._api_path = kwargs.get('api_path')
+        self._generator_size = kwargs.get('generator_size')
 
         self._request = Request(resource=self, **kwargs)
 
@@ -53,7 +54,7 @@ class Resource(object):
         :param offset: (optional) Number of records to skip before returning records
         :return: :class:`Response <Response>` object
         """
-        return next(self._request.all(query=query, fields=fields, order_by=order_by, offset=offset, limit=1), {})
+        return self._request.all(query=query, fields=fields, order_by=order_by, offset=offset, limit=1)
 
     def insert(self, payload):
         """Creates a new record in the API resource
