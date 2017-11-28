@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import json
-import itertools
 import requests
 
 from .response import Response
 from .query import Query
+from .report import Report
 
-from pysnow.exceptions import (MultipleResults,
-                               NoResults,
-                               InvalidUsage)
+from pysnow.exceptions import InvalidUsage
 
 
 class Request(object):
@@ -46,7 +44,7 @@ class Request(object):
         self._url = self._get_url()
 
         if self._enable_reporting:
-            self._report = Report(resource, request_params)
+            self._report = Report(resource, request_params, generator_size, session)
         else:
             self._report = None
 
@@ -79,9 +77,6 @@ class Request(object):
         prepared = request.prepare()
         response = self._session.send(prepared)
 
-        if self._enable_reporting:
-            self._report.add_response(response)
-
         return response
 
     def _get_response(self, *args, **kwargs):
@@ -93,19 +88,8 @@ class Request(object):
         :return: :class:`pysnow.Response <Response>` object
         """
 
-        return Response(self._send(*args, **kwargs), raise_on_empty=self._raise_on_empty, report=self._report)
-
-    def _get_inner(self, *args, **kwargs):
-        request_params = self._get_request_params(*args, **kwargs)
-
-        #r = Response(self._send('GET', params=request_params),
-        #             raise_on_empty=self._raise_on_empty, report=self._report)
-
-        r = self._get_response('GET', params=request_params)
-
-        while 'next' in r.links:
-            r = self._send('GET', url=r.links['next']['url'])
-            r.add_response(r)
+        return Response(self._send(*args, **kwargs), request_callback=self._send,
+                        raise_on_empty=self._raise_on_empty, report=self._report)
 
     def _get_request_params(self, query=None, fields=list(), limit=None, order_by=list(), offset=None):
         """Constructs request params dictionary to pass along with a :class:`requests.Request <Request>`
@@ -133,13 +117,15 @@ class Request(object):
 
         return query_params.as_dict()
 
-    def all(self, *args, **kwargs):
-        #return itertools.chain.from_iterable(self._get_inner(*args, **kwargs))
+    def get(self, *args, **kwargs):
+        """Fetches one or more records
 
+        :param args: args to pass along to :meth:_get_response()
+        :param kwargs: kwargs to pass along to :meth:_get_response()
+        :return: :class:`pysnow.Response <Response>` object
+        """
         request_params = self._get_request_params(*args, **kwargs)
-        #return self._get_response('GET', params=request_params)
-        #return itertools.chain.from_iterable(self._get_inner(*args, **kwargs).linked_response)
-        return self._get_inner(*args, **kwargs).linked_result
+        return self._get_response('GET', params=request_params)
 
     def insert(self, payload):
         """Creates a new record
@@ -160,13 +146,9 @@ class Request(object):
         if not isinstance(payload, dict):
             raise InvalidUsage("Update payload must be of type dict")
 
-        result = list(self.all('GET', query))
-        if len(result) < 1:
-            raise NoResults('Cannot update non-existing record')
-        elif len(result) > 1:
-            raise MultipleResults('Updating multiple records is not supported')
+        record = self.get(query=query).one()
 
-        url = self._get_url(sys_id=result[0]['sys_id'])
+        url = self._get_url(sys_id=record['sys_id'])
         return self._get_response('PUT', url=url, data=json.dumps(payload))
 
     def delete(self, query):
@@ -175,31 +157,8 @@ class Request(object):
         :param query: Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
         :return: :class:`pysnow.Response <Response>` object
         """
-        result = list(self.all(query))
-        if len(result) < 1:
-            raise NoResults('Cannot delete non-existing record')
-        elif len(result) > 1:
-            raise MultipleResults('Deleting multiple records is not supported')
+        record = self.get(query=query).one()
 
-        url = self._get_url(sys_id=result[0]['sys_id'])
+        url = self._get_url(sys_id=record['sys_id'])
         return self._get_response('DELETE', url=url)
 
-
-class Report(object):
-    def __init__(self, resource, request_params):
-        self.records = 0
-        self.responses = []
-        self.request_params = request_params
-        self.resource = resource
-
-    def set_count(self, count):
-        self.records = count
-
-    def add_response(self, response):
-        self.responses.append(response)
-
-    def __getitem__(self, key):
-        return self.__getattribute__(key)
-
-    def __repr__(self):
-        return "%s %s" % (self.__class__, self.__dict__)
