@@ -39,7 +39,7 @@ class Client(object):
                  raise_on_empty=True,
                  request_params=None,
                  use_ssl=True,
-                 generator_size=500,
+                 generator_size=50,
                  session=None):
 
         if (host and instance) is not None:
@@ -142,12 +142,14 @@ class Client(object):
                                     base_url=self.base_url,
                                     **kwargs)
 
-    def resource(self, api_path=None, base_path='/api/now', request_params=None, **kwargs):
+    def resource(self, api_path=None, base_path='/api/now', request_params=None, enable_reporting=False):
         """Creates a new :class:`Resource` object after validating paths
 
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
         :param request_params: (optional) Request params override for this resource
+        :param enable_reporting: Set to True to enable detailed resource-request-response reporting on the
+        :class:`pysnow.Response <Response>` object
         :return: :class:`Resource <Resource>` object
         """
 
@@ -160,14 +162,17 @@ class Client(object):
         else:
             request_params = self.request_params
 
+        if type(enable_reporting) is not bool:
+            raise InvalidUsage("Argument 'enable_reporting' must be of type bool")
+
         return pysnow.Resource(api_path=api_path,
                                base_path=base_path,
                                request_params=request_params,
                                raise_on_empty=self.raise_on_empty,
+                               enable_reporting=enable_reporting,
                                session=self.session,
                                base_url=self.base_url,
-                               generator_size=self.generator_size,
-                               **kwargs)
+                               generator_size=self.generator_size)
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.
