@@ -92,6 +92,9 @@ class Response(object):
         # Yes, I'm aware this doesn't belong in this function. But it's so damn practical to put here.
         self.add_record_count(len(content['result']))
 
+        if self._report:
+            self._report.add_response(response)
+
         try:
             # Raise an HTTPError if we hit a non-200 status code
             response.raise_for_status()
