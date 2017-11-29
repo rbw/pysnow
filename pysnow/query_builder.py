@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-from pysnow.exceptions import (QueryEmpty,
-                               QueryExpressionError,
-                               QueryMissingField,
-                               QueryMultipleExpressions,
-                               QueryTypeError)
+
+from .exceptions import (QueryEmpty,
+                         QueryExpressionError,
+                         QueryMissingField,
+                         QueryMultipleExpressions,
+                         QueryTypeError)
 
 
 class QueryBuilder(object):

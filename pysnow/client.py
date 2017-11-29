@@ -7,8 +7,10 @@ import inspect
 import requests
 from requests.auth import HTTPBasicAuth
 
-import pysnow
-from pysnow.exceptions import InvalidUsage
+from .legacy_request import LegacyRequest
+from .resource import Resource
+
+from .exceptions import InvalidUsage
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -133,14 +135,14 @@ class Client(object):
         warnings.warn("`%s` is deprecated and will be removed in a future release. "
                       "Please use `request()` instead." % inspect.stack()[1][3], DeprecationWarning)
 
-        return pysnow.LegacyRequest(method,
-                                    table,
-                                    request_params=self.request_params,
-                                    raise_on_empty=self.raise_on_empty,
-                                    session=self.session,
-                                    instance=self.instance,
-                                    base_url=self.base_url,
-                                    **kwargs)
+        return LegacyRequest(method,
+                             table,
+                             request_params=self.request_params,
+                             raise_on_empty=self.raise_on_empty,
+                             session=self.session,
+                             instance=self.instance,
+                             base_url=self.base_url,
+                             **kwargs)
 
     def resource(self, api_path=None, base_path='/api/now', request_params=None, enable_reporting=False):
         """Creates a new :class:`Resource` object after validating paths
@@ -165,14 +167,14 @@ class Client(object):
         if type(enable_reporting) is not bool:
             raise InvalidUsage("Argument 'enable_reporting' must be of type bool")
 
-        return pysnow.Resource(api_path=api_path,
-                               base_path=base_path,
-                               request_params=request_params,
-                               raise_on_empty=self.raise_on_empty,
-                               enable_reporting=enable_reporting,
-                               session=self.session,
-                               base_url=self.base_url,
-                               generator_size=self.generator_size)
+        return Resource(api_path=api_path,
+                        base_path=base_path,
+                        request_params=request_params,
+                        raise_on_empty=self.raise_on_empty,
+                        enable_reporting=enable_reporting,
+                        session=self.session,
+                        base_url=self.base_url,
+                        generator_size=self.generator_size)
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.

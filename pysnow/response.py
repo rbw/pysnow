@@ -4,12 +4,12 @@ import itertools
 
 from requests.exceptions import HTTPError
 
-from pysnow.exceptions import (ResponseError,
-                               NoResults,
-                               MultipleResults,
-                               UnexpectedResponseFormat,
-                               MissingResult,
-                               ReportUnavailable)
+from .exceptions import (ResponseError,
+                         NoResults,
+                         MultipleResults,
+                         UnexpectedResponseFormat,
+                         MissingResult,
+                         ReportUnavailable)
 
 
 class Response(object):

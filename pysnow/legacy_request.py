@@ -8,12 +8,12 @@ import warnings
 
 from .query_builder import QueryBuilder
 
-from pysnow.exceptions import (NoRequestExecuted,
-                               MultipleResults,
-                               NoResults,
-                               InvalidUsage,
-                               UnexpectedResponse,
-                               MissingResult)
+from .exceptions import (NoRequestExecuted,
+                         MultipleResults,
+                         NoResults,
+                         InvalidUsage,
+                         UnexpectedResponse,
+                         MissingResult)
 
 
 class LegacyRequest(object):

@@ -6,7 +6,7 @@ from .request import Request
 class Resource(object):
     """Creates a new :class:`Resource <Resource>`
 
-    Resources enables a natural way of interfacing with ServiceNow APIs.
+    Resources provides a natural way of interfacing with ServiceNow APIs.
 
     :param base_path: Base path
     :param api_path: API path
@@ -49,6 +49,7 @@ class Resource(object):
         :param payload: Dictionary containing key-value fields of the new record
         :return: :class:`Response <Response>` object
         """
+
         return self._request.insert(payload)
 
     def update(self, query, payload):
@@ -58,6 +59,7 @@ class Resource(object):
         :param payload: Dictionary containing key-value fields of the record to be updated
         :return: :class:`Response <Response>` object
         """
+
         return self._request.update(query, payload)
 
     def delete(self, query):
@@ -66,4 +68,5 @@ class Resource(object):
         :param query: Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
         :return: :class:`Response <Response>` object
         """
+
         return self._request.delete(query)

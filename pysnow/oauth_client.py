@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import warnings
+
 from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from requests_oauthlib import OAuth2Session
-from pysnow import Client
-from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
+
+from .client import Client
+from .exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -13,24 +15,14 @@ warnings.simplefilter("always", DeprecationWarning)
 class OAuthClient(Client):
     """Pysnow `Client` with extras for oauth session and token handling.
 
-    This API exposes two extra public methods:
-
-    - generate_token(user, pass)
-        - This method takes user and password credentials to generate a new OAuth token that can be stored outside the context of pysnow, e.g. in a session or database.
-
-
-    - set_token(token)
-        - Takes an OAuth token (dict) and internally creates a new pysnow-compatible session, enabling pysnow.OAuthClient to create requests.
-
-
     :param client_id: client_id from ServiceNow
     :param client_secret: client_secret from ServiceNow
     :param token_updater: callback function called when a token has been refreshed
     :param instance: instance name, used to construct host
     :param host: host can be passed as an alternative to instance
     :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
-    :param request_params: request params to send with requests
-    :param use_ssl: Enable or disable SSL
+    :param request_params: Request params to send with requests globally
+    :param use_ssl: Enable or disable SSL, defaults to True
     """
     token = None
 
@@ -72,7 +64,7 @@ class OAuthClient(Client):
             })
 
     def set_token(self, token):
-        """Validates token and creates a pysnow compatible session
+        """Sets token after validating
 
         :param token: dict containing the information required to create an OAuth2Session
         """
@@ -87,17 +79,33 @@ class OAuthClient(Client):
 
         self.token = token
 
-    def _request(self, *args, **kwargs):
-        """Checks if token has been set then calls parent
+    def _legacy_request(self, *args, **kwargs):
+        """Makes sure token has been set, then calls parent to create a new :class:`pysnow.LegacyRequest` object
 
-        :return: pysnow.Request object
+        :param args: args to pass along to _legacy_request()
+        :param kwargs: kwargs to pass along to _legacy_request()
+        :return: :class:`pysnow.LegacyRequest` object
         """
 
         if isinstance(self.token, dict):
             self.session = self._get_oauth_session()
-            return super(OAuthClient, self)._request(*args, **kwargs)
+            return super(OAuthClient, self)._legacy_request(*args, **kwargs)
 
-        raise MissingToken("You must set_token() before creating a request with pysnow.OAuthClient")
+        raise MissingToken("You must set_token() before creating a legacy request with OAuthClient")
+
+    def resource(self, *args, **kwargs):
+        """Makes sure token has been set, then calls parent to create a new :class:`pysnow.Resource` object
+
+        :param args: args to pass along to resource()
+        :param kwargs: kwargs to pass along to resource()
+        :return: :class:`pysnow.Resource` object
+        """
+
+        if isinstance(self.token, dict):
+            self.session = self._get_oauth_session()
+            return super(OAuthClient, self).resource(*args, **kwargs)
+
+        raise MissingToken("You must set_token() before creating a resource with OAuthClient")
 
     def generate_token(self, user, password):
         """Takes user and password credentials and generates a new token
@@ -106,6 +114,7 @@ class OAuthClient(Client):
         :param password: password
         :return: dictionary containing token data
         """
+
         try:
             return dict(self.session.fetch_token(token_url=self.token_url,
                                                  username=user,

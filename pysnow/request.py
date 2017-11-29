@@ -7,7 +7,7 @@ from .response import Response
 from .query import Query
 from .report import Report
 
-from pysnow.exceptions import InvalidUsage
+from .exceptions import InvalidUsage
 
 
 class Request(object):
@@ -80,8 +80,8 @@ class Request(object):
         return response
 
     def _get_response(self, *args, **kwargs):
-        """Response wrapper - creates a :class:`requests.Response <Response>` object and passes along to
-        :class:`pysnow.Response <Response>` for validation and parsing.
+        """Response wrapper - creates a :class:`requests.Response` object and passes along to :class:`pysnow.Response`
+        for validation and parsing.
 
         :param args: args to pass along to _send()
         :param kwargs: kwargs to pass along to _send()
@@ -118,12 +118,13 @@ class Request(object):
         return query_params.as_dict()
 
     def get(self, *args, **kwargs):
-        """Fetches one or more records
+        """Fetches one or more records, exposes a public API of :class:`pysnow.Response`
 
         :param args: args to pass along to :meth:_get_response()
         :param kwargs: kwargs to pass along to :meth:_get_response()
         :return: :class:`pysnow.Response <Response>` object
         """
+
         request_params = self._get_request_params(*args, **kwargs)
         return self._get_response('GET', params=request_params)
 
@@ -131,16 +132,17 @@ class Request(object):
         """Creates a new record
 
         :param payload: Dictionary payload
-        :return: :class:`pysnow.Response <Response>` object
+        :return: Dictionary containing the inserted record
         """
-        return self._get_response('POST', data=json.dumps(payload))
+
+        return self._get_response('POST', data=json.dumps(payload)).one()
 
     def update(self, query, payload):
         """Updates a record
 
         :param query: Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
         :param payload: Dictionary payload
-        :return: :class:`pysnow.Response <Response>` object
+        :return: Dictionary containing the updated record
         """
 
         if not isinstance(payload, dict):
@@ -149,16 +151,15 @@ class Request(object):
         record = self.get(query=query).one()
 
         url = self._get_url(sys_id=record['sys_id'])
-        return self._get_response('PUT', url=url, data=json.dumps(payload))
+        return self._get_response('PUT', url=url, data=json.dumps(payload)).one()
 
     def delete(self, query):
         """Deletes a record
 
         :param query: Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
-        :return: :class:`pysnow.Response <Response>` object
+        :return: Dictionary containing the result
         """
         record = self.get(query=query).one()
 
         url = self._get_url(sys_id=record['sys_id'])
-        return self._get_response('DELETE', url=url)
-
+        return self._get_response('DELETE', url=url).one()

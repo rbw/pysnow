@@ -5,7 +5,7 @@ import six
 
 from .query_builder import QueryBuilder
 
-from pysnow.exceptions import InvalidUsage
+from .exceptions import InvalidUsage
 
 
 class Query(object):
