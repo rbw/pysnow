@@ -70,3 +70,16 @@ class Resource(object):
         """
 
         return self._request.delete(query)
+
+    def custom(self, method, *args, path_append=None, headers=None, **kwargs):
+        """Creates a custom request
+
+        :param method: HTTP method to use
+        :param path_append: (optional) relative to :prop:`api_path`
+        :param headers: (optional) Dictionary of headers to add or override
+        :param args: args to pass along to :class:`requests.Request`
+        :param kwargs: kwargs to pass along to :class:`requests.Request`
+        :return: :class:`Response <Response>` object
+        """
+
+        return self._request.custom(method, *args, **kwargs, path_append=path_append, headers=headers)

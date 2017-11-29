@@ -128,6 +128,28 @@ class Request(object):
         request_params = self._get_request_params(*args, **kwargs)
         return self._get_response('GET', params=request_params)
 
+    def custom(self, method, *args, path_append=None, headers=None, **kwargs):
+        """Creates a custom request
+
+        :param method: HTTP method
+        :param path_append: (optional) append path to resource.api_path
+        :param headers: (optional) Dictionary of headers to add or override
+        :param args: args to pass along to :class:`requests.Request`
+        :param kwargs: kwargs to pass along to :class:`requests.Request`
+        :return:
+        """
+
+        if headers:
+            self._session.headers.update(headers)
+
+        if path_append and isinstance(path_append, str) and path_append.startswith('/'):
+            self._url = "%s/%s" % (self._url, path_append)
+        else:
+            raise InvalidUsage("Argument 'path_append' must be a string in the following format: "
+                               "/path-to-append[/.../...]")
+
+        return self._get_response(method, *args, **kwargs)
+
     def insert(self, payload):
         """Creates a new record
 

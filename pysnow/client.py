@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import warnings
-import re
 import inspect
+import re
+import warnings
 
 import requests
 from requests.auth import HTTPBasicAuth
 
-from .legacy_request import LegacyRequest
-from .resource import Resource
-
+from .legacy.request import LegacyRequest
 from .exceptions import InvalidUsage
+from .resource import Resource
 
 warnings.simplefilter("always", DeprecationWarning)
 
