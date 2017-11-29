@@ -187,9 +187,9 @@ class Response(object):
         content = self._get_validated_content(self._response)
 
         if len(content) > 1:
-            raise MultipleResults("Unexpected result containing multiple records")
+            raise MultipleResults("Expected single-record result, got multiple")
         elif len(content) < 1:
-            raise NoResults("Unexpected result containing no records")
+            raise NoResults("Expected single-record result, got none")
 
         return content[0]
 

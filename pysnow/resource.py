@@ -28,7 +28,7 @@ class Resource(object):
         """Returns full API path"""
         return "%s" % self._base_path + self._api_path
 
-    def get_multiple(self, query=None, limit=None, fields=list(), order_by=list(), offset=None):
+    def get(self, query=None, limit=None, fields=list(), order_by=list(), offset=None):
         """Queries the API resource
 
         :param query: (optional) Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
@@ -40,21 +40,8 @@ class Resource(object):
         :param offset: (optional) Number of records to skip before returning records
         :return: :class:`Response <Response>` object
         """
-        return self._request.all(query=query, fields=fields, order_by=order_by, offset=offset, limit=limit)
 
-    def get_first(self, query=None, fields=list(), order_by=list(), offset=None):
-        """Queries the API resource with a limit set to 1. Gets next item from the iterator, effectively
-        fetching the first item in the result set.
-
-        :param query: (optional) Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
-        :param fields: (optional) List of fields to include in the response
-        :param order_by: (optional) List of columns used in sorting. Example:
-        ['category', '-created_on'] would sort the category field in ascending order, with a secondary sort by
-        created_on in descending order.
-        :param offset: (optional) Number of records to skip before returning records
-        :return: :class:`Response <Response>` object
-        """
-        return self._request.all(query=query, fields=fields, order_by=order_by, offset=offset, limit=1)
+        return self._request.get(query=query, fields=fields, order_by=order_by, offset=offset, limit=limit)
 
     def insert(self, payload):
         """Creates a new record in the API resource
