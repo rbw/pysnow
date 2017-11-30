@@ -120,9 +120,14 @@ class PreparedRequest(object):
         else:
             query_params.set_limit(limit)
 
-        query_params.set_fields(fields)
-        query_params.set_offset(offset)
-        query_params.set_sorting(order_by)
+        if fields:
+            query_params.set_fields(fields)
+
+        if offset:
+            query_params.set_offset(offset)
+
+        if order_by:
+            query_params.set_sorting(order_by)
 
         return query_params.as_dict()
 
