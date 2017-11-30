@@ -2,11 +2,10 @@
 
 
 class Report(object):
-    def __init__(self, resource, request_params, generator_size, session):
+    def __init__(self, resource, generator_size, session):
         """Constructs a report, keeping track of resources, requests and responses
 
         :param resource: :class:`pysnow.Resource <Resource>` object
-        :param request_params: Dictionary of request params
         :param generator_size: Generator size (integer)
         :param session: :class:`requests.Session <Session>` object
         """
@@ -14,7 +13,7 @@ class Report(object):
         self.consumed_records = 0
         self.responses = []
         self.generator_size = generator_size
-        self.request_params = request_params
+        self.request_params = None
         self.resource = resource
         self.session = session
 

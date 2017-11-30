@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .request import Request
+from .request import PreparedRequest
 
 
 class Resource(object):
@@ -18,7 +18,7 @@ class Resource(object):
         self._api_path = kwargs.get('api_path')
         self._generator_size = kwargs.get('generator_size')
 
-        self._request = Request(resource=self, **kwargs)
+        self._request = PreparedRequest(resource=self, **kwargs)
 
     def __repr__(self):
         return '<%s [%s]>' % (self.__class__.__name__, self.path)
@@ -71,15 +71,14 @@ class Resource(object):
 
         return self._request.delete(query)
 
-    def custom(self, method, *args, path_append=None, headers=None, **kwargs):
+    def custom(self, method, path_append=None, headers=None, **kwargs):
         """Creates a custom request
 
         :param method: HTTP method to use
         :param path_append: (optional) relative to :prop:`api_path`
         :param headers: (optional) Dictionary of headers to add or override
-        :param args: args to pass along to :class:`requests.Request`
         :param kwargs: kwargs to pass along to :class:`requests.Request`
         :return: :class:`Response <Response>` object
         """
 
-        return self._request.custom(method, *args, **kwargs, path_append=path_append, headers=headers)
+        return self._request.custom(method, path_append=path_append, headers=headers, **kwargs)

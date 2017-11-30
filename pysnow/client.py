@@ -63,7 +63,7 @@ class Client(object):
         elif (user and session) is not None:
             raise InvalidUsage("Provide either username and password or a session, not both.")
 
-        if request_params:
+        if request_params is not None:
             if not isinstance(request_params, dict):
                 raise InvalidUsage("Request params must be of type dict")
             self.request_params = request_params
@@ -132,7 +132,7 @@ class Client(object):
         """
 
         warnings.warn("`%s` is deprecated and will be removed in a future release. "
-                      "Please use `request()` instead." % inspect.stack()[1][3], DeprecationWarning)
+                      "Please use `resource()` instead." % inspect.stack()[1][3], DeprecationWarning)
 
         return LegacyRequest(method,
                              table,
@@ -157,7 +157,7 @@ class Client(object):
         for path in [api_path, base_path]:
             self._validate_path(path)
 
-        if request_params:
+        if request_params is not None:
             if not isinstance(request_params, dict):
                 raise InvalidUsage("Request params must be of type dict")
         else:
