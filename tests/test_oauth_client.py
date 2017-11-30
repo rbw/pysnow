@@ -89,10 +89,26 @@ class TestOAuthClient(unittest.TestCase):
         self.assertEqual(isinstance(c.session, OAuth2Session), True)
 
     def test_request_without_token(self):
-        """OauthClient should raise MissingToken when creating query if no token has been set"""
+        """OauthClient should raise MissingToken when creating query when no token has been set"""
         c = self.client
 
         self.assertRaises(MissingToken, c.query, table='incident', query={})
+
+    def test_resource_without_token(self):
+        """OauthClient should raise MissingToken when creating a resource when no token has been set"""
+        c = self.client
+
+        self.assertRaises(MissingToken, c.resource, api_path='/valid/path')
+
+    def test_resource_with_token(self):
+        """OauthClient should raise MissingToken when creating a resource when no token has been set"""
+        api_path = '/valid/path'
+
+        c = self.client
+        c.set_token(self.mock_token)
+
+        r = c.resource(api_path='/valid/path')
+        self.assertEquals(r._api_path, api_path)
 
     def test_reset_token(self):
         """OAuthClient should set token property to None and bypass validation if passed token is `False`"""

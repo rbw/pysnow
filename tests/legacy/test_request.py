@@ -3,12 +3,17 @@ import unittest
 import logging
 import json
 import httpretty
+import warnings
+
 from copy import copy
 
 from pysnow.legacy.exceptions import *
 
 from pysnow.client import Client
 from pysnow.query_builder import QueryBuilder
+
+
+warnings.simplefilter("ignore")
 
 
 class TestIncident(unittest.TestCase):
@@ -47,17 +52,6 @@ class TestIncident(unittest.TestCase):
         # Use `nosetests -l debug` to enable this logger
         logging.basicConfig(level=logging.DEBUG)
         self.log = logging.getLogger('debug')
-
-    def test_invalid_request_params(self):
-        """
-        Make sure passing an invalid payload doesn't work
-        """
-        self.assertRaises(InvalidUsage, Client,
-                          instance=self.mock_connection['instance'],
-                          user=self.mock_connection['user'],
-                          password=self.mock_connection['pass'],
-                          raise_on_empty=self.mock_connection['raise_on_empty'],
-                          request_params='invalid payload')
 
     def test_connection(self):
         self.assertEqual(self.client.instance, self.mock_connection['instance'])
