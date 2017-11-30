@@ -47,7 +47,7 @@ class Resource(object):
         """Creates a new record in the API resource
 
         :param payload: Dictionary containing key-value fields of the new record
-        :return: :class:`Response` object
+        :return: Dictionary of the inserted record
         """
 
         return self._request.insert(payload)
@@ -57,16 +57,16 @@ class Resource(object):
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
         :param payload: Dictionary containing key-value fields of the record to be updated
-        :return: :class:`Response` object
+        :return: Dictionary of the updated record
         """
 
         return self._request.update(query, payload)
 
     def delete(self, query):
-        """Deletes the queried record
+        """Deletes matching record
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
-        :return: :class:`Response` object
+        :return: Dictionary containing information about deletion result
         """
 
         return self._request.delete(query)
