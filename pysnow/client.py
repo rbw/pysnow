@@ -15,7 +15,7 @@ warnings.simplefilter("always", DeprecationWarning)
 
 
 class Client(object):
-    """User-created :class:`Client <Client>` object.
+    """User-created :class:`pysnow.Client` object.
 
     :param instance: Instance name, used to construct host
     :param host: Host can be passed as an alternative to instance
@@ -26,8 +26,8 @@ class Client(object):
     :param use_ssl: Enable or disable SSL, defaults to True
     :param generator_size: Decides the size of each yield, a higher value might increases performance some but
     will cause pysnow to consume more memory when serving big results. Defaults to 500 (records).
-    :param session: Optional :class:`requests.Session <Session>` object to use instead of passing user/pass
-    to :class:`Client <Client>`
+    :param session: Optional :class:`requests.Session` object to use instead of passing user/pass
+    to :class:`Client`
     :raise:
         :InvalidUsage: If validation fails for an input argument
     """
@@ -85,7 +85,7 @@ class Client(object):
         """Creates a new session with basic auth, unless one was provided, and sets headers.
 
         :param session: (optional) Session to re-use
-        :return: :class:`requests.Session <Session>` object
+        :return: :class:`requests.Session` object
         """
         if not session:
             s = requests.Session()
@@ -124,11 +124,11 @@ class Client(object):
             )
 
     def _legacy_request(self, method, table, **kwargs):
-        """Returns a :class:`LegacyRequest <LegacyRequest>` object, compatible with Client.query and Client.insert
+        """Returns a :class:`LegacyRequest` object, compatible with Client.query and Client.insert
 
         :param method: HTTP method
         :param table: Table to operate on
-        :return: :class:`LegacyRequest <LegacyRequest>` object
+        :return: :class:`LegacyRequest` object
         """
 
         warnings.warn("`%s` is deprecated and will be removed in a future release. "
@@ -150,8 +150,8 @@ class Client(object):
         :param base_path: (optional) Base path override
         :param request_params: (optional) Request params override for this resource
         :param enable_reporting: Set to True to enable detailed resource-request-response reporting on the
-        :class:`pysnow.Response <Response>` object
-        :return: :class:`Resource <Resource>` object
+        :class:`pysnow.Response` object
+        :return: :class:`Resource` object
         """
 
         for path in [api_path, base_path]:

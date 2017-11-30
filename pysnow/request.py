@@ -11,7 +11,7 @@ from .exceptions import InvalidUsage
 
 
 class PreparedRequest(object):
-    """Creates a new :class:`Request <Request>` object.
+    """Creates a new :class:`PreparedRequest` object.
 
     :param request_params: Request parameters to pass along with the request
     :param session: :class:`request.Session` object
@@ -69,7 +69,7 @@ class PreparedRequest(object):
         :param method: Request method
         :param url: (optional) URL override (instead of :prop:`_url`)
         :param kwargs: kwargs to pass along to Request
-        :return: :class:`requests.Response <Response>` object
+        :return: :class:`requests.Response` object
         """
 
         url = url or self._url
@@ -92,35 +92,37 @@ class PreparedRequest(object):
 
         :param args: args to pass along to _send()
         :param kwargs: kwargs to pass along to _send()
-        :return: :class:`pysnow.Response <Response>` object
+        :return: :class:`pysnow.Response` object
         """
 
         return Response(self._send(method, **kwargs), request_callback=self._send,
                         raise_on_empty=self._raise_on_empty, report=self._report)
 
     def _get_request_params(self, query=None, fields=list(), limit=None, order_by=list(), offset=None):
-        """Constructs request params dictionary to pass along with a :class:`requests.Request <Request>`
+        """Constructs request params dictionary to pass along with a :class:`requests.PreparedRequest` object
 
-        :param query: Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
+        :param query: Dictionary, string or :class:`QueryBuilder` object
         :param limit: Limits the number of records returned
         :param fields: List of fields to include in the response
         :param order_by: List of columns used in sorting. Example:
         ['category', '-created_on'] would sort the category field in ascending order, with a secondary sort by
         created_on in descending order.
         :param offset: Number of records to skip before returning records
-        :return: :class:`pysnow.Query <Query>` dictionary-like object
+        :return: :class:`pysnow.Query` dictionary-like object
         """
 
         query_params = Query(query, self._request_params)
 
+        # Generator responses creates its "iterable chunks" using `sysparm_limit` and relies on the
+        # use of link headers, which set_limit() disables, effectively disabling the use of generators.
         if not limit:
             query_params.set_generator_size(self._generator_size)
+        else:
+            query_params.set_limit(limit)
 
-        query_params.filter(fields=fields,
-                            limit=limit,
-                            offset=offset)
-
-        query_params.sort(order_by=order_by)
+        query_params.set_fields(fields)
+        query_params.set_offset(offset)
+        query_params.set_sorting(order_by)
 
         return query_params.as_dict()
 
@@ -128,7 +130,7 @@ class PreparedRequest(object):
         """Fetches one or more records, exposes a public API of :class:`pysnow.Response`
 
         :param kwargs: kwargs to pass along to :class:`requests.Request`
-        :return: :class:`pysnow.Response <Response>` object
+        :return: :class:`pysnow.Response` object
         """
 
         request_params = self._get_request_params(**kwargs)
@@ -141,7 +143,7 @@ class PreparedRequest(object):
         :param path_append: (optional) append path to resource.api_path
         :param headers: (optional) Dictionary of headers to add or override
         :param kwargs: kwargs to pass along to :class:`requests.Request`
-        :return: :class:`pysnow.Response <Response>` object
+        :return: :class:`pysnow.Response` object
         """
 
         if headers:
@@ -168,7 +170,7 @@ class PreparedRequest(object):
     def update(self, query, payload):
         """Updates a record
 
-        :param query: Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
+        :param query: Dictionary, string or :class:`QueryBuilder` object
         :param payload: Dictionary payload
         :return: Dictionary containing the updated record
         """
@@ -184,7 +186,7 @@ class PreparedRequest(object):
     def delete(self, query):
         """Deletes a record
 
-        :param query: Dictionary, string or :class:`QueryBuilder <QueryBuilder>`
+        :param query: Dictionary, string or :class:`QueryBuilder` object
         :return: Dictionary containing the result
         """
         record = self.get(query=query).one()

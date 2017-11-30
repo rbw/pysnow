@@ -16,19 +16,17 @@ class Query(object):
     :param request_params: Dictionary of query parameters to pass along to :class:`requests.Request`
     """
 
-    def __init__(self, query, request_params):
-        self._query = query or {}
-        self._request_params = request_params
+    def __init__(self, query, request_params=None):
+        self.str_query = self.stringify(query)
+        self._request_params = request_params or {}
 
-        self.str_query = self._stringify()
-
-    def _stringify(self):
+    @staticmethod
+    def stringify(query):
         """Stringifies the query (dict or QueryBuilder) to a ServiceNow-compatible format
 
         :return: ServiceNow-compatible string-type query
         """
 
-        query = self._query
         if isinstance(query, QueryBuilder):
             # Get string-representation of the passed :class:`pysnow.QueryBuilder` object
             return str(query)
@@ -41,7 +39,7 @@ class Query(object):
         else:
             raise InvalidUsage('Query must be instance of %s, %s or %s' % (QueryBuilder, str, dict))
 
-    def sort(self, order_by):
+    def set_sorting(self, order_by):
         """Applies sorting to the query
 
         :param order_by: List of columns used in sorting. Example:
@@ -52,7 +50,7 @@ class Query(object):
         """
 
         if not isinstance(order_by, list):
-            raise InvalidUsage('order_by must be of type list()')
+            raise InvalidUsage('Sort fields must be of type list()')
 
         for field in order_by:
             if field[0] == '-':
@@ -68,36 +66,56 @@ class Query(object):
         :param size:  generator size (int)
         """
 
+        if not isinstance(size, int) or isinstance(size, bool):
+            raise InvalidUsage("Generator size must be an integer")
+
         self._request_params.update({
             'sysparm_limit': size,
         })
 
-    def filter(self, fields=list(), limit=None, offset=None):
-        """Applies fields, limit and offset filters to the query
+    def set_offset(self, offset):
+        """Sets `sysparm_offset`, usually used to accomplish pagination
+
+        :param offset: Number of records to skip before fetching records
+        :raise:
+            :InvalidUsage: if offset is of an unexpected type
+        """
+
+        if not isinstance(offset, int) or isinstance(offset, bool):
+            raise InvalidUsage('Offset must be an integer')
+
+        self._request_params.update({'sysparm_offset': offset})
+
+    def set_limit(self, limit):
+        """Sets `sysparm_limit` to the limit provided and `sysparm_suppress_pagination_header` to True, which disables
+        the use of link headers and as an side-effect, the use of generators in :class:`pysnow.Response`.
+
+        :param limit: Maximum number of records to return in the response
+        :raise:
+            :InvalidUsage: if limit is of an unexpected type
+        """
+
+        if not isinstance(limit, int) or isinstance(limit, bool):
+            raise InvalidUsage('Limit must be an integer')
+
+        self._request_params.update({
+            'sysparm_limit': limit,
+            'sysparm_suppress_pagination_header': True
+        })
+
+    def set_fields(self, fields):
+        """Converts a list of fields to a comma-separated string
 
         :param fields: List of fields to include in the response
-        :param limit: Limits the number of records returned
-        :param offset: Number of records to skip before returning records
-        :return: self
-        :rtype: :class:`pysnow.Query`
+        :raise:
+            :InvalidUsage: if fields is of an unexpected type
         """
 
         if not isinstance(fields, list):
             raise InvalidUsage('fields must be of type list()')
 
-        if limit:
-            self._request_params.update({
-                'sysparm_limit': limit,
-                'sysparm_suppress_pagination_header': True
-            })
-
-        if offset:
-            self._request_params.update({'sysparm_offset': offset})
-
         if len(fields) > 0:
             self._request_params.update({'sysparm_fields': ",".join(fields)})
-
-        return self
 
     def as_dict(self):
         """Constructs query params compatible with :class:`requests.Request`

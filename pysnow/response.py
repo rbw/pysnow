@@ -16,9 +16,9 @@ class Response(object):
     """Takes a :class:`requests.Response` object and performs deserialization and validation and offers
     an interface for obtaining the content in a safe manner.
 
-    :param response: :class:`request.Response <Response>` object
+    :param response: :class:`request.Response` object
     :param raise_on_empty: whether or not to raise an exception if the content doesn't contain any records
-    :param report: :class:`pysnow.request.Report <Report>` object
+    :param report: :class:`pysnow.request.Report` object
     :param request_callback: callback function to use when following linked requests
     """
 
@@ -36,9 +36,9 @@ class Response(object):
     def report(self):
         """Returns a report containing information about the resource-request-response stack.
 
-        :return: :class:`Report <Report>` object
+        :return: :class:`Report` object
         :raise:
-            :ReportUnavailable: If no :class:`pysnow.request.Report <Report>` object is available
+            :ReportUnavailable: If no :class:`pysnow.request.Report` object is available
         """
 
         if not self._report:

@@ -33,34 +33,12 @@ class MissingToken(Exception):
     pass
 
 
-class ResponseError(Exception):
-    message = '<empty>'
-    detail = '<empty>'
-
-    def __init__(self, error):
-        if 'message' in error:
-            self.message = error['message'] or self.message
-        if 'detail' in error:
-            self.detail = error['detail'] or self.detail
-
-    def __str__(self):
-        return 'Error in response. Message: %s, Details: %s' % (self.message, self.detail)
-
-
 class UnexpectedResponseFormat(Exception):
     pass
 
 
 class ReportUnavailable(Exception):
     pass
-
-
-class TokenCreateError(Exception):
-    def __init__(self, error, description):
-        message = "Error creating new user token"
-        super(TokenCreateError, self).__init__(message)
-        self.error = error
-        self.description = description
 
 
 class UnexpectedResponse(Exception):
