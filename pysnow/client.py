@@ -10,6 +10,7 @@ from requests.auth import HTTPBasicAuth
 from .legacy.request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
+from .url import URL
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -78,7 +79,7 @@ class Client(object):
         self.use_ssl = use_ssl
         self.generator_size = generator_size
 
-        self.base_url = self._get_base_url()
+        self.base_url = URL.get_base_url(use_ssl, instance, host)
         self.session = self._get_session(session)
 
     def _get_session(self, session):
@@ -96,32 +97,6 @@ class Client(object):
         s.headers.update({'content-type': 'application/json', 'accept': 'application/json'})
 
         return s
-
-    def _get_base_url(self):
-        """Formats the base URL using either `host` or `instance`
-
-        :return: Base URL string
-        """
-        if self.instance is not None:
-            self.host = "%s.service-now.com" % self.instance
-
-        if self.use_ssl is True:
-            return "https://%s" % self.host
-
-        return "http://%s" % self.host.rstrip('/')
-
-    def _validate_path(self, path):
-        """Validates the provided path
-
-        :param path: path to validate (string)
-        :raise:
-            :InvalidUsage: If validation fails.
-        """
-
-        if not isinstance(path, str) or not re.match('^/(?:[._a-zA-Z0-9-]/?)+[^/]$', path):
-            raise InvalidUsage(
-                "Path validation failed - Expected: '/<component>[/component], got: %s" % path
-            )
 
     def _legacy_request(self, method, table, **kwargs):
         """Returns a :class:`LegacyRequest` object, compatible with Client.query and Client.insert
@@ -155,7 +130,7 @@ class Client(object):
         """
 
         for path in [api_path, base_path]:
-            self._validate_path(path)
+            URL.validate_path(path)
 
         if request_params is not None:
             if not isinstance(request_params, dict):

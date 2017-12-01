@@ -16,6 +16,7 @@ class Report(object):
         self.request_params = None
         self.resource = resource
         self.session = session
+        self.url = None
 
     def set_x_total_count(self, count):
         """Sets the x-total-count (from response header)

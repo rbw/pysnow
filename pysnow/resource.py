@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from .request import PreparedRequest
+from .url import URL
+
+from .report import Report
 
 
 class Resource(object):
@@ -13,12 +16,22 @@ class Resource(object):
     :param \*\*kwargs: Arguments to pass along to :class:`Request`
     """
 
-    def __init__(self, **kwargs):
-        self._base_path = kwargs.get('base_path')
-        self._api_path = kwargs.get('api_path')
-        self._generator_size = kwargs.get('generator_size')
+    _report = None
 
-        self._request = PreparedRequest(resource=self, **kwargs)
+    def __init__(self, base_url=None, base_path=None, api_path=None,
+                 enable_reporting=False, **kwargs):
+        self._base_url = base_url
+        self._base_path = base_path
+        self._api_path = api_path
+
+        if enable_reporting:
+            self._report = Report(self, kwargs.get('generator_size'), kwargs.get('session'))
+
+        self._url = URL(base_url, base_path, api_path)
+
+        self._request = PreparedRequest(resource_url=self._url,
+                                        report=self._report,
+                                        **kwargs)
 
     def __repr__(self):
         return '<%s [%s]>' % (self.__class__.__name__, self.path)
