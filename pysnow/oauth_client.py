@@ -18,15 +18,13 @@ class OAuthClient(Client):
     :param client_id: client_id from ServiceNow
     :param client_secret: client_secret from ServiceNow
     :param token_updater: callback function called when a token has been refreshed
-    :param instance: instance name, used to construct host
-    :param host: host can be passed as an alternative to instance
-    :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
-    :param request_params: Request params to send with requests globally
-    :param use_ssl: Enable or disable SSL, defaults to True
+    :param kwargs: Kwargs passed along to :class:`pysnow.Client`
     """
+
     token = None
 
-    def __init__(self, client_id=None, client_secret=None, token_updater=None, *args, **kwargs):
+    def __init__(self, client_id=None, client_secret=None, token_updater=None, **kwargs):
+
         if not (client_secret and client_id):
             raise InvalidUsage('You must supply a client_id and client_secret')
 
@@ -39,13 +37,13 @@ class OAuthClient(Client):
         kwargs['user'] = None
         kwargs['password'] = None
 
-        super(OAuthClient, self).__init__(*args, **kwargs)
+        super(OAuthClient, self).__init__(**kwargs)
 
         self.token_updater = token_updater
         self.client_id = client_id
         self.client_secret = client_secret
 
-        self.token_url = "%s/oauth_token.do" % self._get_base_url()
+        self.token_url = "%s/oauth_token.do" % self.base_url
 
     def _get_oauth_session(self):
         """Creates a new OAuth session

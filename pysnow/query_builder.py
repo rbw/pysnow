@@ -40,6 +40,24 @@ class QueryBuilder(object):
         self.current_field = field
         return self
 
+    def order_descending(self):
+        """Sets ordering of field descending
+
+        :return: self
+        :rtype: :class:`pysnow.QueryBuilder`
+        """
+
+        return self._add_condition('ORDERBYDESC{}'.format(self.current_field), '', types=[str])
+
+    def order_ascending(self):
+        """Sets ordering of field ascending
+
+        :return: self
+        :rtype: :class:`pysnow.QueryBuilder`
+        """
+
+        return self._add_condition('ORDERBY{}'.format(self.current_field), '', types=[str])
+
     def starts_with(self, starts_with):
         """Adds and validates new `STARTSWITH` condition
 
@@ -214,7 +232,7 @@ class QueryBuilder(object):
         self._query.append("%(current_field)s%(operator)s%(operand)s" % {
                                'current_field': self.current_field,
                                'operator': operator,
-            'operand': operand
+                               'operand': operand
         })
 
         return self

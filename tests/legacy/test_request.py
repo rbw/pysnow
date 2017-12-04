@@ -70,8 +70,9 @@ class TestIncident(unittest.TestCase):
                         user=self.mock_connection['user'],
                         password=self.mock_connection['pass'],
                         raise_on_empty=self.mock_connection['raise_on_empty'],
-                        use_ssl=False,
-                        request_params={'foo1': 'bar1', 'foo2': 'bar2'})
+                        use_ssl=False)
+
+        client.request_params = {'foo1': 'bar1', 'foo2': 'bar2'}
 
         r = client.query(table='incident', query={})
         r.get_one()
@@ -258,7 +259,7 @@ class TestIncident(unittest.TestCase):
     @httpretty.activate
     def test_get_sorted_invalid(self):
         """
-        Make sure get_multiple fails if order_by is not of type list()
+        Make sure get_multiple fails if order_by is not of type `list`
         """
         json_body = json.dumps({'result': [{'number': self.mock_incident['number']}]})
         httpretty.register_uri(httpretty.GET,
@@ -298,7 +299,7 @@ class TestIncident(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        # Pass query as a list() , which is invalid
+        # Pass query as a `list` , which is invalid
         r = self.client.query(table='incident', query=list())
         self.assertRaises(InvalidUsage, r.get_one)
 

@@ -5,137 +5,142 @@ import json
 
 from pysnow.response import Response
 from pysnow.client import Client
+from pysnow.request import SnowRequest
 
 
-class TestResource(unittest.TestCase):
-    """Performs basic request/response integration tests for :class:`Resource`,
-    more detailed tests are available in the test_request and test_response modules"""
+def get_serialized(dict_mock):
+    return json.dumps({'result': [dict_mock]})
+
+
+class TestResourceRequest(unittest.TestCase):
+    """Performs resource-request tests"""
 
     def setUp(self):
-        api_path = '/api/path'
-        base_path = '/base/path'
+        self.record_response_get = {
+            'sys_id': '98ace1a537ea2a00cf5c9c9953990e19',
+            'attr1': 'foo',
+            'attr2': 'bar'
+        }
 
-        self.mock_client = {
+        self.record_response_insert = {
+            'sys_id': '90e11a537ea2a00cf598ace9c99539c9',
+            'attr1': 'foo_insert',
+            'attr2': 'bar_insert'
+        }
+
+        self.record_response_update = {
+            'sys_id': '2a00cf5c9c99539998ace1a537ea0e19',
+            'attr1': 'foo_updated',
+            'attr2': 'bar_updated'
+        }
+
+        self.record_response_delete = {
+            'status': 'record deleted'
+        }
+
+        self.client_kwargs = {
             'user': 'mock_user',
             'password': 'mock_password',
-            'instance': 'mock_instance',
-            'generator_size': 50,
+            'instance': 'mock_instance'
         }
 
-        self.mock_resource_path = {
-            'api_path': api_path,
-            'base_path': base_path
-        }
+        self.base_path = '/table/incident'
+        self.api_path = '/api/now/test'
 
-        self.mock_sys_id = "98ace1a537ea2a00cf5c9c9953990e19"
-        self.mock_query = "sys_id=%s" % self.mock_sys_id
+        self.client = Client(**self.client_kwargs)
+        self.resource = self.client.resource(base_path=self.base_path, api_path=self.api_path, enable_reporting=True)
 
-        self.client = Client(**self.mock_client)
+        self.mock_url_builder = self.resource._url_builder
 
-        self.mock_url = self.client.base_url + base_path + api_path
-        self.mock_url_put = self.mock_url_delete = "%s/%s" % (self.mock_url, self.mock_sys_id)
+        self.mock_url_builder_base = self.resource._url_builder.get_url()
+        self.mock_url_builder_sys_id = (self.mock_url_builder
+                                        .get_appended_custom('/{}'.format(self.record_response_get['sys_id'])))
+
+        self.dict_query = {'sys_id': self.record_response_get['sys_id']}
+        self.get_fields = ['foo', 'bar']
 
     def test_create_resource(self):
         """:class:`Resource` object repr type should be string, and its path should be set to api_path + base_path """
 
-        r = self.client.resource(api_path=self.mock_resource_path['api_path'],
-                                 base_path=self.mock_resource_path['base_path'])
+        r = self.client.resource(base_path=self.base_path,
+                                 api_path=self.api_path)
 
         resource_repr = type(repr(r))
 
-        path = self.mock_resource_path['base_path'] + self.mock_resource_path['api_path']
-
         self.assertEquals(resource_repr, str)
-        self.assertEquals(r.path, path)
+        self.assertEquals(r._base_path, self.base_path)
+        self.assertEquals(r._api_path, self.api_path)
+        self.assertEquals(r.path, self.base_path + self.api_path)
 
     @httpretty.activate
-    def test_integration_get(self):
-        """:meth:`get` should return a :class:`pysnow.Response` object"""
+    def test_get_request_fields(self):
+        """:meth:`get_request` should return a :class:`pysnow.Response` object"""
 
         httpretty.register_uri(httpretty.GET,
-                               self.mock_url,
+                               self.mock_url_builder_base,
                                status=200,
                                content_type="application/json")
 
-        r = self.client.resource(api_path=self.mock_resource_path['api_path'],
-                                 base_path=self.mock_resource_path['base_path'])
+        response = self.resource.get(self.dict_query, fields=self.get_fields)
+        report_params = response.report.request_params
 
-        response = r.get(self.mock_query)
-
+        # List of fields should end up as comma-separated string
+        self.assertEquals(report_params['sysparm_fields'], ','.join(self.get_fields))
         self.assertEquals(type(response), Response)
 
     @httpretty.activate
-    def test_integration_insert(self):
+    def test_insert_request(self):
         """:meth:`insert` should return a dictionary of the new record"""
 
-        response = {'foo': 'bar'}
-        json_body = json.dumps({'result': [response]})
         httpretty.register_uri(httpretty.POST,
-                               self.mock_url,
-                               body=json_body,
+                               self.mock_url_builder_base,
+                               body=get_serialized(self.record_response_insert),
                                status=200,
                                content_type="application/json")
 
-        r = self.client.resource(api_path=self.mock_resource_path['api_path'],
-                                 base_path=self.mock_resource_path['base_path'])
-
-        result = r.insert(response)
+        result = self.resource.insert(self.record_response_insert)
 
         self.assertEquals(type(result), dict)
-        self.assertEquals(result['foo'], response['foo'])
+        self.assertEquals(result, self.record_response_insert)
 
     @httpretty.activate
-    def test_integration_update(self):
+    def test_update_request(self):
         """:meth:`update` should return a dictionary of the updated record"""
 
-        get_response = {'sys_id': self.mock_sys_id}
-        get_json_body = json.dumps({'result': [get_response]})
         httpretty.register_uri(httpretty.GET,
-                               self.mock_url,
-                               body=get_json_body,
+                               self.mock_url_builder_base,
+                               body=get_serialized(self.record_response_get),
                                status=200,
                                content_type="application/json")
 
-        put_response = {'foo': 'bar'}
-        put_json_body = json.dumps({'result': [put_response]})
         httpretty.register_uri(httpretty.PUT,
-                               self.mock_url_put,
-                               body=put_json_body,
+                               self.mock_url_builder_sys_id,
+                               body=get_serialized(self.record_response_update),
                                status=200,
                                content_type="application/json")
 
-        r = self.client.resource(api_path=self.mock_resource_path['api_path'],
-                                 base_path=self.mock_resource_path['base_path'])
-
-        result = r.update(self.mock_query, put_response)
+        result = self.resource.update(self.dict_query, self.record_response_update)
 
         self.assertEquals(type(result), dict)
-        self.assertEquals(result['foo'], put_response['foo'])
+        self.assertEquals(self.record_response_update['attr1'], result['attr1'])
 
     @httpretty.activate
     def test_integration_delete(self):
         """:meth:`delete` should return a dictionary containing status"""
 
-        get_response = {'sys_id': self.mock_sys_id}
-        get_json_body = json.dumps({'result': [get_response]})
         httpretty.register_uri(httpretty.GET,
-                               self.mock_url,
-                               body=get_json_body,
+                               self.mock_url_builder_base,
+                               body=get_serialized(self.record_response_get),
                                status=200,
                                content_type="application/json")
 
-        put_response = {'foo': 'bar'}
-        put_json_body = json.dumps({'result': [put_response]})
         httpretty.register_uri(httpretty.DELETE,
-                               self.mock_url_delete,
-                               body=put_json_body,
-                               status=204,
+                               self.mock_url_builder_sys_id,
+                               body=get_serialized(self.record_response_delete),
+                               status=200,
                                content_type="application/json")
 
-        r = self.client.resource(api_path=self.mock_resource_path['api_path'],
-                                 base_path=self.mock_resource_path['base_path'])
-
-        result = r.delete(get_response)
+        result = self.resource.delete(self.dict_query)
 
         self.assertEquals(type(result), dict)
         self.assertEquals(result['status'], 'record deleted')
@@ -144,18 +149,13 @@ class TestResource(unittest.TestCase):
     def test_integration_custom(self):
         """:meth:`custom` should return a :class:`pysnow.Response` object"""
 
-        get_response = {'sys_id': self.mock_sys_id}
-        get_json_body = json.dumps({'result': [get_response]})
         httpretty.register_uri(httpretty.GET,
-                               self.mock_url,
-                               body=get_json_body,
+                               self.mock_url_builder_base,
+                               body=get_serialized(self.record_response_get),
                                status=200,
                                content_type="application/json")
 
-        r = self.client.resource(api_path=self.mock_resource_path['api_path'],
-                                 base_path=self.mock_resource_path['base_path'])
-
-        response = r.custom('GET')
+        response = self.resource.custom('GET')
 
         self.assertEquals(type(response), Response)
 

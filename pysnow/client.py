@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import inspect
-import re
 import warnings
 
 import requests
@@ -10,7 +9,8 @@ from requests.auth import HTTPBasicAuth
 from .legacy.request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
-from .url import URL
+from .url_builder import URLBuilder
+from .sysparms import Sysparms
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -25,8 +25,6 @@ class Client(object):
     :param raise_on_empty: Whether or not to raise an exception on 404 (no matching records), defaults to True
     :param request_params: Request params to send with requests globally
     :param use_ssl: Enable or disable SSL, defaults to True
-    :param generator_size: Decides the size of each yield, a higher value might increases performance some but
-    will cause pysnow to consume more memory when serving big results. Defaults to 500 (records).
     :param session: Optional :class:`requests.Session` object to use instead of passing user/pass
     to :class:`Client`
     :raise:
@@ -41,14 +39,10 @@ class Client(object):
                  raise_on_empty=True,
                  request_params=None,
                  use_ssl=True,
-                 generator_size=50,
                  session=None):
 
         if (host and instance) is not None:
             raise InvalidUsage("Arguments 'instance' and 'host' are mutually exclusive, you cannot use both.")
-
-        if type(generator_size) is not int:
-            raise InvalidUsage("Argument 'generator_size' must be of type int")
 
         if type(use_ssl) is not bool:
             raise InvalidUsage("Argument 'use_ssl' must be of type bool")
@@ -64,22 +58,23 @@ class Client(object):
         elif (user and session) is not None:
             raise InvalidUsage("Provide either username and password or a session, not both.")
 
-        if request_params is not None:
-            if not isinstance(request_params, dict):
-                raise InvalidUsage("Request params must be of type dict")
-            self.request_params = request_params
-        else:
-            self.request_params = {}
+        self._sysparms = Sysparms()
 
+        if request_params is not None:
+            try:
+                self._sysparms.add_foreign(request_params)
+            except TypeError:
+                raise InvalidUsage("Request params must be of type dict")
+
+        self.request_params = request_params or {}
         self.instance = instance
         self.host = host
         self._user = user
         self._password = password
         self.raise_on_empty = raise_on_empty
         self.use_ssl = use_ssl
-        self.generator_size = generator_size
 
-        self.base_url = URL.get_base_url(use_ssl, instance, host)
+        self.base_url = URLBuilder.get_base_url(use_ssl, instance, host)
         self.session = self._get_session(session)
 
     def _get_session(self, session):
@@ -118,37 +113,25 @@ class Client(object):
                              base_url=self.base_url,
                              **kwargs)
 
-    def resource(self, api_path=None, base_path='/api/now', request_params=None, enable_reporting=False):
+    def resource(self, api_path=None, base_path='/api/now'):
         """Creates a new :class:`Resource` object after validating paths
 
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
-        :param request_params: (optional) Request params override for this resource
         :param enable_reporting: Set to True to enable detailed resource-request-response reporting on the
         :class:`pysnow.Response` object
         :return: :class:`Resource` object
         """
 
         for path in [api_path, base_path]:
-            URL.validate_path(path)
-
-        if request_params is not None:
-            if not isinstance(request_params, dict):
-                raise InvalidUsage("Request params must be of type dict")
-        else:
-            request_params = self.request_params
-
-        if type(enable_reporting) is not bool:
-            raise InvalidUsage("Argument 'enable_reporting' must be of type bool")
+            URLBuilder.validate_path(path)
 
         return Resource(api_path=api_path,
                         base_path=base_path,
-                        request_params=request_params,
+                        sysparms=self._sysparms,
                         raise_on_empty=self.raise_on_empty,
-                        enable_reporting=enable_reporting,
                         session=self.session,
-                        base_url=self.base_url,
-                        generator_size=self.generator_size)
+                        base_url=self.base_url)
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.

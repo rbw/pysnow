@@ -202,7 +202,7 @@ class LegacyRequest(object):
         """
 
         if not isinstance(reset_fields, list):
-            raise InvalidUsage("reset_fields must be a list() of fields")
+            raise InvalidUsage("reset_fields must be a `list` of fields")
 
         try:
             response = self.get_one()
@@ -366,10 +366,10 @@ class LegacyRequest(object):
         """
 
         if not isinstance(order_by, list):
-            raise InvalidUsage("Argument order_by must be of type list()")
+            raise InvalidUsage("Argument order_by should be a `list` of fields")
 
         if not isinstance(fields, list):
-            raise InvalidUsage("Argument fields must be of type list()")
+            raise InvalidUsage("Argument fields should be a `list` of fields")
 
         if isinstance(self.query, QueryBuilder):
             sysparm_query = str(self.query)

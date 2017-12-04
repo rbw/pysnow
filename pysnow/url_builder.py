@@ -4,7 +4,7 @@ import re
 from .exceptions import InvalidUsage
 
 
-class URL(object):
+class URLBuilder(object):
     def __init__(self, base_url, base_path, api_path):
         self._base_url = base_url
         self._base_path = base_path

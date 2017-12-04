@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import itertools
+import ijson.backends.yajl2_cffi as ijson
+from ijson.common import ObjectBuilder
 
 from requests.exceptions import HTTPError
 
@@ -8,8 +9,7 @@ from .exceptions import (ResponseError,
                          NoResults,
                          MultipleResults,
                          UnexpectedResponseFormat,
-                         MissingResult,
-                         ReportUnavailable)
+                         MissingResult)
 
 
 class Response(object):
@@ -18,51 +18,12 @@ class Response(object):
 
     :param response: :class:`request.Response` object
     :param raise_on_empty: whether or not to raise an exception if the content doesn't contain any records
-    :param report: :class:`pysnow.request.Report` object
-    :param request_callback: callback function to use when following linked requests
     """
 
-    def __init__(self, response, raise_on_empty, report, request_callback):
+    def __init__(self, response, raise_on_empty):
         self._raise_on_empty = raise_on_empty
-        self._report = report
-        self._request_callback = request_callback
         self._response = response
         self.count = 0
-
-        if 'X-Total-Count' in response.headers and self._report is not None:
-            self._report.set_x_total_count(int(response.headers['X-Total-Count']))
-
-    @property
-    def report(self):
-        """Returns a report containing information about the resource-request-response stack.
-
-        :return: :class:`Report` object
-        :raise:
-            :ReportUnavailable: If no :class:`pysnow.request.Report` object is available
-        """
-
-        if not self._report:
-            raise ReportUnavailable("Reporting was not enabled for this resource")
-
-        return self._report
-
-    def _deserialize_content(self, response):
-        """Response content deserialization (JSON string to Dict)
-
-        :param response: :class:`requests.Response` object
-        :return: Result dictionary containing a list, of records if any
-        :raise:
-            :UnexpectedResponseFormat: Raised if deserialization failed
-        """
-
-        # Make sure we're dealing with JSON content, if not, let the user know.
-        try:
-            content = response.json()
-        except ValueError:
-            raise UnexpectedResponseFormat('Expected JSON in response, got something else. '
-                                           'Have you enabled the REST API in ServiceNow?')
-
-        return dict(content)
 
     def _get_validated_content(self, response):
         """Validates the content after performing deserialization of the JSON body
@@ -79,8 +40,6 @@ class Response(object):
         if response.request.method == 'DELETE' and response.status_code == 204:
             return [{'status': 'record deleted'}]
 
-        content = self._deserialize_content(response)
-
         if 'error' in content:
             raise ResponseError(content['error'])
 
@@ -88,12 +47,6 @@ class Response(object):
         if 'result' not in content:
             raise MissingResult('The expected `result` key was missing in the response from ServiceNow. '
                                 'Cannot continue')
-
-        # Yes, I'm aware this doesn't belong in this function. But it's so damn practical to put here.
-        self.add_record_count(len(content['result']))
-
-        if self._report:
-            self._report.add_response(response)
 
         try:
             # Raise an HTTPError if we hit a non-200 status code
@@ -121,33 +74,29 @@ class Response(object):
 
         :param count: Count to be added
         """
+        #self.add_record_count(len(content['result']))
         self.count = self.count + int(count)
-        if self._report:
-            self._report.add_consumed_count(count)
 
-    def _generator_response(self):
-        """Yields the deserialized and validated content of the original request response, then follows
-        link headers if present on the response.
-
-        :return: generator response
-        """
-
-        response = self._response
-        yield self._get_validated_content(response)
-
-        # Follow link headers, if present
-        while 'next' in response.links:
-            url_link = response.links['next']['url']
-            response = self._request_callback('GET', url_link)
-            yield self._get_validated_content(response)
+    def __repr__(self):
+        return '<%s [%d - %s]>' % (self.__class__.__name__, self._response.status_code, self._response.request.method)
 
     def all(self):
-        """Creates a chained generator response
+        """Yields streamed response
 
-        :return: Chained generator response (iterable)
+        :return: Iterable response
         """
 
-        return itertools.chain.from_iterable(self._generator_response())
+        key = '-'
+        for prefix, event, value in ijson.parse(self._response.raw):
+            if prefix == '' and event == 'map_key':  # found new object at the root
+                key = value  # mark the key value
+                builder = ObjectBuilder()
+            elif key == 'error' and event == 'end_map':
+                raise ResponseError(getattr(builder, 'value'))
+            elif prefix.startswith(key):  # while at this key, build the object
+                builder.event(event, value)
+                if event == 'end_map':  # found the end of an object at the current key, yield
+                    yield getattr(builder, 'value')
 
     def first(self):
         """Returns the first item in the response content after deserialization and validation

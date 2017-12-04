@@ -8,16 +8,14 @@ class TestReport(unittest.TestCase):
     def setUp(self):
         self.mock_report = {
             'session': 'mock_session',
-            'resource': 'mock_resource',
-            'generator_size': 10
+            'resource': 'mock_resource'
         }
 
     def test_create_report(self):
-        """Creating a new :class:`Report` should be a dict-like object with session, resource and generator_size set"""
+        """Creating a new :class:`Report` should be a dict-like object with session, resource set"""
 
         r = Report(**self.mock_report)
 
-        self.assertEquals(r['generator_size'], self.mock_report['generator_size'])
         self.assertEquals(r['session'], self.mock_report['session'])
         self.assertEquals(r['resource'], self.mock_report['resource'])
 

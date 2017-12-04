@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from .request import PreparedRequest
-from .url import URL
-
-from .report import Report
-
+from .request import SnowRequest
+from .url_builder import URLBuilder
 
 class Resource(object):
     """Creates a new :class:`Resource` object
@@ -18,20 +15,14 @@ class Resource(object):
 
     _report = None
 
-    def __init__(self, base_url=None, base_path=None, api_path=None,
-                 enable_reporting=False, **kwargs):
+    def __init__(self, base_url=None, base_path=None, api_path=None, **kwargs):
         self._base_url = base_url
         self._base_path = base_path
         self._api_path = api_path
+        self._url_builder = URLBuilder(base_url, base_path, api_path)
 
-        if enable_reporting:
-            self._report = Report(self, kwargs.get('generator_size'), kwargs.get('session'))
-
-        self._url = URL(base_url, base_path, api_path)
-
-        self._request = PreparedRequest(resource_url=self._url,
-                                        report=self._report,
-                                        **kwargs)
+        self.sysparms = kwargs.pop('sysparms')
+        self.kwargs = kwargs
 
     def __repr__(self):
         return '<%s [%s]>' % (self.__class__.__name__, self.path)
@@ -41,20 +32,22 @@ class Resource(object):
         """Returns full API path"""
         return "%s" % self._base_path + self._api_path
 
-    def get(self, query=None, limit=None, fields=list(), order_by=list(), offset=None):
+    @property
+    def _request(self):
+        return SnowRequest(url_builder=self._url_builder, sysparms=self.sysparms, **self.kwargs)
+
+    def get(self, query, limit=None, offset=None, fields=list()):
         """Queries the API resource
 
-        :param query: (optional) Dictionary, string or :class:`QueryBuilder` object
+        :param query: Dictionary, string or :class:`QueryBuilder` object
         :param limit: (optional) Limits the number of records returned
         :param fields: (optional) List of fields to include in the response
-        :param order_by: (optional) List of columns used in sorting. Example:
-        ['category', '-created_on'] would sort the category field in ascending order, with a secondary sort by
         created_on in descending order.
         :param offset: (optional) Number of records to skip before returning records
         :return: :class:`Response` object
         """
 
-        return self._request.get(query=query, fields=fields, order_by=order_by, offset=offset, limit=limit)
+        return self._request.get(query, limit, offset, fields)
 
     def insert(self, payload):
         """Creates a new record in the API resource
