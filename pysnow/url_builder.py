@@ -57,7 +57,7 @@ class URLBuilder(object):
         """
         self.validate_path(path_component)
 
-        return self._resource_url
+        return self._resource_url + path_component
 
     def get_url(self):
         """Returns :prop:`_resource_url`
