@@ -3,6 +3,7 @@
 from .request import SnowRequest
 from .url_builder import URLBuilder
 
+
 class Resource(object):
     """Creates a new :class:`Resource` object
 
@@ -49,14 +50,14 @@ class Resource(object):
 
         return self._request.get(query, limit, offset, fields)
 
-    def insert(self, payload):
+    def create(self, payload):
         """Creates a new record in the API resource
 
         :param payload: Dictionary containing key-value fields of the new record
         :return: Dictionary of the inserted record
         """
 
-        return self._request.insert(payload)
+        return self._request.create(payload)
 
     def update(self, query, payload):
         """Updates a record in the API resource
