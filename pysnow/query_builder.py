@@ -47,7 +47,9 @@ class QueryBuilder(object):
         :rtype: :class:`pysnow.QueryBuilder`
         """
 
-        return self._add_condition('ORDERBYDESC{}'.format(self.current_field), '', types=[str])
+        self._query.append('ORDERBYDESC{}'.format(self.current_field))
+        self.c_oper = inspect.currentframe().f_back.f_code.co_name
+        return self
 
     def order_ascending(self):
         """Sets ordering of field ascending
@@ -56,7 +58,9 @@ class QueryBuilder(object):
         :rtype: :class:`pysnow.QueryBuilder`
         """
 
-        return self._add_condition('ORDERBY{}'.format(self.current_field), '', types=[str])
+        self._query.append('ORDERBY{}'.format(self.current_field))
+        self.c_oper = inspect.currentframe().f_back.f_code.co_name
+        return self
 
     def starts_with(self, starts_with):
         """Adds and validates new `STARTSWITH` condition
