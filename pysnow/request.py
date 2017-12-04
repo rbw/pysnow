@@ -32,9 +32,11 @@ class SnowRequest(object):
         :return: :class:`pysnow.Response` object
         """
 
-        prepared = requests.Request(method, self._url, auth=self._session.auth, **kwargs).prepare()
+        request = requests.Request(method, self._url, **kwargs)
+        prepped = self._session.prepare_request(request)
+        response = self._session.send(prepped,
+                                      stream=True)
 
-        response = self._session.send(prepared, stream=True)
         response.raw.decode_content = True
 
         return Response(response, raise_on_empty=self._raise_on_empty)
@@ -63,14 +65,13 @@ class SnowRequest(object):
 
         return self._get_response('GET', params=self._sysparms.as_dict())
 
-    def insert(self, payload):
+    def create(self, payload):
         """Creates a new record
 
         :param payload: Dictionary payload
-        :return: Dictionary containing the inserted record
+        :return: Dictionary of the inserted record
         """
 
-        self._url = self._url_builder.get_url()
         return self._get_response('POST', data=json.dumps(payload)).one()
 
     def update(self, query, payload):
@@ -78,7 +79,7 @@ class SnowRequest(object):
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
         :param payload: Dictionary payload
-        :return: Dictionary containing the updated record
+        :return: Dictionary of the updated record
         """
 
         if not isinstance(payload, dict):
@@ -93,8 +94,9 @@ class SnowRequest(object):
         """Deletes a record
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
-        :return: Dictionary containing the result
+        :return: Dictionary containing status of the delete operation
         """
+
         record = self.get(query=query).one()
 
         self._url = self._url_builder.get_appended_custom("/{}".format(record['sys_id']))
