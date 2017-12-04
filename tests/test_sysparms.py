@@ -23,12 +23,16 @@ class TestQuery(unittest.TestCase):
 
         self.assertEquals(Sysparms.stringify_query(query), expected_string)
 
-    def test_stringify_string(self):
-        """:meth:`_stringify` should leave string-type queries as is"""
+    def test_query_setter_getter(self):
+        """:prop:query setter should set _sysparms['sysparm_query'] and be accessible using :prop:query getter"""
 
         query = "str_foo=str_bar"
 
-        self.assertEquals(Sysparms.stringify_query(query), query)
+        sp = Sysparms()
+        sp.query = query
+
+        self.assertEquals(sp.query, query)
+        self.assertEquals(sp._sysparms['sysparm_query'], query)
 
     def test_stringify_invalid_type(self):
         """:meth:`_stringify` should raise an InvalidUsage exception if the query is of invalid type"""
@@ -40,31 +44,34 @@ class TestQuery(unittest.TestCase):
 
     def test_apply_valid_limit(self):
         """:meth:`set_limit` should set `sysparm_limit` and `sysparm_suppress_pagination_header`
-        in :prop:`_request_params`"""
+        in :prop:`_sysparms`"""
 
         limit = 20
         sp = Sysparms()
         sp.limit = limit
 
         self.assertEquals(sp._sysparms['sysparm_limit'], limit)
+        self.assertEquals(sp.limit, limit)
 
     def test_apply_valid_offset(self):
-        """:meth:`set_offset` should set `sysparm_offset` in :prop:`_request_params`"""
+        """:meth:`set_offset` should set `sysparm_offset` in :prop:`_sysparms`"""
 
         offset = 30
         sp = Sysparms()
         sp.offset = offset
 
         self.assertEquals(sp._sysparms['sysparm_offset'], offset)
+        self.assertEquals(sp.offset, offset)
 
     def test_apply_valid_fields(self):
-        """:meth:`set_fields` should set `sysparm_fields` in :prop:`_request_params` to a comma-separated string"""
+        """:meth:`set_fields` should set `sysparm_fields` in :prop:`_sysparms` to a comma-separated string"""
 
         fields = ['field1', 'field2']
         sp = Sysparms()
         sp.fields = fields
 
         self.assertEquals(sp._sysparms['sysparm_fields'], ','.join(fields))
+        self.assertEquals(sp.fields, ','.join(fields))
 
     def test_apply_invalid_fields(self):
         """:meth:`set_fields` should raise an InvalidUsage exception if fields is of an invalid type"""
@@ -96,4 +103,46 @@ class TestQuery(unittest.TestCase):
         self.assertRaises(InvalidUsage, setattr, sp, 'limit', False)
         self.assertRaises(InvalidUsage, setattr, sp, 'limit', ('asd', 'dsa'))
 
+    def test_set_pagination(self):
+        """:prop:`paginate` setter should set `sysparm_suppress_pagination_header` in :prop:`_sysparms`"""
+
+        sp = Sysparms()
+
+        sp.pagination = True
+        self.assertEquals(sp._sysparms['sysparm_suppress_pagination_header'], False)
+        self.assertEquals(sp.pagination, True)
+        sp.pagination = False
+        self.assertEquals(sp._sysparms['sysparm_suppress_pagination_header'], True)
+        self.assertEquals(sp.pagination, False)
+
+    def test_set_pagination_invalid(self):
+        """:meth:`paginate` setter should raise an exception if type is not bool"""
+
+        sp = Sysparms()
+
+        self.assertRaises(InvalidUsage, setattr, sp, 'pagination', 'foo')
+        self.assertRaises(InvalidUsage, setattr, sp, 'pagination', 1)
+        self.assertRaises(InvalidUsage, setattr, sp, 'pagination', {'foo': 'bar'})
+
+    def test_add_foreign_parameter(self):
+        """The foreign parameter dicts provided to :meth:`add_foreign` should be added to :prop:`_foreign_params`"""
+
+        foreign_param = {'foo': 'bar'}
+
+        sp = Sysparms()
+        sp.add_foreign(foreign_param)
+
+        self.assertEquals(sp.foreign_params, foreign_param)
+        self.assertEquals(sp._foreign_params, foreign_param)
+        self.assertEquals(sp.as_dict()['foo'], foreign_param['foo'])
+
+    def test_add_invalid_foreign_parameter(self):
+        """:meth:`add_foreign` should only accept dicts"""
+
+        sp = Sysparms()
+
+        self.assertRaises(InvalidUsage, sp.add_foreign, ('foo', 'bar'))
+        self.assertRaises(InvalidUsage, sp.add_foreign, 'foo')
+        self.assertRaises(InvalidUsage, sp.add_foreign, True)
+        self.assertRaises(InvalidUsage, sp.add_foreign, 0)
 

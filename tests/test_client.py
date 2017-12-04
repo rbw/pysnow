@@ -43,13 +43,6 @@ class TestClient(unittest.TestCase):
         self.assertEquals(r._api_path, api_path)
         self.assertEquals(r._base_path, base_path)
 
-    def test_invalid_resource_enable_reporting(self):
-        """:meth:`response` should raise an InvalidUsage exception if `enable_reporting` is not bool"""
-        c = Client(user="foo", password="foo", instance="instance")
-        self.assertRaises(InvalidUsage, c.resource, api_path='/is/valid', enable_reporting=0)
-        self.assertRaises(InvalidUsage, c.resource, api_path='/is/valid', enable_reporting='invalid')
-        self.assertRaises(InvalidUsage, c.resource, api_path='/is/valid', enable_reporting=[])
-
     def test_client_with_session(self):
         """Should be able to create a client given a requests session object."""
         session = requests.Session()

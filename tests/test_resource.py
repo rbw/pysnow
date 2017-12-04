@@ -5,27 +5,57 @@ import json
 
 from pysnow.response import Response
 from pysnow.client import Client
-from pysnow.request import SnowRequest
+
+from requests.exceptions import HTTPError
+
+from pysnow.exceptions import ResponseError, NoResults, MultipleResults
 
 
-def get_serialized(dict_mock):
-    return json.dumps({'result': [dict_mock]})
+def get_serialized_result(dict_mock):
+    return json.dumps({'result': dict_mock})
+
+
+def get_serialized_error(dict_mock):
+    return json.dumps({'error': dict_mock})
 
 
 class TestResourceRequest(unittest.TestCase):
     """Performs resource-request tests"""
 
     def setUp(self):
-        self.record_response_get = {
+        self.error_message_body = {
+            'message': 'error_message',
+            'detail': 'error_detail'
+        }
+        
+        self.record_response_get_one = [{
             'sys_id': '98ace1a537ea2a00cf5c9c9953990e19',
             'attr1': 'foo',
             'attr2': 'bar'
-        }
+        }]
 
-        self.record_response_insert = {
+        self.record_response_get_three = [
+            {
+                'sys_id': '37ea2a00cf5c9c995399098ace1a5e19',
+                'attr1': 'foo1',
+                'attr2': 'bar1'
+            },
+            {
+                'sys_id': '98ace1a537ea2a00cf5c9c9953990e19',
+                'attr1': 'foo2',
+                'attr2': 'bar2'
+            },
+            {
+                'sys_id': 'a00cf5c9c9953990e1998ace1a537ea2',
+                'attr1': 'foo3',
+                'attr2': 'bar3'
+            }
+        ]
+
+        self.record_response_create = {
             'sys_id': '90e11a537ea2a00cf598ace9c99539c9',
-            'attr1': 'foo_insert',
-            'attr2': 'bar_insert'
+            'attr1': 'foo_create',
+            'attr2': 'bar_create'
         }
 
         self.record_response_update = {
@@ -48,15 +78,15 @@ class TestResourceRequest(unittest.TestCase):
         self.api_path = '/api/now/test'
 
         self.client = Client(**self.client_kwargs)
-        self.resource = self.client.resource(base_path=self.base_path, api_path=self.api_path, enable_reporting=True)
+        self.resource = self.client.resource(base_path=self.base_path, api_path=self.api_path)
 
         self.mock_url_builder = self.resource._url_builder
 
         self.mock_url_builder_base = self.resource._url_builder.get_url()
         self.mock_url_builder_sys_id = (self.mock_url_builder
-                                        .get_appended_custom('/{}'.format(self.record_response_get['sys_id'])))
+                                        .get_appended_custom('/{}'.format(self.record_response_get_one[0]['sys_id'])))
 
-        self.dict_query = {'sys_id': self.record_response_get['sys_id']}
+        self.dict_query = {'sys_id': self.record_response_get_one[0]['sys_id']}
         self.get_fields = ['foo', 'bar']
 
     def test_create_resource(self):
@@ -73,6 +103,36 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(r.path, self.base_path + self.api_path)
 
     @httpretty.activate
+    def test_response_count(self):
+        """:prop:`count` of :class:`pysnow.Response` should raise an exception if count is set to non-integer"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+
+        # List of fields should end up as comma-separated string
+        self.assertRaises(TypeError, setattr, response, 'count', 'foo')
+        self.assertRaises(TypeError, setattr, response, 'count', True)
+        self.assertRaises(TypeError, setattr, response, 'count', {'foo': 'bar'})
+
+    @httpretty.activate
+    def test_response_error(self):
+        """:class:`pysnow.Response` should raise an exception if an error is encountered in the response body"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_error(self.error_message_body),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+
+        self.assertRaises(ResponseError, response.first)
+
+    @httpretty.activate
     def test_get_request_fields(self):
         """:meth:`get_request` should return a :class:`pysnow.Response` object"""
 
@@ -82,40 +142,196 @@ class TestResourceRequest(unittest.TestCase):
                                content_type="application/json")
 
         response = self.resource.get(self.dict_query, fields=self.get_fields)
-        report_params = response.report.request_params
 
         # List of fields should end up as comma-separated string
-        self.assertEquals(report_params['sysparm_fields'], ','.join(self.get_fields))
         self.assertEquals(type(response), Response)
 
     @httpretty.activate
-    def test_insert_request(self):
-        """:meth:`insert` should return a dictionary of the new record"""
+    def test_get_one(self):
+        """:meth:`one` of :class:`pysnow.Response` should raise an exception if more than one match was found"""
 
-        httpretty.register_uri(httpretty.POST,
+        httpretty.register_uri(httpretty.GET,
                                self.mock_url_builder_base,
-                               body=get_serialized(self.record_response_insert),
+                               body=get_serialized_result(self.record_response_get_one),
                                status=200,
                                content_type="application/json")
 
-        result = self.resource.insert(self.record_response_insert)
+        response = self.resource.get(self.dict_query)
+        result = response.one()
 
-        self.assertEquals(type(result), dict)
-        self.assertEquals(result, self.record_response_insert)
+        self.assertEquals(result['sys_id'], self.record_response_get_one[0]['sys_id'])
 
     @httpretty.activate
-    def test_update_request(self):
+    def test_response_404_not_raise_on_empty(self):
+        """:meth:`all` of :class:`pysnow.Response` should return empty record if a 404 response is encountered when
+        :prop:`raise_on_empty` is set to False"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               status=404,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        response._raise_on_empty = False
+        result = response.all()
+        self.assertEquals(next(result), {})
+
+    @httpretty.activate
+    def test_response_404_not_raise_on_empty(self):
+        """:meth:`all` of :class:`pysnow.Response` should raise an exception if a 404 response is encountered when
+        :prop:`raise_on_empty` is set to True"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               status=404,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        response._raise_on_empty = True
+        result = response.all()
+        self.assertRaises(NoResults, next, result)
+
+    @httpretty.activate
+    def test_http_error_get_one(self):
+        """:meth:`one` of :class:`pysnow.Response` should raise an HTTPError exception if a
+        non-200 response code was encountered"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               status=500,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        self.assertRaises(HTTPError, response.one)
+
+    @httpretty.activate
+    def test_get_one_many(self):
+        """:meth:`one` of :class:`pysnow.Response` should raise an exception if more than one match was found"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_three),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        self.assertRaises(MultipleResults, response.one)
+
+    @httpretty.activate
+    def test_get_one_empty(self):
+        """:meth:`one` of :class:`pysnow.Response` should raise an exception if no matches were found"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result([]),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        self.assertRaises(NoResults, response.one)
+
+    @httpretty.activate
+    def test_get_one_or_none_empty(self):
+        """:meth:`one_or_none` of :class:`pysnow.Response` should return `None` if no matches were found """
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result([]),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        result = response.one_or_none()
+
+        self.assertEquals(result, None)
+
+    @httpretty.activate
+    def test_get_first_or_none_empty(self):
+        """:meth:`first_or_none` of :class:`pysnow.Response` should return None if no records were found"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result([]),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        result = response.first_or_none()
+
+        self.assertEquals(result, None)
+
+    @httpretty.activate
+    def test_get_first_or_none(self):
+        """:meth:`first_or_none` of :class:`pysnow.Response` should return first match if multiple records were found"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_three),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        result = response.first_or_none()
+
+        self.assertEquals(result, self.record_response_get_three[0])
+
+    @httpretty.activate
+    def test_get_first(self):
+        """:meth:`first` of :class:`pysnow.Response` should return first match if multiple records were found"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_three),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        result = response.first()
+
+        self.assertEquals(result, self.record_response_get_three[0])
+
+    @httpretty.activate
+    def test_get_first_empty(self):
+        """:meth:`first` of :class:`pysnow.Response` should raise an exception if matches were found"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result([]),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+
+        self.assertRaises(NoResults, response.first)
+
+    @httpretty.activate
+    def test_create(self):
+        """:meth:`create` should return a dictionary of the new record"""
+
+        httpretty.register_uri(httpretty.POST,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_create),
+                               status=200,
+                               content_type="application/json")
+
+        result = self.resource.create(self.record_response_create)
+
+        self.assertEquals(type(result), dict)
+        self.assertEquals(result, self.record_response_create)
+
+    @httpretty.activate
+    def test_update(self):
         """:meth:`update` should return a dictionary of the updated record"""
 
         httpretty.register_uri(httpretty.GET,
                                self.mock_url_builder_base,
-                               body=get_serialized(self.record_response_get),
+                               body=get_serialized_result(self.record_response_get_one),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.PUT,
                                self.mock_url_builder_sys_id,
-                               body=get_serialized(self.record_response_update),
+                               body=get_serialized_result(self.record_response_update),
                                status=200,
                                content_type="application/json")
 
@@ -125,18 +341,18 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(self.record_response_update['attr1'], result['attr1'])
 
     @httpretty.activate
-    def test_integration_delete(self):
+    def test_delete(self):
         """:meth:`delete` should return a dictionary containing status"""
 
         httpretty.register_uri(httpretty.GET,
                                self.mock_url_builder_base,
-                               body=get_serialized(self.record_response_get),
+                               body=get_serialized_result(self.record_response_get_one),
                                status=200,
                                content_type="application/json")
 
         httpretty.register_uri(httpretty.DELETE,
                                self.mock_url_builder_sys_id,
-                               body=get_serialized(self.record_response_delete),
+                               body=get_serialized_result(self.record_response_delete),
                                status=200,
                                content_type="application/json")
 
@@ -146,16 +362,50 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(result['status'], 'record deleted')
 
     @httpretty.activate
-    def test_integration_custom(self):
+    def test_custom(self):
         """:meth:`custom` should return a :class:`pysnow.Response` object"""
 
         httpretty.register_uri(httpretty.GET,
                                self.mock_url_builder_base,
-                               body=get_serialized(self.record_response_get),
+                               body=get_serialized_result(self.record_response_get_one),
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.custom('GET')
+        method = 'GET'
 
+        response = self.resource.custom(method)
+
+        self.assertEquals(response._response.request.method, method)
         self.assertEquals(type(response), Response)
 
+    @httpretty.activate
+    def test_custom_with_headers(self):
+        """Headers provided to :meth:`custom` should end up in the request"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        headers = {'foo': 'bar'}
+
+        response = self.resource.custom('GET', headers=headers)
+
+        self.assertEquals(response._response.request.headers['foo'], headers['foo'])
+
+    @httpretty.activate
+    def test_custom_with_path(self):
+        """path_append passed to :meth:`custom` should get appended to the request path"""
+
+        path_append = '/foo'
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base + path_append,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.custom('GET', path_append='/foo')
+
+        self.assertEquals(response._response.status_code, 200)

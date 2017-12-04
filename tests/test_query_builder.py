@@ -54,6 +54,16 @@ class TestIncident(unittest.TestCase):
         q = pysnow.QueryBuilder().field('test').equals('test').NQ().field('test2').equals('test')
         self.assertEqual(str(q), 'test=test^NQtest2=test')
 
+    def test_query_order_descending(self):
+        # :meth:`order_descending` should generate ORDERBYDESC<field>
+        q = pysnow.QueryBuilder().field('foo').equals('bar').AND().field('foo2').order_descending()
+        self.assertEqual(str(q), 'foo=bar^ORDERBYDESCfoo2')
+
+    def test_query_order_ascending(self):
+        # :meth:`order_descending` should generate ORDERBY<field>
+        q = pysnow.QueryBuilder().field('foo').equals('bar').AND().field('foo2').order_ascending()
+        self.assertEqual(str(q), 'foo=bar^ORDERBYfoo2')
+
     def test_query_cond_between(self):
         # Make sure between with str arguments fails
         q1 = pysnow.QueryBuilder().field('test')
