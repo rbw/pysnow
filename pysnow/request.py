@@ -87,7 +87,7 @@ class SnowRequest(object):
 
         record = self.get(query).one()
 
-        self._url = self._url_builder.get_appended_custom("/{}".format(record['sys_id']))
+        self._url = self._url_builder.get_appended_custom("/{0}".format(record['sys_id']))
         return self._get_response('PUT', data=json.dumps(payload)).one()
 
     def delete(self, query):
@@ -99,7 +99,7 @@ class SnowRequest(object):
 
         record = self.get(query=query).one()
 
-        self._url = self._url_builder.get_appended_custom("/{}".format(record['sys_id']))
+        self._url = self._url_builder.get_appended_custom("/{0}".format(record['sys_id']))
         return self._get_response('DELETE').one()
 
     def custom(self, method, path_append=None, headers=None, **kwargs):

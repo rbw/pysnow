@@ -47,7 +47,7 @@ class QueryBuilder(object):
         :rtype: :class:`pysnow.QueryBuilder`
         """
 
-        self._query.append('ORDERBYDESC{}'.format(self.current_field))
+        self._query.append('ORDERBYDESC{0}'.format(self.current_field))
         self.c_oper = inspect.currentframe().f_back.f_code.co_name
         return self
 
@@ -58,7 +58,7 @@ class QueryBuilder(object):
         :rtype: :class:`pysnow.QueryBuilder`
         """
 
-        self._query.append('ORDERBY{}'.format(self.current_field))
+        self._query.append('ORDERBY{0}'.format(self.current_field))
         self.c_oper = inspect.currentframe().f_back.f_code.co_name
         return self
 

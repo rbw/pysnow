@@ -84,7 +84,7 @@ class TestResourceRequest(unittest.TestCase):
 
         self.mock_url_builder_base = self.resource._url_builder.get_url()
         self.mock_url_builder_sys_id = (self.mock_url_builder
-                                        .get_appended_custom('/{}'.format(self.record_response_get_one[0]['sys_id'])))
+                                        .get_appended_custom('/{0}'.format(self.record_response_get_one[0]['sys_id'])))
 
         self.dict_query = {'sys_id': self.record_response_get_one[0]['sys_id']}
         self.get_fields = ['foo', 'bar']
