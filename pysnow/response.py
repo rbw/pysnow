@@ -57,17 +57,16 @@ class Response(object):
 
         for prefix, event, value in ijson.parse(self._response.raw, buf_size=self._chunk_size):
             if (prefix, event) == ('error', 'start_map'):
-                # We've found a ServiceNow `error` object at the root
+                # Matched ServiceNow `error` object at the root
                 has_error = True
                 builder = ObjectBuilder()
-            elif (prefix, event) == ('result', 'start_map'):
-                # We've found a ServiceNow `result` object at the root
-                has_single_result = True
+            elif prefix == 'result' and event in ['start_map', 'start_array']:
+                # Matched ServiceNow `result`
                 builder = ObjectBuilder()
-            elif (prefix, event) == ('result', 'start_array'):
-                # We've found a ServiceNow `result` array at the root
-                has_many_result = True
-                builder = ObjectBuilder()
+                if event == 'start_map':  # Matched object
+                    has_single_result = True
+                elif event == 'start_array':  # Matched array
+                    has_many_result = True
 
             if has_many_result:
                 # Build the result
