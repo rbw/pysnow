@@ -118,8 +118,6 @@ class Client(object):
 
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
-        :param enable_reporting: Set to True to enable detailed resource-request-response reporting on the
-        :class:`pysnow.Response` object
         :return: :class:`Resource` object
         """
 
