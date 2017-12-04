@@ -46,7 +46,7 @@ class Sysparms(object):
 
     def add_foreign(self, params):
         if isinstance(params, dict) is False:
-            raise TypeError("Foreign parameters must be of type `dict`")
+            raise InvalidUsage("Foreign parameters must be of type `dict`")
 
         self._foreign_params.update(params)
 
@@ -95,11 +95,14 @@ class Sysparms(object):
         self._sysparms['sysparm_fields'] = ",".join(fields)
 
     @property
-    def paginate(self):
+    def pagination(self):
         return not self._sysparms['sysparm_suppress_pagination_header']
 
-    @paginate.setter
-    def paginate(self, pagination_wanted=True):
+    @pagination.setter
+    def pagination(self, pagination_wanted):
+        if not isinstance(pagination_wanted, bool):
+            raise InvalidUsage('pagination must be of type bool')
+
         self._sysparms['sysparm_suppress_pagination_header'] = not pagination_wanted
 
     @property
@@ -107,17 +110,16 @@ class Sysparms(object):
         return self._sysparms['sysparm_limit']
 
     @limit.setter
-    def limit(self, number_records):
-        """Sets page_size aka limit
+    def limit(self, max_count):
+        """Sets record limit
 
-        :param size: Generator size (int)
-        :param disable_pagination: Whether or not to use pagination (Link headers)
+        :param max_count: Size limit (int)
         """
 
-        if not isinstance(number_records, int) or isinstance(number_records, bool):
+        if not isinstance(max_count, int) or isinstance(max_count, bool):
             raise InvalidUsage("limit size must be of type integer")
 
-        self._sysparms['sysparm_limit'] = number_records
+        self._sysparms['sysparm_limit'] = max_count
 
     def as_dict(self):
         """Constructs query params compatible with :class:`requests.Request`
