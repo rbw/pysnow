@@ -61,10 +61,7 @@ class Client(object):
         self._sysparms = Sysparms()
 
         if request_params is not None:
-            try:
-                self._sysparms.add_foreign(request_params)
-            except TypeError:
-                raise InvalidUsage("Request params must be of type dict")
+            self._sysparms.add_foreign(request_params)
 
         self.request_params = request_params or {}
         self.instance = instance
