@@ -2,6 +2,7 @@
 import unittest
 import httpretty
 import json
+from six.moves.urllib.parse import urlparse, unquote
 
 from pysnow.response import Response
 from pysnow.client import Client
@@ -17,6 +18,11 @@ def get_serialized_result(dict_mock):
 
 def get_serialized_error(dict_mock):
     return json.dumps({'error': dict_mock})
+
+
+def qs_as_dict(url):
+    qs_str = urlparse(url).query
+    return dict((x[0], unquote(x[1])) for x in [x.split("=") for x in qs_str.split("&")])
 
 
 class TestResourceRequest(unittest.TestCase):
@@ -113,7 +119,6 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.get(self.dict_query)
 
-        # List of fields should end up as comma-separated string
         self.assertRaises(TypeError, setattr, response, 'count', 'foo')
         self.assertRaises(TypeError, setattr, response, 'count', True)
         self.assertRaises(TypeError, setattr, response, 'count', {'foo': 'bar'})
@@ -142,9 +147,45 @@ class TestResourceRequest(unittest.TestCase):
                                content_type="application/json")
 
         response = self.resource.get(self.dict_query, fields=self.get_fields)
+        qs = qs_as_dict(response._response.request.url)
+
+        str_fields = ','.join(self.get_fields)
 
         # List of fields should end up as comma-separated string
         self.assertEquals(type(response), Response)
+        self.assertEquals(qs['sysparm_fields'], str_fields)
+
+    @httpretty.activate
+    def test_get_offset(self):
+        """offset passed to :meth:`get` should set sysparm_offset in query"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        offset = 5
+        response = self.resource.get(self.dict_query, offset=offset)
+        qs = qs_as_dict(response._response.request.url)
+
+        self.assertEquals(int(qs['sysparm_offset']), offset)
+
+    @httpretty.activate
+    def test_get_limit(self):
+        """limit passed to :meth:`get` should set sysparm_limit in QS"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        limit = 2
+
+        response = self.resource.get(self.dict_query, limit=limit)
+        qs = qs_as_dict(response._response.request.url)
+        self.assertEquals(int(qs['sysparm_limit']), limit)
 
     @httpretty.activate
     def test_get_one(self):
