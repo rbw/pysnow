@@ -1,11 +1,4 @@
-.. code-block::
-  
-	 ______   __  __    ______    __   __    ______    __     __    
-	/\  == \ /\ \_\ \  /\  ___\  /\ "-.\ \  /\  __ \  /\ \  _ \ \   
-	\ \  _-/ \ \____ \ \ \___  \ \ \ \-.  \ \ \ \/\ \ \ \ \/ ".\ \  
-	 \ \_\    \/\_____\ \/\_____\ \ \_\\"\_\ \ \_____\ \ \__/".~\_\ 
-	  \/_/     \/_____/  \/_____/  \/_/ \/_/  \/_____/  \/_/   \/_/ 
-			- a Python library for the ServiceNow REST API
+.. image:: https://raw.githubusercontent.com/rbw0/pysnow/branch-0.6.0/pysnow.gif
 			
 .. image:: https://travis-ci.org/rbw0/pysnow.svg?branch=master
     :target: https://travis-ci.org/rbw0/pysnow
