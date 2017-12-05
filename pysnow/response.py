@@ -52,8 +52,8 @@ class Response(object):
             :MissingResult: If no result nor error was found
         """
 
-        has_single_result = False
-        has_many_result = False
+        has_result_single = False
+        has_result_many = False
         has_error = False
 
         for prefix, event, value in ijson.parse(self._response.raw, buf_size=self._chunk_size):
@@ -65,11 +65,11 @@ class Response(object):
                 # Matched ServiceNow `result`
                 builder = ObjectBuilder()
                 if event == 'start_map':  # Matched object
-                    has_single_result = True
+                    has_result_single = True
                 elif event == 'start_array':  # Matched array
-                    has_many_result = True
+                    has_result_many = True
 
-            if has_many_result:
+            if has_result_many:
                 # Build the result
                 if (prefix, event) == ('result.item', 'end_map'):
                     # Reached end of object. Set count and yield
@@ -79,7 +79,7 @@ class Response(object):
                 elif prefix.startswith('result.item'):
                     # Build the result object
                     builder.event(event, value)
-            elif has_single_result:
+            elif has_result_single:
                 if (prefix, event) == ('result', 'end_map'):
                     # Reached end of the result object. Set count and yield.
                     builder.event(event, value)
@@ -96,7 +96,7 @@ class Response(object):
                     # Build the error object
                     builder.event(event, value)
 
-        if (has_single_result or has_many_result) and self.count == 0:  # Results empty
+        if (has_result_single or has_result_many) and self.count == 0:  # Results empty
             if self._raise_on_empty is True:
                 # Raise exception if it was requested
                 raise NoResults('Query yielded no results')
@@ -104,7 +104,7 @@ class Response(object):
             # Otherwise just yield empty dict
             yield {}
 
-        if not (has_single_result or has_many_result or has_error):  # None of the expected keys were found
+        if not (has_result_single or has_result_many or has_error):  # None of the expected keys were found
             raise MissingResult('The expected `result` key was missing in the response. Cannot continue')
 
     def _get_validated_response(self):
