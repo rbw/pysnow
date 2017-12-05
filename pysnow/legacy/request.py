@@ -3,6 +3,7 @@
 import itertools
 import json
 import os
+import six
 import ntpath
 import warnings
 
@@ -374,12 +375,7 @@ class LegacyRequest(object):
         if isinstance(self.query, QueryBuilder):
             sysparm_query = str(self.query)
         elif isinstance(self.query, dict):  # Dict-type query
-            try:
-                items = self.query.iteritems()  # Python 2
-            except AttributeError:
-                items = self.query.items()  # Python 3
-
-            sysparm_query = '^'.join(['%s=%s' % (field, value) for field, value in items])
+            sysparm_query = '^'.join(['%s=%s' % (k, v) for k, v in six.iteritems(self.query)])
         elif isinstance(self.query, str):  # String-type query
             sysparm_query = self.query
         else:
