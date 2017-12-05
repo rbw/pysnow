@@ -9,7 +9,13 @@ from pysnow.client import Client
 
 from requests.exceptions import HTTPError
 
-from pysnow.exceptions import ResponseError, NoResults, MultipleResults
+from pysnow.exceptions import (
+    ResponseError,
+    NoResults,
+    MultipleResults,
+    InvalidUsage,
+    MissingResult
+)
 
 
 def get_serialized_result(dict_mock):
@@ -30,8 +36,8 @@ class TestResourceRequest(unittest.TestCase):
 
     def setUp(self):
         self.error_message_body = {
-            'message': 'error_message',
-            'detail': 'error_detail'
+            'message': 'test_message',
+            'detail': 'test_details'
         }
         
         self.record_response_get_one = [{
@@ -135,7 +141,13 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.get(self.dict_query)
 
-        self.assertRaises(ResponseError, response.first)
+        expected_str = "Error in response. Message: %s, Details: %s" % (self.error_message_body['message'],
+                                                                        self.error_message_body['detail'])
+
+        try:
+            response.first()
+        except ResponseError as e:
+            self.assertEquals(str(e), expected_str)
 
     @httpretty.activate
     def test_get_request_fields(self):
@@ -203,6 +215,38 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(result['sys_id'], self.record_response_get_one[0]['sys_id'])
 
     @httpretty.activate
+    def test_get_all_empty(self):
+        """:meth:`all` of :class:`pysnow.Response` should return a list with an empty object if `raise_on_empty`
+        is set to False"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result([]),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+        response._raise_on_empty = False
+        result = list(response.all())
+
+        self.assertEquals(result[0], {})
+
+    @httpretty.activate
+    def test_get_one_missing_result_keys(self):
+        """:meth:`one` of :class:`pysnow.Response` should raise an exception if none of the expected keys
+        was found in the result"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=json.dumps({}),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+
+        self.assertRaises(MissingResult, response.one)
+
+    @httpretty.activate
     def test_response_404_not_raise_on_empty(self):
         """:meth:`all` of :class:`pysnow.Response` should return empty record if a 404 response is encountered when
         :prop:`raise_on_empty` is set to False"""
@@ -218,7 +262,7 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(next(result), {})
 
     @httpretty.activate
-    def test_response_404_not_raise_on_empty(self):
+    def test_response_404_raise_on_empty(self):
         """:meth:`all` of :class:`pysnow.Response` should raise an exception if a 404 response is encountered when
         :prop:`raise_on_empty` is set to True"""
 
@@ -382,6 +426,16 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(self.record_response_update['attr1'], result['attr1'])
 
     @httpretty.activate
+    def test_update_invalid_payload(self):
+        """:meth:`update` should raise an exception if payload is of invalid type"""
+
+        self.assertRaises(InvalidUsage, self.resource.update, self.dict_query, 'foo')
+        self.assertRaises(InvalidUsage, self.resource.update, self.dict_query, False)
+        self.assertRaises(InvalidUsage, self.resource.update, self.dict_query, 1)
+        self.assertRaises(InvalidUsage, self.resource.update, self.dict_query, ('foo', 'bar'))
+        self.assertRaises(InvalidUsage, self.resource.update, self.dict_query, ['foo', 'bar'])
+
+    @httpretty.activate
     def test_delete(self):
         """:meth:`delete` should return a dictionary containing status"""
 
@@ -394,7 +448,7 @@ class TestResourceRequest(unittest.TestCase):
         httpretty.register_uri(httpretty.DELETE,
                                self.mock_url_builder_sys_id,
                                body=get_serialized_result(self.record_response_delete),
-                               status=200,
+                               status=204,
                                content_type="application/json")
 
         result = self.resource.delete(self.dict_query)
@@ -450,3 +504,27 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.custom('GET', path_append='/foo')
 
         self.assertEquals(response._response.status_code, 200)
+
+    @httpretty.activate
+    def test_custom_with_path_invalid(self):
+        """:meth:`custom` should raise an exception if the provided path is invalid"""
+
+        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append='foo')
+        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append={'foo': 'bar'})
+        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append='foo/')
+        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append=True)
+
+    @httpretty.activate
+    def test_response_repr(self):
+        """:meth:`get` should result in response obj repr describing the response"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(query={})
+        response_repr = repr(response)
+
+        self.assertEquals(response_repr, '<Response [200 - GET]>')
