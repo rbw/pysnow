@@ -1,31 +1,48 @@
 .. title:: pysnow
 
-pysnow
+PYSNOW
 ======
 
-Python library for the ServiceNow REST API
+
+Library written in Python that makes interacting with the ServiceNow REST API much enjoyable.
 
 
+.. _general:
 
 .. toctree::
-   :maxdepth: 1
+   :caption: General
 
-   client
-   oauth_client
-   query
-   request
+   general
 
+.. _api:
 
-Usage
------
-Go  `here <usage>`_ for usage examples.
+.. toctree::
+   :maxdepth: 2
+   :caption: API
 
-Installation
-------------
-$ pip install pysnow
+   api/client
+   api/oauth_client
+   api/query_builder
+   api/resource
+   api/params_builder
+   api/response
 
-Compatibility
--------------
-Python 2 and 3. Tested: Python 2.6+ and Python 3.3+
+.. _usage:
 
+.. toctree::
+   :maxdepth: 3
+   :caption: Usage
+
+   usage/client
+   usage/resource
+   usage/parameters
+   usage/query
+
+.. _examples:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Full examples
+
+   examples/create
 
