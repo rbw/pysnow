@@ -10,25 +10,24 @@ from .legacy.request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
 from .url_builder import URLBuilder
-from .sysparms import Sysparms
+from .params_builder import ParamsBuilder
 
 warnings.simplefilter("always", DeprecationWarning)
 
 
 class Client(object):
-    """User-created :class:`pysnow.Client` object.
+    """User-created Client object.
 
     :param instance: Instance name, used to construct host
     :param host: Host can be passed as an alternative to instance
     :param user: User name
     :param password: Password
     :param raise_on_empty: Whether or not to raise an exception on 404 (no matching records), defaults to True
-    :param request_params: Request params to send with requests globally
-    :param use_ssl: Enable or disable SSL, defaults to True
-    :param session: Optional :class:`requests.Session` object to use instead of passing user/pass
-    to :class:`Client`
-    :raise:
-        :InvalidUsage: If validation fails for an input argument
+    :param request_params: Request params to send with requests globally (deprecated)
+    :param use_ssl: Enable or disable the use of SSL, defaults to True
+    :param session: Optional :class:`requests.Session` object to use instead of passing user/pass to :class:`Client`
+    :raises:
+        - InvalidUsage: On argument validation error
     """
 
     def __init__(self,
@@ -58,10 +57,13 @@ class Client(object):
         elif (user and session) is not None:
             raise InvalidUsage("Provide either username and password or a session, not both.")
 
-        self._sysparms = Sysparms()
+        self.parameters = ParamsBuilder()
 
         if request_params is not None:
-            self._sysparms.add_foreign(request_params)
+            warnings.warn("The use of the `request_params` argument is deprecated and will be removed in a "
+                          "future release. Please use Client.parameters instead.", DeprecationWarning)
+
+            self.parameters.add_custom(request_params)
 
         self.request_params = request_params or {}
         self.instance = instance
@@ -116,6 +118,8 @@ class Client(object):
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
         :return: :class:`Resource` object
+        :raises:
+            - InvalidUsage: If a path fails validation
         """
 
         for path in [api_path, base_path]:
@@ -123,7 +127,7 @@ class Client(object):
 
         return Resource(api_path=api_path,
                         base_path=base_path,
-                        sysparms=self._sysparms,
+                        parameters=self.parameters,
                         raise_on_empty=self.raise_on_empty,
                         session=self.session,
                         base_url=self.base_url)

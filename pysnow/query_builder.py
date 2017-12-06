@@ -10,115 +10,79 @@ from .exceptions import (QueryEmpty,
 
 
 class QueryBuilder(object):
-    """Query builder - for constructing complex ServiceNow compatible queries"""
+    """Query builder - for constructing advanced ServiceNow queries"""
     def __init__(self):
         self._query = []
         self.current_field = None
         self.c_oper = None
         self.l_oper = None
 
-    def AND(self):
-        """Adds and validates `^` operator"""
-        return self._add_logical_operator('^')
-
-    def OR(self):
-        """Adds and validates `OR` operator"""
-        return self._add_logical_operator('^OR')
-
-    def NQ(self):
-        """Adds and validates `NQ` (new query) operator"""
-        return self._add_logical_operator('^NQ')
-
     def field(self, field):
         """Sets the field to operate on
 
         :param field: field (str) to operate on
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
         """
 
         self.current_field = field
         return self
 
     def order_descending(self):
-        """Sets ordering of field descending
-
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
-        """
+        """Sets ordering of field descending"""
 
         self._query.append('ORDERBYDESC{0}'.format(self.current_field))
         self.c_oper = inspect.currentframe().f_back.f_code.co_name
         return self
 
     def order_ascending(self):
-        """Sets ordering of field ascending
-
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
-        """
+        """Sets ordering of field ascending"""
 
         self._query.append('ORDERBY{0}'.format(self.current_field))
         self.c_oper = inspect.currentframe().f_back.f_code.co_name
         return self
 
     def starts_with(self, starts_with):
-        """Adds and validates new `STARTSWITH` condition
+        """Adds new `STARTSWITH` condition
 
         :param starts_with: Match field starting with the provided value
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
         """
 
         return self._add_condition('STARTSWITH', starts_with, types=[str])
 
     def ends_with(self, ends_with):
-        """Adds and validates new `ENDSWITH` condition
+        """Adds new `ENDSWITH` condition
 
         :param ends_with: Match field ending with the provided value
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
         """
 
         return self._add_condition('ENDSWITH', ends_with, types=[str])
 
     def contains(self, contains):
-        """Adds and validates new `LIKE` condition
+        """Adds new `LIKE` condition
 
         :param contains: Match field containing the provided value
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
         """
 
         return self._add_condition('LIKE', contains, types=[str])
 
     def not_contains(self, not_contains):
-        """Adds and validates new `NOTLIKE` condition
+        """Adds new `NOTLIKE` condition
 
         :param not_contains: Match field not containing the provided value
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
         """
 
         return self._add_condition('NOTLIKE', not_contains, types=[str])
 
     def is_empty(self):
-        """Adds and validates new `ISEMPTY` condition
-
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
-        """
+        """Adds new `ISEMPTY` condition"""
 
         return self._add_condition('ISEMPTY', '', types=[str, int])
 
     def equals(self, data):
-        """Adds and validates new `IN` or `=` condition depending on if a list or string was provided
+        """Adds new `IN` or `=` condition depending on if a list or string was provided
 
         :param data: string or list of values
         :raise:
-            :QueryTypeError: if `data` is of an unexpected type
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
+            - QueryTypeError: if `data` is of an unexpected type
         """
 
         if isinstance(data, str):
@@ -129,13 +93,11 @@ class QueryBuilder(object):
         raise QueryTypeError('Expected value of type `str` or `list`, not %s' % type(data))
 
     def not_equals(self, data):
-        """Adds and validates new `NOT IN` or `!=` condition depending on if a list or string was provided
+        """Adds new `NOT IN` or `!=` condition depending on if a list or string was provided
 
         :param data: string or list of values
         :raise:
-            :QueryTypeError: if `data` is of an unexpected type
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
+            - QueryTypeError: if `data` is of an unexpected type
         """
 
         if isinstance(data, str):
@@ -146,13 +108,11 @@ class QueryBuilder(object):
         raise QueryTypeError('Expected value of type `str` or `list`, not %s' % type(data))
 
     def greater_than(self, greater_than):
-        """Adds and validates new `>` condition
+        """Adds new `>` condition
 
         :param greater_than: str or datetime compatible object
         :raise:
-            :QueryTypeError: if `greater_than` is of an unexpected type
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
+            - QueryTypeError: if `greater_than` is of an unexpected type
         """
 
         if hasattr(greater_than, 'strftime'):
@@ -163,13 +123,11 @@ class QueryBuilder(object):
         return self._add_condition('>', greater_than, types=[int, str])
 
     def less_than(self, less_than):
-        """Adds and validates new `<` condition
+        """Adds new `<` condition
 
         :param less_than: str or datetime compatible object
         :raise:
-            :QueryTypeError: if `less_than` is of an unexpected type
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
+            - QueryTypeError: if `less_than` is of an unexpected type
         """
 
         if hasattr(less_than, 'strftime'):
@@ -180,14 +138,12 @@ class QueryBuilder(object):
         return self._add_condition('<', less_than, types=[int, str])
 
     def between(self, start, end):
-        """Adds and validates new `BETWEEN` condition
+        """Adds new `BETWEEN` condition
 
         :param start: int or datetime  compatible object
         :param end: int or datetime compatible object
         :raise:
-            :QueryTypeError: if start or end arguments is of an invalid type
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
+            - QueryTypeError: if start or end arguments is of an invalid type
         """
 
         if hasattr(start, 'strftime') and hasattr(end, 'strftime'):
@@ -207,6 +163,18 @@ class QueryBuilder(object):
 
         return self._add_condition('BETWEEN', dt_between, types=[str])
 
+    def AND(self):
+        """Adds an and-operator"""
+        return self._add_logical_operator('^')
+
+    def OR(self):
+        """Adds an or-operator"""
+        return self._add_logical_operator('^OR')
+
+    def NQ(self):
+        """Adds a NQ-operator (new query)"""
+        return self._add_logical_operator('^NQ')
+
     def _add_condition(self, operator, operand, types):
         """Appends condition to self._query after performing validation
 
@@ -214,11 +182,9 @@ class QueryBuilder(object):
         :param operand: operand
         :param types: allowed types
         :raise:
-            :QueryMissingField: if a field hasn't been set
-            :QueryMultipleExpressions: if a condition already has been set
-            :QueryTypeError: if the value is of an unexpected type
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
+            - QueryMissingField: if a field hasn't been set
+            - QueryMultipleExpressions: if a condition already has been set
+            - QueryTypeError: if the value is of an unexpected type
         """
 
         if not self.current_field:
@@ -246,9 +212,7 @@ class QueryBuilder(object):
 
         :param operator: logical operator (str)
         :raise:
-            :QueryExpressionError: if a expression hasn't been set
-        :return: self
-        :rtype: :class:`pysnow.QueryBuilder`
+            - QueryExpressionError: if a expression hasn't been set
         """
 
         if not self.c_oper:
@@ -265,9 +229,10 @@ class QueryBuilder(object):
         """String representation of the query object
 
         :raise:
-            :QueryEmpty: if there's no conditions defined
-            :QueryMissingField: if field() hasn't been set
-            :QueryExpressionError: if a expression hasn't been set
+            - QueryEmpty: if there's no conditions defined
+            - QueryMissingField: if field() hasn't been set
+            - QueryExpressionError: if a expression hasn't been set
+
         :return: String-type query
         """
 

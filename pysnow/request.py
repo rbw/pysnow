@@ -10,14 +10,14 @@ from .exceptions import InvalidUsage
 class SnowRequest(object):
     """Creates a new :class:`SnowRequest` object.
 
-    :param sysparms: :class:`sysparms.Sysparms` object
+    :param parameters: :class:`sysparms.Sysparms` object
     :param session: :class:`request.Session` object
     :param raise_on_empty: Whether or not to raise an exception on 404 (no matching records)
     :param url_builder: :class:`url_builder.URLBuilder` object
     """
 
-    def __init__(self, sysparms=None, session=None, raise_on_empty=True, url_builder=None):
-        self._sysparms = sysparms
+    def __init__(self, parameters=None, session=None, raise_on_empty=True, url_builder=None):
+        self._parameters = parameters
         self._session = session
         self._raise_on_empty = raise_on_empty
         self._url_builder = url_builder
@@ -52,18 +52,18 @@ class SnowRequest(object):
         :return: :class:`pysnow.Response` object
         """
 
-        self._sysparms.query = query
+        self._parameters.query = query
 
         if limit is not None:
-            self._sysparms.limit = limit
+            self._parameters.limit = limit
 
         if offset is not None:
-            self._sysparms.offset = offset
+            self._parameters.offset = offset
 
         if len(fields) > 0:
-            self._sysparms.fields = fields
+            self._parameters.fields = fields
 
-        return self._get_response('GET', params=self._sysparms.as_dict())
+        return self._get_response('GET', params=self._parameters.as_dict())
 
     def create(self, payload):
         """Creates a new record

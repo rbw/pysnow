@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
+
 from .request import SnowRequest
 from .url_builder import URLBuilder
 
@@ -14,36 +16,40 @@ class Resource(object):
     :param \*\*kwargs: Arguments to pass along to :class:`Request`
     """
 
-    _report = None
+    def __init__(self, base_url=None, base_path=None, api_path=None,
+                 parameters=None, raise_on_empty=False, session=None):
 
-    def __init__(self, base_url=None, base_path=None, api_path=None, **kwargs):
         self._base_url = base_url
         self._base_path = base_path
         self._api_path = api_path
         self._url_builder = URLBuilder(base_url, base_path, api_path)
 
-        self.sysparms = kwargs.pop('sysparms')
-        self.kwargs = kwargs
+        self.raise_on_empty = raise_on_empty
+        self.parameters = deepcopy(parameters)
+
+        self._session = session
 
     def __repr__(self):
         return '<%s [%s]>' % (self.__class__.__name__, self.path)
 
     @property
     def path(self):
-        """Returns full API path"""
         return "%s" % self._base_path + self._api_path
 
     @property
     def _request(self):
-        return SnowRequest(url_builder=self._url_builder, sysparms=self.sysparms, **self.kwargs)
+        raise_on_empty = self.raise_on_empty
+        parameters = deepcopy(self.parameters)
+
+        return SnowRequest(url_builder=self._url_builder, raise_on_empty=raise_on_empty,
+                           parameters=parameters, session=self._session)
 
     def get(self, query, limit=None, offset=None, fields=list()):
         """Queries the API resource
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
         :param limit: (optional) Limits the number of records returned
-        :param fields: (optional) List of fields to include in the response
-        created_on in descending order.
+        :param fields: (optional) List of fields to include in the response created_on in descending order.
         :param offset: (optional) Number of records to skip before returning records
         :return: :class:`Response` object
         """

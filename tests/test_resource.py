@@ -197,6 +197,7 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.get(self.dict_query, limit=limit)
         qs = qs_as_dict(response._response.request.url)
+
         self.assertEquals(int(qs['sysparm_limit']), limit)
 
     @httpretty.activate

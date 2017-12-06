@@ -47,9 +47,9 @@ class Response(object):
         the raw response content (stream of bytes)
 
         :raise:
-            :ResponseError: If there's an error in the response
-            :NoResults: If empty result set and raise_on_empty is set to True
-            :MissingResult: If no result nor error was found
+            - ResponseError: If there's an error in the response
+            - NoResults: If empty result set and raise_on_empty is set to True
+            - MissingResult: If no result nor error was found
         """
 
         has_result_single = False
@@ -114,7 +114,7 @@ class Response(object):
         contains a body).
 
         :raise:
-            :NoResults: On status 404 if raise_on_empty is set to True
+            - NoResults: On status 404 if raise_on_empty is set to True
         """
 
         response = self._response
@@ -151,7 +151,7 @@ class Response(object):
 
         :return: Dictionary containing the first item in the response content
         :raise:
-            :NoResults: If no results were found
+            - NoResults: If no results were found
         """
 
         self._raise_on_empty = True
@@ -174,8 +174,8 @@ class Response(object):
 
         :return: Dictionary containing the only item in the response content
         :raise:
-            :MultipleResults: If more than one records are present in the content
-            :NoResults: If no records are present in the content
+            - MultipleResults: If more than one records are present in the content
+            - NoResults: If no records are present in the content
         """
 
         self._raise_on_empty = True
@@ -196,6 +196,8 @@ class Response(object):
         """Return at most one result or raise an exception.
 
         :return: Dictionary containing the matching record or None
+        :raise:
+            - MultipleResults: If more than one records are present in the content
         """
 
         try:

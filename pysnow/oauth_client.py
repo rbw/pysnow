@@ -17,8 +17,8 @@ class OAuthClient(Client):
 
     :param client_id: client_id from ServiceNow
     :param client_secret: client_secret from ServiceNow
-    :param token_updater: callback function called when a token has been refreshed
-    :param kwargs: Kwargs passed along to :class:`pysnow.Client`
+    :param token_updater: function called when a token has been refreshed
+    :param kwargs: kwargs passed along to :class:`pysnow.Client`
     """
 
     token = None
@@ -83,6 +83,8 @@ class OAuthClient(Client):
         :param args: args to pass along to _legacy_request()
         :param kwargs: kwargs to pass along to _legacy_request()
         :return: :class:`pysnow.LegacyRequest` object
+        :raises:
+            - MissingToken: If token hasn't been set
         """
 
         if isinstance(self.token, dict):
@@ -91,17 +93,19 @@ class OAuthClient(Client):
 
         raise MissingToken("You must set_token() before creating a legacy request with OAuthClient")
 
-    def resource(self, *args, **kwargs):
-        """Makes sure token has been set, then calls parent to create a new :class:`pysnow.Resource` object
+    def resource(self, api_path=None, base_path='/api/now'):
+        """Overrides :meth:`resource` provided by :class:`pysnow.Client` with extras for OAuth
 
-        :param args: args to pass along to resource()
-        :param kwargs: kwargs to pass along to resource()
-        :return: :class:`pysnow.Resource` object
+        :param api_path: Path to the API to operate on
+        :param base_path: (optional) Base path override
+        :return: :class:`Resource` object
+        :raises:
+            - InvalidUsage: If a path fails validation
         """
 
         if isinstance(self.token, dict):
             self.session = self._get_oauth_session()
-            return super(OAuthClient, self).resource(*args, **kwargs)
+            return super(OAuthClient, self).resource(api_path, base_path)
 
         raise MissingToken("You must set_token() before creating a resource with OAuthClient")
 
@@ -111,6 +115,8 @@ class OAuthClient(Client):
         :param user: user
         :param password: password
         :return: dictionary containing token data
+        :raises:
+            - TokenCreateError: If there was an error generating the new token
         """
 
         try:
