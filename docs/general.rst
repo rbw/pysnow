@@ -27,8 +27,7 @@ Demo!
 -----
 This demo features the :class:`pysnow.QueryBuilder` and shows an example of how to fetch records using the **incident** table API.
 
-.. image:: https://raw.githubusercontent.com/rbw0/pysnow/branch-0.6.0/docs/pysnow.gif
-
+.. image:: pysnow.gif
 
 License
 -------

@@ -1,7 +1,7 @@
 The Client
 ==========
 
-Comes in two shapes:
+The **Client** comes in two shapes:
  - The regular :class:`pysnow.Client` - use if you're authenticating with password credentials or wish to pass an already created session object.
  - The :class:`pysnow.OAuthClient` - use if you wish to do OAuth with an OAuth2 enabled ServiceNow instance.
 
@@ -69,7 +69,7 @@ Using tokens
 
 Once an initial token has been obtained it will be refreshed automatically upon usage, provided its refresh_token hasn't expired.
 
-After a token has been refreshed, the provided :attr:`pysnow.OAuthClient.token_updater` function will be called with the refreshed token as first argument.
+After a token has been refreshed, the provided :meth:`token_updater` function will be called with the refreshed token as first argument.
 
 .. code-block:: python
 

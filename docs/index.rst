@@ -44,5 +44,9 @@ Library written in Python that makes interacting with the ServiceNow REST API mu
    :maxdepth: 2
    :caption: Full examples
 
-   examples/create
-
+       full_examples/fetch
+       full_examples/create
+       full_examples/update
+       full_examples/delete
+       full_examples/oauth_client
+       full_examples/query_builder
