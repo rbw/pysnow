@@ -35,7 +35,7 @@ class Client(object):
                  host=None,
                  user=None,
                  password=None,
-                 raise_on_empty=True,
+                 raise_on_empty=None,
                  request_params=None,
                  use_ssl=True,
                  session=None):
@@ -46,7 +46,14 @@ class Client(object):
         if type(use_ssl) is not bool:
             raise InvalidUsage("Argument 'use_ssl' must be of type bool")
 
-        if type(raise_on_empty) is not bool:
+        if raise_on_empty is None:
+            self.raise_on_empty = True
+        elif type(raise_on_empty) is bool:
+            warnings.warn("The use of the `raise_on_empty` argument is deprecated and will be removed in a "
+                          "future release.", DeprecationWarning)
+
+            self.raise_on_empty = raise_on_empty
+        else:
             raise InvalidUsage("Argument 'raise_on_empty' must be of type bool")
 
         if not (host or instance):
@@ -70,7 +77,6 @@ class Client(object):
         self.host = host
         self._user = user
         self._password = password
-        self.raise_on_empty = raise_on_empty
         self.use_ssl = use_ssl
 
         self.base_url = URLBuilder.get_base_url(use_ssl, instance, host)
@@ -112,11 +118,12 @@ class Client(object):
                              base_url=self.base_url,
                              **kwargs)
 
-    def resource(self, api_path=None, base_path='/api/now'):
+    def resource(self, api_path=None, base_path='/api/now', chunk_size=None):
         """Creates a new :class:`Resource` object after validating paths
 
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
+        :param chunk_size: Response stream parser chunk size (in bytes)
         :return: :class:`Resource` object
         :raises:
             - InvalidUsage: If a path fails validation
@@ -128,7 +135,7 @@ class Client(object):
         return Resource(api_path=api_path,
                         base_path=base_path,
                         parameters=self.parameters,
-                        raise_on_empty=self.raise_on_empty,
+                        chunk_size=chunk_size,
                         session=self.session,
                         base_url=self.base_url)
 
