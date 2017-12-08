@@ -6,8 +6,6 @@ from ijson.common import ObjectBuilder
 
 from itertools import chain
 
-from requests.exceptions import HTTPError
-
 from .exceptions import (ResponseError,
                          NoResults,
                          MultipleResults,
@@ -18,12 +16,10 @@ class Response(object):
     """Takes a :class:`requests.Response` object and performs deserialization and validation.
 
     :param response: :class:`request.Response` object
-    :param raise_on_empty: whether or not to raise an exception if the content doesn't contain any records
     :param chunk_size: Read and return up to this size (in bytes) in the stream parser
     """
 
-    def __init__(self, response, raise_on_empty, chunk_size=1024):
-        self._raise_on_empty = raise_on_empty
+    def __init__(self, response, chunk_size=2048):
         self._response = response
         self._chunk_size = chunk_size
         self._count = 0
@@ -48,7 +44,6 @@ class Response(object):
 
         :raise:
             - ResponseError: If there's an error in the response
-            - NoResults: If empty result set and raise_on_empty is set to True
             - MissingResult: If no result nor error was found
         """
 
@@ -97,11 +92,6 @@ class Response(object):
                     builder.event(event, value)
 
         if (has_result_single or has_result_many) and self.count == 0:  # Results empty
-            if self._raise_on_empty is True:
-                # Raise exception if it was requested
-                raise NoResults('Query yielded no results')
-
-            # Otherwise just yield empty dict
             yield {}
 
         if not (has_result_single or has_result_many or has_error):  # None of the expected keys were found
@@ -114,7 +104,7 @@ class Response(object):
         contains a body).
 
         :raise:
-            - NoResults: On status 404 if raise_on_empty is set to True
+            - HTTPError: if a non-200 response is encountered
         """
 
         response = self._response
@@ -122,18 +112,8 @@ class Response(object):
         if response.request.method == 'DELETE' and response.status_code == 204:
             yield [{'status': 'record deleted'}]
         else:
-            try:
-                # Raise an HTTPError if we hit a non-200 status code
-                response.raise_for_status()
-            except HTTPError as e:
-                # Versions prior to Helsinki returns 404 on empty result sets
-                if response.status_code == 404:
-                    if self._raise_on_empty is True:
-                        raise NoResults('Query yielded no results')
-                    else:
-                        yield [{}]
-                else:
-                    raise e
+            # Raise an HTTPError if we hit a non-200 status code
+            response.raise_for_status()
 
             # Parse byte stream
             yield self._parse_response()
@@ -154,9 +134,13 @@ class Response(object):
             - NoResults: If no results were found
         """
 
-        self._raise_on_empty = True
+        content = next(self.all())
 
-        return next(self.all())
+        if len(content) == 0:
+            raise NoResults("No records found")
+
+        return content
+
 
     def first_or_none(self):
         """Return the first record or None
@@ -178,10 +162,11 @@ class Response(object):
             - NoResults: If no records are present in the content
         """
 
-        self._raise_on_empty = True
-
         r = self.all()
         result = next(r)
+
+        if len(result) == 0:
+            raise NoResults("No records found")
 
         try:
             next(r)

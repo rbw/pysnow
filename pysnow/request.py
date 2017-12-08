@@ -12,15 +12,15 @@ class SnowRequest(object):
 
     :param parameters: :class:`sysparms.Sysparms` object
     :param session: :class:`request.Session` object
-    :param raise_on_empty: Whether or not to raise an exception on 404 (no matching records)
     :param url_builder: :class:`url_builder.URLBuilder` object
     """
 
-    def __init__(self, parameters=None, session=None, raise_on_empty=True, url_builder=None):
+    def __init__(self, parameters=None, session=None, url_builder=None, chunk_size=None):
         self._parameters = parameters
-        self._session = session
-        self._raise_on_empty = raise_on_empty
         self._url_builder = url_builder
+        self._session = session
+        self._chunk_size = chunk_size or 4096
+
         self._url = url_builder.get_url()
 
     def _get_response(self, method, **kwargs):
@@ -39,7 +39,7 @@ class SnowRequest(object):
 
         response.raw.decode_content = True
 
-        return Response(response, raise_on_empty=self._raise_on_empty)
+        return Response(response, self._chunk_size)
 
     def get(self, query, limit=None, offset=None, fields=list()):
         """Fetches one or more records, exposes a public API of :class:`pysnow.Response`

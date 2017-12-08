@@ -13,21 +13,20 @@ class Resource(object):
 
     :param base_path: Base path
     :param api_path: API path
+    :param chunk_size: Response stream parser chunk size (in bytes)
     :param \*\*kwargs: Arguments to pass along to :class:`Request`
     """
 
-    def __init__(self, base_url=None, base_path=None, api_path=None,
-                 parameters=None, raise_on_empty=False, session=None):
+    def __init__(self, base_url=None, base_path=None, api_path=None, parameters=None, **kwargs):
 
         self._base_url = base_url
         self._base_path = base_path
         self._api_path = api_path
         self._url_builder = URLBuilder(base_url, base_path, api_path)
 
-        self.raise_on_empty = raise_on_empty
-        self.parameters = deepcopy(parameters)
+        self.kwargs = kwargs
 
-        self._session = session
+        self.parameters = deepcopy(parameters)
 
     def __repr__(self):
         return '<%s [%s]>' % (self.__class__.__name__, self.path)
@@ -38,11 +37,9 @@ class Resource(object):
 
     @property
     def _request(self):
-        raise_on_empty = self.raise_on_empty
         parameters = deepcopy(self.parameters)
 
-        return SnowRequest(url_builder=self._url_builder, raise_on_empty=raise_on_empty,
-                           parameters=parameters, session=self._session)
+        return SnowRequest(url_builder=self._url_builder, parameters=parameters, **self.kwargs)
 
     def get(self, query, limit=None, offset=None, fields=list()):
         """Queries the API resource
@@ -88,7 +85,7 @@ class Resource(object):
         """Creates a custom request
 
         :param method: HTTP method to use
-        :param path_append: (optional) relative to :prop:`api_path`
+        :param path_append: (optional) relative to :attr:`api_path`
         :param headers: (optional) Dictionary of headers to add or override
         :param kwargs: kwargs to pass along to :class:`requests.Request`
         :return: :class:`Response` object
