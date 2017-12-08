@@ -86,8 +86,8 @@ class TestResourceRequest(unittest.TestCase):
             'instance': 'mock_instance'
         }
 
-        self.base_path = '/table/incident'
-        self.api_path = '/api/now/test'
+        self.base_path = '/api/now/test'
+        self.api_path = '/table/incident'
 
         self.client = Client(**self.client_kwargs)
         self.resource = self.client.resource(base_path=self.base_path, api_path=self.api_path)
@@ -246,36 +246,6 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query)
 
         self.assertRaises(MissingResult, response.one)
-
-    @httpretty.activate
-    def test_response_404_not_raise_on_empty(self):
-        """:meth:`all` of :class:`pysnow.Response` should return empty record if a 404 response is encountered when
-        :prop:`raise_on_empty` is set to False"""
-
-        httpretty.register_uri(httpretty.GET,
-                               self.mock_url_builder_base,
-                               status=404,
-                               content_type="application/json")
-
-        response = self.resource.get(self.dict_query)
-        response._raise_on_empty = False
-        result = response.all()
-        self.assertEquals(next(result), {})
-
-    @httpretty.activate
-    def test_response_404_raise_on_empty(self):
-        """:meth:`all` of :class:`pysnow.Response` should raise an exception if a 404 response is encountered when
-        :prop:`raise_on_empty` is set to True"""
-
-        httpretty.register_uri(httpretty.GET,
-                               self.mock_url_builder_base,
-                               status=404,
-                               content_type="application/json")
-
-        response = self.resource.get(self.dict_query)
-        response._raise_on_empty = True
-        result = response.all()
-        self.assertRaises(NoResults, next, result)
 
     @httpretty.activate
     def test_http_error_get_one(self):
