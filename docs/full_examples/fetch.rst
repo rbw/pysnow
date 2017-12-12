@@ -42,7 +42,7 @@ First record
 ------------
 
 The :meth:`pysnow.Response.first` returns the first record in a result containing one or more records.
-Should the result contain no records, an exception is thrown.
+If the result contain no records, an exception is thrown.
 
 
 .. code-block:: python
@@ -65,7 +65,7 @@ First or none
 -------------
 
 The :meth:`pysnow.Response.first_or_none` returns the first record in a result containing one or more records.
-None is returned should the result contain no records.
+None is returned if the result doesn't contain any records.
 
 
 .. code-block:: python
@@ -91,7 +91,7 @@ Exactly one
 -----------
 
 The :meth:`pysnow.Response.one` returns exactly one record.
-Should the result contain zero or multiple records, an exception is raised.
+If the result contains zero or multiple records, an exception is raised.
 
 
 .. code-block:: python
@@ -115,7 +115,7 @@ One or none
 -----------
 
 The :meth:`pysnow.Response.one_or_none` returns one record, or None if no matching records were found.
-An exception is raised should the result contain multiple records
+An exception is raised if the result contains multiple records
 
 
 .. code-block:: python

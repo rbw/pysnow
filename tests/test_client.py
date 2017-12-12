@@ -13,7 +13,7 @@ class TestClient(unittest.TestCase):
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo")
         self.assertRaises(InvalidUsage, Client, instance="test", password="foo")
 
-    def test_client_incompabtible_args(self):
+    def test_client_incompatible_args(self):
         """Client should raise an exception if it receives incompatible args."""
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="bar", session="foobar")
 
