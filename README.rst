@@ -16,35 +16,28 @@
 .. image:: https://img.shields.io/badge/License-MIT-green.svg
     :target: https://opensource.org/licenses/MIT
 
-Installation
-------------
-$ pip install pysnow
-
-
-Usage examples
---------------
-Go `here <http://pysnow.readthedocs.io/en/latest/usage>`_ for usage examples
-
 
 Documentation
 -------------
-The full documentation is available `here <http://pysnow.readthedocs.org/>`_
 
+The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four sections:
 
-Compatibility
--------------
-Python 2 and 3. Tested: Python 2.6+ and Python 3.3+
+ - `General <http://pysnow.readthedocs.io/en/latest/#general>`_
+ - `Library API <http://pysnow.readthedocs.io/en/latest/#api>`_
+ - `Usage <http://pysnow.readthedocs.io/en/latest/#usage>`_
+ - `Examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
+
 
 Contributors
 ------------
 lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk
 
 
-JetBrains
----------
-Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
-
 Author
 ------
 Created by Robert Wikman <rbw@vault13.org> in 2016
 
+
+JetBrains
+---------
+Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
