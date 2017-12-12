@@ -22,20 +22,20 @@ Documentation
 
 The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four sections:
 
- - `General <http://pysnow.readthedocs.io/en/latest/#general>`_
+ - `General <http://pysnow.readthedocs.io/en/latest/#general>`_ (install, compatibility etc)
  - `Library API <http://pysnow.readthedocs.io/en/latest/#api>`_
  - `Usage <http://pysnow.readthedocs.io/en/latest/#usage>`_
- - `Examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
-
-
-Contributors
-------------
-lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk
+ - `Full examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
 
 
 Author
 ------
 Created by Robert Wikman <rbw@vault13.org> in 2016
+
+
+Contributors
+------------
+lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk
 
 
 JetBrains
