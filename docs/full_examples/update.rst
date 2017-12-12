@@ -4,11 +4,11 @@ Updating a record
 The :meth:`Client.resource.update` requires a **payload** and a **query** or **sys_id** to perform an update.
 
 .. note::
-This method returns :meth:`pysnow.Response.one` (dict) if the update was successful.
+    This method returns :meth:`pysnow.Response.one` (dict) if the update was successful.
     Refer to :meth:`Client.resource.custom` if you want a **Response** object back.
 
 .. note::
-Updating multiple records is **not supported**.
+    Updating multiple records is **not supported**.
 
 
 .. code-block:: python

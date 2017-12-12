@@ -5,7 +5,7 @@ The :meth:`Client.resource.create` takes a dictionary payload with key-values of
 
 
 .. note::
-This method returns :meth:`pysnow.Resource.one` if the record was created successfully, returning a dictionary of the created record.
+    This method calls :meth:`pysnow.Resource.one` if the record was created successfully, returning a dictionary of the created record.
 
 
 .. code-block:: python

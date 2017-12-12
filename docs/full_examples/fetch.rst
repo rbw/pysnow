@@ -5,7 +5,7 @@ The :meth:`pysnow.Resource.get` returns an instance of :class:`pysnow.Response`,
 various convenience methods for getting the data you're after.
 
 .. note::
-The **Response API** uses an incremental stream parser when fetching results, which dramatically reduces memory usage,
+    The **Response API** uses an incremental stream parser when fetching results, which dramatically reduces memory usage,
     load on the ServiceNow instance and response times.
 
     Example: using **first()** on a query that would yield 50000 records

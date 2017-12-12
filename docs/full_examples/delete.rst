@@ -5,7 +5,7 @@ Deletes the record returned from the query.
 Successfully deleting a record returns a dictionary containing the result.
 
 .. note::
-Deletion of multiple records is **not supported**.
+    Deletion of multiple records is **not supported**.
 
 .. code-block:: python
 
