@@ -1,74 +1,96 @@
 # -*- coding: utf-8 -*-
 
-import requests
+import inspect
 import warnings
-from pysnow import request
-from pysnow.exceptions import InvalidUsage
+
+import requests
+from requests.auth import HTTPBasicAuth
+
+from .legacy.request import LegacyRequest
+from .exceptions import InvalidUsage
+from .resource import Resource
+from .url_builder import URLBuilder
+from .params_builder import ParamsBuilder
 
 warnings.simplefilter("always", DeprecationWarning)
 
 
 class Client(object):
+    """User-created Client object.
+
+    :param instance: Instance name, used to construct host
+    :param host: Host can be passed as an alternative to instance
+    :param user: User name
+    :param password: Password
+    :param raise_on_empty: Whether or not to raise an exception on 404 (no matching records), defaults to True
+    :param request_params: Request params to send with requests globally (deprecated)
+    :param use_ssl: Enable or disable the use of SSL, defaults to True
+    :param session: Optional :class:`requests.Session` object to use instead of passing user/pass to :class:`Client`
+    :raises:
+        - InvalidUsage: On argument validation error
+    """
+
     def __init__(self,
                  instance=None,
                  host=None,
                  user=None,
                  password=None,
-                 raise_on_empty=True,
+                 raise_on_empty=None,
                  request_params=None,
                  use_ssl=True,
                  session=None):
-        """Creates a client ready to handle requests
-
-        :param instance: instance name, used to construct host
-        :param host: host can be passed as an alternative to instance
-        :param user: username
-        :param password: password
-        :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
-        :param request_params: request params to send with requests
-        :param use_ssl: Enable or disable SSL
-        :param session: a requests session object
-        """
 
         if (host and instance) is not None:
-            raise InvalidUsage("Instance and host are mutually exclusive, you cannot use both.")
+            raise InvalidUsage("Arguments 'instance' and 'host' are mutually exclusive, you cannot use both.")
 
         if type(use_ssl) is not bool:
-            raise InvalidUsage("Argument use_ssl must be of type bool")
+            raise InvalidUsage("Argument 'use_ssl' must be of type bool")
 
-        if type(raise_on_empty) is not bool:
-            raise InvalidUsage("Argument raise_on_empty must be of type bool")
+        if raise_on_empty is None:
+            self.raise_on_empty = True
+        elif type(raise_on_empty) is bool:
+            warnings.warn("The use of the `raise_on_empty` argument is deprecated and will be removed in a "
+                          "future release.", DeprecationWarning)
+
+            self.raise_on_empty = raise_on_empty
+        else:
+            raise InvalidUsage("Argument 'raise_on_empty' must be of type bool")
 
         if not (host or instance):
-            raise InvalidUsage("You must supply an instance name or a host")
+            raise InvalidUsage("You must supply either 'instance' or 'host'")
 
         if not (user and password) and not session:
-            raise InvalidUsage("You must provide either username and password or a session object")
+            raise InvalidUsage("You must supply either username and password or a session object")
         elif (user and session) is not None:
             raise InvalidUsage("Provide either username and password or a session, not both.")
 
-        if request_params is not None:
-            if isinstance(request_params, dict):
-                self.request_params = request_params
-            else:
-                raise InvalidUsage("Request params must be of type dict")
-        else:
-            self.request_params = {}
+        self.parameters = ParamsBuilder()
 
+        if request_params is not None:
+            warnings.warn("The use of the `request_params` argument is deprecated and will be removed in a "
+                          "future release. Please use Client.parameters instead.", DeprecationWarning)
+
+            self.parameters.add_custom(request_params)
+
+        self.request_params = request_params or {}
         self.instance = instance
         self.host = host
         self._user = user
         self._password = password
-        self.raise_on_empty = raise_on_empty
         self.use_ssl = use_ssl
 
-        self.base_url = self._get_base_url()
+        self.base_url = URLBuilder.get_base_url(use_ssl, instance, host)
         self.session = self._get_session(session)
 
     def _get_session(self, session):
+        """Creates a new session with basic auth, unless one was provided, and sets headers.
+
+        :param session: (optional) Session to re-use
+        :return: :class:`requests.Session` object
+        """
         if not session:
             s = requests.Session()
-            s.auth = requests.auth.HTTPBasicAuth(self._user, self._password)
+            s.auth = HTTPBasicAuth(self._user, self._password)
         else:
             s = session
 
@@ -76,41 +98,56 @@ class Client(object):
 
         return s
 
-    def _get_base_url(self):
-        if self.instance is not None:
-            self.host = "%s.service-now.com" % self.instance
-
-        if self.use_ssl is True:
-            return "https://%s" % self.host
-
-        return "http://%s" % self.host
-
-    def _request(self, method, table, **kwargs):
-        """Creates and returns a new `Request` object, takes some basic settings from the `Client` object and
-        passes along to the `Request` constructor
+    def _legacy_request(self, method, table, **kwargs):
+        """Returns a :class:`LegacyRequest` object, compatible with Client.query and Client.insert
 
         :param method: HTTP method
         :param table: Table to operate on
-        :param kwargs: Keyword arguments passed along to `Request`
-        :return: `Request` object
+        :return: :class:`LegacyRequest` object
         """
-        return request.Request(method,
-                               table,
-                               request_params=self.request_params,
-                               raise_on_empty=self.raise_on_empty,
-                               session=self.session,
-                               instance=self.instance,
-                               base_url=self.base_url,
-                               **kwargs)
+
+        warnings.warn("`%s` is deprecated and will be removed in a future release. "
+                      "Please use `resource()` instead." % inspect.stack()[1][3], DeprecationWarning)
+
+        return LegacyRequest(method,
+                             table,
+                             request_params=self.request_params,
+                             raise_on_empty=self.raise_on_empty,
+                             session=self.session,
+                             instance=self.instance,
+                             base_url=self.base_url,
+                             **kwargs)
+
+    def resource(self, api_path=None, base_path='/api/now', chunk_size=None):
+        """Creates a new :class:`Resource` object after validating paths
+
+        :param api_path: Path to the API to operate on
+        :param base_path: (optional) Base path override
+        :param chunk_size: Response stream parser chunk size (in bytes)
+        :return: :class:`Resource` object
+        :raises:
+            - InvalidUsage: If a path fails validation
+        """
+
+        for path in [api_path, base_path]:
+            URLBuilder.validate_path(path)
+
+        return Resource(api_path=api_path,
+                        base_path=base_path,
+                        parameters=self.parameters,
+                        chunk_size=chunk_size,
+                        session=self.session,
+                        base_url=self.base_url)
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.
 
         :param table: table to perform query on
         :param kwargs: Keyword arguments passed along to `Request`
-        :return: `Request` object
+        :return: List of dictionaries containing the matching records
         """
-        return self._request('GET', table, **kwargs)
+
+        return self._legacy_request('GET', table, **kwargs)
 
     def insert(self, table, payload, **kwargs):
         """Insert (POST) request wrapper
@@ -118,8 +155,9 @@ class Client(object):
         :param table: table to insert on
         :param payload: update payload (dict)
         :param kwargs: Keyword arguments passed along to `Request`
-        :return: New record content
+        :return: Dictionary containing the created record
         """
-        r = self._request('POST', table, **kwargs)
+
+        r = self._legacy_request('POST', table, **kwargs)
         return r.insert(payload)
 

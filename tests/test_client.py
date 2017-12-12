@@ -13,13 +13,35 @@ class TestClient(unittest.TestCase):
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo")
         self.assertRaises(InvalidUsage, Client, instance="test", password="foo")
 
-    def test_client_incompabtible_args(self):
+    def test_client_incompatible_args(self):
         """Client should raise an exception if it receives incompatible args."""
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="bar", session="foobar")
 
     def test_client_user_password(self):
         """Should be able to create a client given user name and password."""
         Client("snow.example.com", user="foo", password="bar")
+
+    def test_invalid_resource_paths(self):
+        """:meth:`resource` should raise an InvalidUsage exception if an invalid api_path was provided"""
+        c = Client(user="foo", password="foo", instance="instance")
+        self.assertRaises(InvalidUsage, c.resource)
+        self.assertRaises(InvalidUsage, c.resource, api_path="not_valid")
+        self.assertRaises(InvalidUsage, c.resource, api_path="not/valid")
+        self.assertRaises(InvalidUsage, c.resource, api_path="not/valid/")
+        self.assertRaises(InvalidUsage, c.resource, api_path="/")
+        self.assertRaises(InvalidUsage, c.resource, base_path="not_valid")
+        self.assertRaises(InvalidUsage, c.resource, base_path="not/valid")
+        self.assertRaises(InvalidUsage, c.resource, base_path="not/valid/")
+        self.assertRaises(InvalidUsage, c.resource, base_path="/")
+
+    def test_valid_resource_paths(self):
+        """:meth:`resource` should return a :class:`pysnow.Response` object with paths set to the expected value"""
+        api_path = '/api/path'
+        base_path = '/base/path'
+        c = Client(user="foo", password="foo", instance="instance")
+        r = c.resource(api_path=api_path, base_path=base_path)
+        self.assertEquals(r._api_path, api_path)
+        self.assertEquals(r._base_path, base_path)
 
     def test_client_with_session(self):
         """Should be able to create a client given a requests session object."""
@@ -54,22 +76,21 @@ class TestClient(unittest.TestCase):
 
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=3)
 
-        # test if request_params == 0 (evaluates to true but is not valid)
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=0)
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=(1, "2"))
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=True)
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", request_params=2.89)
 
     def test_client_invalid_use_ssl(self):
-        """ Invalid use_ssl type should fail """
+        """ Invalid use_ssl type should raise InvalidUsage"""
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", use_ssl="a string")
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", use_ssl=1)
 
     def test_client_invalid_raise_on_empty(self):
-        """ Non-bool type to raise_on_empty should fail """
+        """ Non-bool type to raise_on_empty should raise InvalidUsage"""
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", raise_on_empty=0)
         self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", raise_on_empty='test')
-        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", raise_on_empty=None)
+        self.assertRaises(InvalidUsage, Client, instance="test", user="foo", password="foo", raise_on_empty={'a': 'b'})
 
     def test_client_use_ssl(self):
         """ Client should construct base URL with correct scheme depending on use_ssl """

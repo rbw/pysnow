@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pysnow.client import *
-from pysnow.oauth_client import *
-from pysnow.query import *
-from pysnow.request import *
-from pysnow.exceptions import *
+# Public API
+from .client import Client
+from .oauth_client import OAuthClient
+from .query_builder import QueryBuilder
+from .resource import Resource
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.5.2"
+__version__ = "0.6.0"

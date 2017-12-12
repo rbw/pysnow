@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import warnings
+
 from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
 from requests_oauthlib import OAuth2Session
-from pysnow import Client
-from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
+
+from .client import Client
+from .exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -13,28 +15,16 @@ warnings.simplefilter("always", DeprecationWarning)
 class OAuthClient(Client):
     """Pysnow `Client` with extras for oauth session and token handling.
 
-    This API exposes two extra public methods:
-
-    - generate_token(user, pass)
-        - This method takes user and password credentials to generate a new OAuth token that can be stored outside the context of pysnow, e.g. in a session or database.
-
-
-    - set_token(token)
-        - Takes an OAuth token (dict) and internally creates a new pysnow-compatible session, enabling pysnow.OAuthClient to create requests.
-
-
     :param client_id: client_id from ServiceNow
     :param client_secret: client_secret from ServiceNow
-    :param token_updater: callback function called when a token has been refreshed
-    :param instance: instance name, used to construct host
-    :param host: host can be passed as an alternative to instance
-    :param raise_on_empty: whether or not to raise an exception on 404 (no matching records)
-    :param request_params: request params to send with requests
-    :param use_ssl: Enable or disable SSL
+    :param token_updater: function called when a token has been refreshed
+    :param kwargs: kwargs passed along to :class:`pysnow.Client`
     """
+
     token = None
 
-    def __init__(self, client_id=None, client_secret=None, token_updater=None, *args, **kwargs):
+    def __init__(self, client_id=None, client_secret=None, token_updater=None, **kwargs):
+
         if not (client_secret and client_id):
             raise InvalidUsage('You must supply a client_id and client_secret')
 
@@ -47,13 +37,13 @@ class OAuthClient(Client):
         kwargs['user'] = None
         kwargs['password'] = None
 
-        super(OAuthClient, self).__init__(*args, **kwargs)
+        super(OAuthClient, self).__init__(**kwargs)
 
         self.token_updater = token_updater
         self.client_id = client_id
         self.client_secret = client_secret
 
-        self.token_url = "%s/oauth_token.do" % self._get_base_url()
+        self.token_url = "%s/oauth_token.do" % self.base_url
 
     def _get_oauth_session(self):
         """Creates a new OAuth session
@@ -72,7 +62,7 @@ class OAuthClient(Client):
             })
 
     def set_token(self, token):
-        """Validates token and creates a pysnow compatible session
+        """Sets token after validating
 
         :param token: dict containing the information required to create an OAuth2Session
         """
@@ -87,17 +77,38 @@ class OAuthClient(Client):
 
         self.token = token
 
-    def _request(self, *args, **kwargs):
-        """Checks if token has been set then calls parent
+    def _legacy_request(self, *args, **kwargs):
+        """Makes sure token has been set, then calls parent to create a new :class:`pysnow.LegacyRequest` object
 
-        :return: pysnow.Request object
+        :param args: args to pass along to _legacy_request()
+        :param kwargs: kwargs to pass along to _legacy_request()
+        :return: :class:`pysnow.LegacyRequest` object
+        :raises:
+            - MissingToken: If token hasn't been set
         """
 
         if isinstance(self.token, dict):
             self.session = self._get_oauth_session()
-            return super(OAuthClient, self)._request(*args, **kwargs)
+            return super(OAuthClient, self)._legacy_request(*args, **kwargs)
 
-        raise MissingToken("You must set_token() before creating a request with pysnow.OAuthClient")
+        raise MissingToken("You must set_token() before creating a legacy request with OAuthClient")
+
+    def resource(self, api_path=None, base_path='/api/now', chunk_size=None):
+        """Overrides :meth:`resource` provided by :class:`pysnow.Client` with extras for OAuth
+
+        :param api_path: Path to the API to operate on
+        :param base_path: (optional) Base path override
+        :param chunk_size: Response stream parser chunk size (in bytes)
+        :return: :class:`Resource` object
+        :raises:
+            - InvalidUsage: If a path fails validation
+        """
+
+        if isinstance(self.token, dict):
+            self.session = self._get_oauth_session()
+            return super(OAuthClient, self).resource(api_path, base_path)
+
+        raise MissingToken("You must set_token() before creating a resource with OAuthClient")
 
     def generate_token(self, user, password):
         """Takes user and password credentials and generates a new token
@@ -105,7 +116,10 @@ class OAuthClient(Client):
         :param user: user
         :param password: password
         :return: dictionary containing token data
+        :raises:
+            - TokenCreateError: If there was an error generating the new token
         """
+
         try:
             return dict(self.session.fetch_token(token_url=self.token_url,
                                                  username=user,
