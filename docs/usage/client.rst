@@ -1,7 +1,7 @@
 The Client
 ==========
 
-The **Client** comes in two shapes:
+The **Client** comes in two forms:
  - The regular :class:`pysnow.Client` - use if you're authenticating with password credentials or wish to pass an already created session object.
  - The :class:`pysnow.OAuthClient` - use if you wish to do OAuth with an OAuth2 enabled ServiceNow instance.
 
@@ -22,8 +22,8 @@ With username and password
                       user='myusername',
                       password='mypassword')
 
-With custom session object
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+With a custom session object
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can pass a custom session object to :class:`pysnow.Client`.
 In this example password credentials are used, but with SSL verification disabled.
@@ -52,7 +52,7 @@ Getting initial tokens
 ^^^^^^^^^^^^^^^^^^^^^^
 
 In order to use the :class:`pysnow.OAuthClient` you first need to obtain a new token from ServiceNow.
-Creating a new token bound to a certain user is easy, simply call :meth:`pysnow.OAuthClient.generate_token()` and keep it in your storage (e.g. in session or database)
+Creating a new token bound to a certain user is easy. Simply call :meth:`pysnow.OAuthClient.generate_token()` and keep it in your storage (e.g. in session or database)
 
 .. code-block:: python
 

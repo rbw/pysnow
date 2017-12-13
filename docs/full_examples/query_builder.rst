@@ -1,7 +1,7 @@
 Using the QueryBuilder
 ----------------------
 
-Example showing how the QueryBuilder can be used to construct a query using the Python datetime library.
+Example showing how the QueryBuilder can be used to construct a query using the Python `datetime` library.
 
 .. code-block:: python
 

@@ -1,10 +1,10 @@
 Updating a record
 =================
 
-The :meth:`Client.resource.update` requires a **payload** and a **query** to perform an update.
+The :meth:`Client.resource.update` takes a **payload** and **query** to perform an update.
 
 .. note::
-    This method returns :meth:`pysnow.Response.one` (dict) if the update was successful.
+    This method returns the updated record (dict) if the operation was successful.
     Refer to :meth:`Client.resource.custom` if you want a **Response** object back.
 
 .. note::

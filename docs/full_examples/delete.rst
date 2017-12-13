@@ -1,8 +1,7 @@
 Deleting a record
 =================
 
-Deletes the record returned from the query.
-Successfully deleting a record returns a dictionary containing the result.
+Deletes the queried record and returns the result (dict).
 
 .. note::
     Deletion of multiple records is **not supported**.

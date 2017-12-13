@@ -12,7 +12,7 @@ various methods available for getting the data you're after.
 Multiple records
 ----------------
 
-The :meth:`pysnow.Response.all` returns a generator that yields records as iterated on.
+The :meth:`pysnow.Response.all` returns a generator iterator, which is iterated on in chunks of 4096 bytes by default.
 
 
 .. code-block:: python
@@ -37,7 +37,7 @@ First record
 ------------
 
 The :meth:`pysnow.Response.first` returns the first record in a result containing one or more records.
-If the result contain no records, an exception is thrown.
+An exception is raised if the result doesn't contain any records.
 
 
 .. code-block:: python
@@ -86,7 +86,7 @@ Exactly one
 -----------
 
 The :meth:`pysnow.Response.one` returns exactly one record.
-If the result contains zero or multiple records, an exception is raised.
+An exception is raised if the result is empty or contains multiple records.
 
 
 .. code-block:: python
