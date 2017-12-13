@@ -6,7 +6,7 @@ import warnings
 import requests
 from requests.auth import HTTPBasicAuth
 
-from .legacy.request import LegacyRequest
+from .legacy_request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
 from .url_builder import URLBuilder

@@ -7,7 +7,7 @@ import warnings
 
 from copy import copy
 
-from pysnow.legacy.exceptions import *
+from pysnow.legacy_exceptions import *
 
 from pysnow.client import Client
 from pysnow.query_builder import QueryBuilder
