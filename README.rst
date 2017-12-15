@@ -17,6 +17,23 @@
     :target: https://opensource.org/licenses/MIT
 
 
+News
+----
+
+Version 0.6 has been released :tada:
+
+This release comes with changes to some fundamental parts of the library. The old code has been kept, and should work seamlessly but raises a deprecation warning upon usage.
+
+In short, the new version introduces the concept of **resources**, which enables a natural interaction with any ServiceNow API and changes how requests are performed, while
+providing an improved response interface.
+
+Also, the documentation has been reworked. The old documentation, including the documentation for the legacy code can be found `here <http://pysnow.readthedocs.io/en/0.5.2>`_.
+
+
+Check out the docs for more info.
+
+
+
 Documentation
 -------------
 
@@ -30,7 +47,7 @@ The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four secti
 
 Author
 ------
-Created by Robert Wikman <rbw@vault13.org> in 2016
+Robert Wikman <rbw@vault13.org>
 
 
 Contributors
