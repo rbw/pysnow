@@ -8,8 +8,6 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from setuptools import find_packages
-
 
 def get_version():
     """ Parses the pysnow package __init__ file and fetches the version attribute from the syntax tree
@@ -24,7 +22,7 @@ def get_version():
 with io.open('README.rst') as readme:
     setup(
         name='pysnow',
-        packages=find_packages(include=['pysnow', 'pysnow.legacy']),
+        packages=['pysnow'],
         version=get_version(),
         description='Python library for the ServiceNow REST API',
         long_description=readme.read(),
