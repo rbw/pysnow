@@ -6,6 +6,8 @@ import warnings
 import requests
 from requests.auth import HTTPBasicAuth
 
+import pysnow
+
 from .legacy_request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
@@ -86,7 +88,8 @@ class Client(object):
         """Creates a new session with basic auth, unless one was provided, and sets headers.
 
         :param session: (optional) Session to re-use
-        :return: :class:`requests.Session` object
+        :return:
+            - :class:`requests.Session` object
         """
         if not session:
             s = requests.Session()
@@ -94,7 +97,13 @@ class Client(object):
         else:
             s = session
 
-        s.headers.update({'content-type': 'application/json', 'accept': 'application/json'})
+        s.headers.update(
+            {
+                'content-type': 'application/json',
+                'accept': 'application/json',
+                'User-Agent': 'pysnow/%s' % pysnow.__version__
+            }
+        )
 
         return s
 
@@ -103,7 +112,8 @@ class Client(object):
 
         :param method: HTTP method
         :param table: Table to operate on
-        :return: :class:`LegacyRequest` object
+        :return:
+            - :class:`LegacyRequest` object
         """
 
         warnings.warn("`%s` is deprecated and will be removed in a future release. "
@@ -124,7 +134,8 @@ class Client(object):
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
         :param chunk_size: Response stream parser chunk size (in bytes)
-        :return: :class:`Resource` object
+        :return:
+            - :class:`Resource` object
         :raises:
             - InvalidUsage: If a path fails validation
         """
@@ -144,7 +155,8 @@ class Client(object):
 
         :param table: table to perform query on
         :param kwargs: Keyword arguments passed along to `Request`
-        :return: List of dictionaries containing the matching records
+        :return:
+            - List of dictionaries containing the matching records
         """
 
         return self._legacy_request('GET', table, **kwargs)
@@ -155,7 +167,8 @@ class Client(object):
         :param table: table to insert on
         :param payload: update payload (dict)
         :param kwargs: Keyword arguments passed along to `Request`
-        :return: Dictionary containing the created record
+        :return:
+            - Dictionary containing the created record
         """
 
         r = self._legacy_request('POST', table, **kwargs)

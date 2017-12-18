@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import requests
 
 from .response import Response
 from .exceptions import InvalidUsage
@@ -10,7 +9,7 @@ from .exceptions import InvalidUsage
 class SnowRequest(object):
     """Creates a new :class:`SnowRequest` object.
 
-    :param parameters: :class:`sysparms.Sysparms` object
+    :param parameters: :class:`params_builder.ParamsBuilder` object
     :param session: :class:`request.Session` object
     :param url_builder: :class:`url_builder.URLBuilder` object
     """
@@ -29,14 +28,11 @@ class SnowRequest(object):
 
         :param args: args to pass along to _send()
         :param kwargs: kwargs to pass along to _send()
-        :return: :class:`pysnow.Response` object
+        :return:
+            - :class:`pysnow.Response` object
         """
 
-        request = requests.Request(method, self._url, **kwargs)
-        prepped = self._session.prepare_request(request)
-        response = self._session.send(prepped,
-                                      stream=True)
-
+        response = self._session.request(method, self._url, stream=True, **kwargs)
         response.raw.decode_content = True
 
         return Response(response, self._chunk_size)
@@ -49,7 +45,8 @@ class SnowRequest(object):
         :param fields: List of fields to include in the response
         created_on in descending order.
         :param offset: Number of records to skip before returning records
-        :return: :class:`pysnow.Response` object
+        :return:
+            - :class:`pysnow.Response` object
         """
 
         self._parameters.query = query
@@ -69,7 +66,8 @@ class SnowRequest(object):
         """Creates a new record
 
         :param payload: Dictionary payload
-        :return: Dictionary of the inserted record
+        :return:
+            - Dictionary of the inserted record
         """
 
         return self._get_response('POST', data=json.dumps(payload)).one()
@@ -79,7 +77,8 @@ class SnowRequest(object):
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
         :param payload: Dictionary payload
-        :return: Dictionary of the updated record
+        :return:
+            - Dictionary of the updated record
         """
 
         if not isinstance(payload, dict):
@@ -94,7 +93,8 @@ class SnowRequest(object):
         """Deletes a record
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
-        :return: Dictionary containing status of the delete operation
+        :return:
+            - Dictionary containing status of the delete operation
         """
 
         record = self.get(query=query).one()
@@ -109,7 +109,8 @@ class SnowRequest(object):
         :param path_append: (optional) append path to resource.api_path
         :param headers: (optional) Dictionary of headers to add or override
         :param kwargs: kwargs to pass along to :class:`requests.Request`
-        :return: :class:`pysnow.Response` object
+        :return:
+            - :class:`pysnow.Response` object
         """
 
         if headers:

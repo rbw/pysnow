@@ -121,7 +121,8 @@ class Response(object):
     def all(self):
         """Returns a chained generator response containing all matching records
 
-        :return: Iterable response
+        :return:
+            - Iterable response
         """
 
         return chain.from_iterable(self._get_validated_response())
@@ -129,7 +130,9 @@ class Response(object):
     def first(self):
         """Return the first record or raise an exception if the result doesn't contain any data
 
-        :return: Dictionary containing the first item in the response content
+        :return:
+            - Dictionary containing the first item in the response content
+
         :raise:
             - NoResults: If no results were found
         """
@@ -141,11 +144,11 @@ class Response(object):
 
         return content
 
-
     def first_or_none(self):
         """Return the first record or None
 
-        :return: Dictionary containing the first item or None
+        :return:
+            - Dictionary containing the first item or None
         """
 
         try:
@@ -156,7 +159,9 @@ class Response(object):
     def one(self):
         """Return exactly one result or raise an exception.
 
-        :return: Dictionary containing the only item in the response content
+        :return:
+            - Dictionary containing the only item in the response content
+
         :raise:
             - MultipleResults: If more than one records are present in the content
             - NoResults: If no records are present in the content
@@ -180,7 +185,9 @@ class Response(object):
     def one_or_none(self):
         """Return at most one result or raise an exception.
 
-        :return: Dictionary containing the matching record or None
+        :return:
+            - Dictionary containing the matching record or None
+
         :raise:
             - MultipleResults: If more than one records are present in the content
         """

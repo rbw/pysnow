@@ -48,23 +48,27 @@ class OAuthClient(Client):
     def _get_oauth_session(self):
         """Creates a new OAuth session
 
-        :return: OAuth2Session object
+        :return:
+            - OAuth2Session object
         """
 
-        return OAuth2Session(
-            client_id=self.client_id,
-            token=self.token,
-            token_updater=self.token_updater,
-            auto_refresh_url=self.token_url,
-            auto_refresh_kwargs={
-                "client_id": self.client_id,
-                "client_secret": self.client_secret
-            })
+        return self._get_session(
+            OAuth2Session(
+                client_id=self.client_id,
+                token=self.token,
+                token_updater=self.token_updater,
+                auto_refresh_url=self.token_url,
+                auto_refresh_kwargs={
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret
+                }
+            )
+        )
 
     def set_token(self, token):
-        """Sets token after validating
+        """Validate and set token
 
-        :param token: dict containing the information required to create an OAuth2Session
+        :param token: the token (dict) to set
         """
 
         if not token:
@@ -82,7 +86,8 @@ class OAuthClient(Client):
 
         :param args: args to pass along to _legacy_request()
         :param kwargs: kwargs to pass along to _legacy_request()
-        :return: :class:`pysnow.LegacyRequest` object
+        :return:
+            - :class:`pysnow.LegacyRequest` object
         :raises:
             - MissingToken: If token hasn't been set
         """
@@ -99,7 +104,8 @@ class OAuthClient(Client):
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
         :param chunk_size: Response stream parser chunk size (in bytes)
-        :return: :class:`Resource` object
+        :return:
+            - :class:`Resource` object
         :raises:
             - InvalidUsage: If a path fails validation
         """
@@ -115,7 +121,8 @@ class OAuthClient(Client):
 
         :param user: user
         :param password: password
-        :return: dictionary containing token data
+        :return:
+            - dictionary containing token data
         :raises:
             - TokenCreateError: If there was an error generating the new token
         """

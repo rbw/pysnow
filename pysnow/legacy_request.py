@@ -44,7 +44,8 @@ class LegacyRequest(object):
 
         :raise:
             :NoRequestExecuted: If no request has been executed
-        :return: last response
+        :return:
+            - last response
         """
         if self._last_response is None:
             raise NoRequestExecuted("%s hasn't been executed" % self)
@@ -111,7 +112,8 @@ class LegacyRequest(object):
         :param limit: Limits the number of records returned
         :param order_by: Sort response based on certain fields
         :param offset: A number of records to skip before returning records (for pagination)
-        :return: Iterable chain object
+        :return:
+            - Iterable chain object
         """
         return itertools.chain.from_iterable(self._all_inner(fields, limit, order_by, offset))
 
@@ -121,7 +123,8 @@ class LegacyRequest(object):
         :param fields: List of fields to return in the result
         :raise:
             :MultipleResults: if more than one match is found
-        :return: Record content
+        :return:
+            - Record content
         """
         response = self.session.get(self._get_table_url(),
                                     params=self._get_formatted_query(fields, limit=None, order_by=list(), offset=None))
@@ -140,7 +143,8 @@ class LegacyRequest(object):
         """Inserts a new record with the payload passed as an argument
 
         :param payload: The record to create (dict)
-        :return: Created record
+        :return:
+            - Created record
         """
         response = self.session.post(self._get_table_url(), data=json.dumps(payload))
         return self._get_content(response)
@@ -151,7 +155,8 @@ class LegacyRequest(object):
         :raise:
             :NoResults: if query returned no results
             :NotImplementedError: if query returned more than one result (currently not supported)
-        :return: Delete response content (Generally always {'Success': True})
+        :return:
+            - Delete response content (Generally always {'Success': True})
         """
         try:
             result = self.get_one()
@@ -173,7 +178,8 @@ class LegacyRequest(object):
         :raise:
             :NoResults: if query returned no results
             :MultipleResults: if query returned more than one result (currently not supported)
-        :return: The updated record
+        :return:
+            - The updated record
         """
         try:
             result = self.get_one()
@@ -199,7 +205,8 @@ class LegacyRequest(object):
             :NoResults: if query returned no results
             :MultipleResults: if query returned more than one result (currently not supported)
             :UnexpectedResponse: informs the user about what likely went wrong
-        :return: The cloned record
+        :return:
+            - The cloned record
         """
 
         if not isinstance(reset_fields, list):
@@ -245,7 +252,8 @@ class LegacyRequest(object):
         :raise:
             :NoResults: if query returned no results
             :MultipleResults: if query returned more than one result (currently not supported)
-        :return: The attachment record metadata
+        :return:
+            - The attachment record metadata
         """
         try:
             result = self.get_one()
@@ -277,7 +285,8 @@ class LegacyRequest(object):
         :param response: response object
         :raise:
             :UnexpectedResponse: if the server responded with an unexpected response
-        :return: ServiceNow response content
+        :return:
+            - ServiceNow response content
         """
         method = response.request.method
         self.last_response = response
@@ -343,7 +352,8 @@ class LegacyRequest(object):
         :param resource: API resource
         :param item: API resource item
         :param sys_id: Record sys_id
-        :return: url string
+        :return:
+            - url string
         """
 
         url_str = '%(base_url)s/%(base_path)s/%(resource)s/%(item)s' % (
@@ -363,7 +373,8 @@ class LegacyRequest(object):
     def _get_formatted_query(self, fields, limit, order_by, offset):
         """
         Converts the query to a ServiceNow-interpretable format
-        :return: ServiceNow query
+        :return:
+            - ServiceNow query
         """
 
         if not isinstance(order_by, list):

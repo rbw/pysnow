@@ -48,7 +48,8 @@ class Resource(object):
         :param limit: (optional) Limits the number of records returned
         :param fields: (optional) List of fields to include in the response created_on in descending order.
         :param offset: (optional) Number of records to skip before returning records
-        :return: :class:`Response` object
+        :return:
+            - :class:`Response` object
         """
 
         return self._request.get(query, limit, offset, fields)
@@ -57,7 +58,8 @@ class Resource(object):
         """Creates a new record in the API resource
 
         :param payload: Dictionary containing key-value fields of the new record
-        :return: Dictionary of the inserted record
+        :return:
+            - Dictionary of the inserted record
         """
 
         return self._request.create(payload)
@@ -67,7 +69,8 @@ class Resource(object):
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
         :param payload: Dictionary containing key-value fields of the record to be updated
-        :return: Dictionary of the updated record
+        :return:
+            - Dictionary of the updated record
         """
 
         return self._request.update(query, payload)
@@ -76,7 +79,8 @@ class Resource(object):
         """Deletes matching record
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
-        :return: Dictionary containing information about deletion result
+        :return:
+            - Dictionary containing information about deletion result
         """
 
         return self._request.delete(query)
@@ -88,7 +92,8 @@ class Resource(object):
         :param path_append: (optional) relative to :attr:`api_path`
         :param headers: (optional) Dictionary of headers to add or override
         :param kwargs: kwargs to pass along to :class:`requests.Request`
-        :return: :class:`Response` object
+        :return:
+            - :class:`Response` object
         """
 
         return self._request.custom(method, path_append=path_append, headers=headers, **kwargs)
