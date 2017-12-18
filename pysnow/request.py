@@ -28,7 +28,8 @@ class SnowRequest(object):
 
         :param args: args to pass along to _send()
         :param kwargs: kwargs to pass along to _send()
-        :return: :class:`pysnow.Response` object
+        :return:
+            - :class:`pysnow.Response` object
         """
 
         response = self._session.request(method, self._url, stream=True, **kwargs)
@@ -44,7 +45,8 @@ class SnowRequest(object):
         :param fields: List of fields to include in the response
         created_on in descending order.
         :param offset: Number of records to skip before returning records
-        :return: :class:`pysnow.Response` object
+        :return:
+            - :class:`pysnow.Response` object
         """
 
         self._parameters.query = query
@@ -64,7 +66,8 @@ class SnowRequest(object):
         """Creates a new record
 
         :param payload: Dictionary payload
-        :return: Dictionary of the inserted record
+        :return:
+            - Dictionary of the inserted record
         """
 
         return self._get_response('POST', data=json.dumps(payload)).one()
@@ -74,7 +77,8 @@ class SnowRequest(object):
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
         :param payload: Dictionary payload
-        :return: Dictionary of the updated record
+        :return:
+            - Dictionary of the updated record
         """
 
         if not isinstance(payload, dict):
@@ -89,7 +93,8 @@ class SnowRequest(object):
         """Deletes a record
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
-        :return: Dictionary containing status of the delete operation
+        :return:
+            - Dictionary containing status of the delete operation
         """
 
         record = self.get(query=query).one()
@@ -104,7 +109,8 @@ class SnowRequest(object):
         :param path_append: (optional) append path to resource.api_path
         :param headers: (optional) Dictionary of headers to add or override
         :param kwargs: kwargs to pass along to :class:`requests.Request`
-        :return: :class:`pysnow.Response` object
+        :return:
+            - :class:`pysnow.Response` object
         """
 
         if headers:

@@ -233,7 +233,8 @@ class QueryBuilder(object):
             - QueryMissingField: if field() hasn't been set
             - QueryExpressionError: if a expression hasn't been set
 
-        :return: String-type query
+        :return:
+            - String-type query
         """
 
         if len(self._query) == 0:
