@@ -51,15 +51,18 @@ class OAuthClient(Client):
         :return: OAuth2Session object
         """
 
-        return OAuth2Session(
-            client_id=self.client_id,
-            token=self.token,
-            token_updater=self.token_updater,
-            auto_refresh_url=self.token_url,
-            auto_refresh_kwargs={
-                "client_id": self.client_id,
-                "client_secret": self.client_secret
-            })
+        return self._get_session(
+            OAuth2Session(
+                client_id=self.client_id,
+                token=self.token,
+                token_updater=self.token_updater,
+                auto_refresh_url=self.token_url,
+                auto_refresh_kwargs={
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret
+                }
+            )
+        )
 
     def set_token(self, token):
         """Sets token after validating
