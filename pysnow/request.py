@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import json
-import requests
 
 from .response import Response
 from .exceptions import InvalidUsage
@@ -10,7 +9,7 @@ from .exceptions import InvalidUsage
 class SnowRequest(object):
     """Creates a new :class:`SnowRequest` object.
 
-    :param parameters: :class:`sysparms.Sysparms` object
+    :param parameters: :class:`params_builder.ParamsBuilder` object
     :param session: :class:`request.Session` object
     :param url_builder: :class:`url_builder.URLBuilder` object
     """
@@ -32,11 +31,7 @@ class SnowRequest(object):
         :return: :class:`pysnow.Response` object
         """
 
-        request = requests.Request(method, self._url, **kwargs)
-        prepped = self._session.prepare_request(request)
-        response = self._session.send(prepped,
-                                      stream=True)
-
+        response = self._session.request(method, self._url, stream=True, **kwargs)
         response.raw.decode_content = True
 
         return Response(response, self._chunk_size)
