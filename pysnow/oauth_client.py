@@ -66,9 +66,9 @@ class OAuthClient(Client):
         )
 
     def set_token(self, token):
-        """Sets token after validating
+        """Validate and set token
 
-        :param token: dict containing the information required to create an OAuth2Session
+        :param token: the token (dict) to set
         """
 
         if not token:
