@@ -6,6 +6,8 @@ import warnings
 import requests
 from requests.auth import HTTPBasicAuth
 
+import pysnow
+
 from .legacy_request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
@@ -94,7 +96,13 @@ class Client(object):
         else:
             s = session
 
-        s.headers.update({'content-type': 'application/json', 'accept': 'application/json'})
+        s.headers.update(
+            {
+                'content-type': 'application/json',
+                'accept': 'application/json',
+                'User-Agent': 'pysnow/%s' % pysnow.__version__
+            }
+        )
 
         return s
 
