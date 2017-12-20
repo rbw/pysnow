@@ -92,7 +92,7 @@ class Response(object):
                     builder.event(event, value)
 
         if (has_result_single or has_result_many) and self.count == 0:  # Results empty
-            yield {}
+            raise StopIteration
 
         if not (has_result_single or has_result_many or has_error):  # None of the expected keys were found
             raise MissingResult('The expected `result` key was missing in the response. Cannot continue')
@@ -137,9 +137,9 @@ class Response(object):
             - NoResults: If no results were found
         """
 
-        content = next(self.all())
-
-        if len(content) == 0:
+        try:
+            content = next(self.all())
+        except StopIteration:
             raise NoResults("No records found")
 
         return content
@@ -164,13 +164,14 @@ class Response(object):
 
         :raise:
             - MultipleResults: If more than one records are present in the content
-            - NoResults: If no records are present in the content
+            - NoResults: If the result is empty
         """
 
         r = self.all()
-        result = next(r)
 
-        if len(result) == 0:
+        try:
+            result = next(r)
+        except StopIteration:
             raise NoResults("No records found")
 
         try:

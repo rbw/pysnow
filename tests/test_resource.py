@@ -217,8 +217,7 @@ class TestResourceRequest(unittest.TestCase):
 
     @httpretty.activate
     def test_get_all_empty(self):
-        """:meth:`all` of :class:`pysnow.Response` should return a list with an empty object if `raise_on_empty`
-        is set to False"""
+        """:meth:`all` generator of :class:`pysnow.Response` should return an empty list if there are no matches"""
 
         httpretty.register_uri(httpretty.GET,
                                self.mock_url_builder_base,
@@ -227,10 +226,9 @@ class TestResourceRequest(unittest.TestCase):
                                content_type="application/json")
 
         response = self.resource.get(self.dict_query)
-        response._raise_on_empty = False
         result = list(response.all())
 
-        self.assertEquals(result[0], {})
+        self.assertEquals(result, [])
 
     @httpretty.activate
     def test_get_one_missing_result_keys(self):
