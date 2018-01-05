@@ -27,7 +27,7 @@ This release comes with changes to some fundamental parts of the library. The ol
 In short, the new version introduces the concept of **resources**, which enables a natural interaction with any ServiceNow API and changes how requests are performed, while
 providing an improved response interface.
 
-Also, the documentation has been reworked and covers only version 0.6. If you're not interested in switching, that's OK, `The old documentation <http://pysnow.readthedocs.io/en/0.5.2>`_ is still available.
+Also, the documentation has been reworked and covers only version 0.6 and later. If you're not interested in switching, that's OK, `The old documentation <http://pysnow.readthedocs.io/en/0.5.2>`_ is still available.
 
 
 
