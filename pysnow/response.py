@@ -92,7 +92,7 @@ class Response(object):
                     builder.event(event, value)
 
         if (has_result_single or has_result_many) and self.count == 0:  # Results empty
-            raise StopIteration
+            return
 
         if not (has_result_single or has_result_many or has_error):  # None of the expected keys were found
             raise MissingResult('The expected `result` key was missing in the response. Cannot continue')
@@ -157,7 +157,7 @@ class Response(object):
             return None
 
     def one(self):
-        """Return exactly one result or raise an exception.
+        """Return exactly one record or raise an exception.
 
         :return:
             - Dictionary containing the only item in the response content
@@ -184,7 +184,7 @@ class Response(object):
         return result
 
     def one_or_none(self):
-        """Return at most one result or raise an exception.
+        """Return at most one record or raise an exception.
 
         :return:
             - Dictionary containing the matching record or None
