@@ -5,14 +5,13 @@ The :meth:`pysnow.Resource.get` returns an instance of :class:`pysnow.Response`,
 various methods available for getting the data you're after.
 
 .. note::
-    All get-methods uses an incremental stream parser which reduces the memory usage, response times and
-    load on your ServiceNow instance.
+    All get-methods uses an incremental stream parser when fetching data.
 
 
 Multiple records
 ----------------
 
-The :meth:`pysnow.Response.all` returns a generator iterator, which is iterated on in chunks of 4096 bytes by default.
+The :meth:`pysnow.Response.all` returns a generator iterator, which is iterated on in chunks of 8192 bytes by default.
 
 
 .. code-block:: python

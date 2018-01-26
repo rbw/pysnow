@@ -18,7 +18,7 @@ class SnowRequest(object):
         self._parameters = parameters
         self._url_builder = url_builder
         self._session = session
-        self._chunk_size = chunk_size or 4096
+        self._chunk_size = chunk_size or 8192
 
         self._url = url_builder.get_url()
 
