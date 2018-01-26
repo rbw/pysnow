@@ -437,7 +437,7 @@ class TestResourceRequest(unittest.TestCase):
 
         method = 'GET'
 
-        response = self.resource.custom(method)
+        response = self.resource.request(method)
 
         self.assertEquals(response._response.request.method, method)
         self.assertEquals(type(response), Response)
@@ -454,7 +454,7 @@ class TestResourceRequest(unittest.TestCase):
 
         headers = {'foo': 'bar'}
 
-        response = self.resource.custom('GET', headers=headers)
+        response = self.resource.request('GET', headers=headers)
 
         self.assertEquals(response._response.request.headers['foo'], headers['foo'])
 
@@ -470,7 +470,7 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.custom('GET', path_append='/foo')
+        response = self.resource.request('GET', path_append='/foo')
 
         self.assertEquals(response._response.status_code, 200)
 
@@ -478,10 +478,10 @@ class TestResourceRequest(unittest.TestCase):
     def test_custom_with_path_invalid(self):
         """:meth:`custom` should raise an exception if the provided path is invalid"""
 
-        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append='foo')
-        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append={'foo': 'bar'})
-        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append='foo/')
-        self.assertRaises(InvalidUsage, self.resource.custom, 'GET', path_append=True)
+        self.assertRaises(InvalidUsage, self.resource.request, 'GET', path_append='foo')
+        self.assertRaises(InvalidUsage, self.resource.request, 'GET', path_append={'foo': 'bar'})
+        self.assertRaises(InvalidUsage, self.resource.request, 'GET', path_append='foo/')
+        self.assertRaises(InvalidUsage, self.resource.request, 'GET', path_append=True)
 
     @httpretty.activate
     def test_response_repr(self):
