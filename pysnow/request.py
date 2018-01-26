@@ -32,7 +32,7 @@ class SnowRequest(object):
             - :class:`pysnow.Response` object
         """
 
-        response = self._session.request(method, self._url, stream=True, **kwargs)
+        response = self._session.request(method, self._url, stream=True, params=self._parameters.as_dict(), **kwargs)
         response.raw.decode_content = True
 
         return Response(response, self._chunk_size)
@@ -60,7 +60,7 @@ class SnowRequest(object):
         if len(fields) > 0:
             self._parameters.fields = fields
 
-        return self._get_response('GET', params=self._parameters.as_dict())
+        return self._get_response('GET')
 
     def create(self, payload):
         """Creates a new record
