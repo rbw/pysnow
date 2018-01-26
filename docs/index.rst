@@ -49,3 +49,4 @@ Library written in Python that makes interacting with the ServiceNow REST API mu
    full_examples/delete
    full_examples/oauth_client
    full_examples/query_builder
+   full_examples/attachments
