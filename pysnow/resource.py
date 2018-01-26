@@ -26,6 +26,9 @@ class Resource(object):
 
         self.kwargs = kwargs
 
+        # @TODO - Remove this alias in a future release
+        self.custom = self.request
+
         self.parameters = deepcopy(parameters)
 
     def __repr__(self):
@@ -85,8 +88,8 @@ class Resource(object):
 
         return self._request.delete(query)
 
-    def custom(self, method, path_append=None, headers=None, **kwargs):
-        """Creates a custom request
+    def request(self, method, path_append=None, headers=None, **kwargs):
+        """Create a custom request
 
         :param method: HTTP method to use
         :param path_append: (optional) relative to :attr:`api_path`
