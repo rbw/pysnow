@@ -47,6 +47,12 @@ Author
 Robert Wikman <rbw@vault13.org>
 
 
+Other projects using pysnow
+---------------------------
+- `pysnow-flask <https://github.com/rbw0/pysnow-flask>`_ - Creates a bridge between your Flask backend and ServiceNow
+- `pysnow-shovel <https://github.com/zetup/pysnow-shovel>`_ - Simple CLI to push data into ServiceNow
+
+
 Contributors
 ------------
 lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk
