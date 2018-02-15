@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import warnings
-import six
+import logging
 
 from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
@@ -11,6 +11,8 @@ from .client import Client
 from .exceptions import InvalidUsage, MissingToken, TokenCreateError
 
 warnings.simplefilter("always", DeprecationWarning)
+
+logger = logging.getLogger('pysnow')
 
 
 class OAuthClient(Client):
@@ -34,7 +36,6 @@ class OAuthClient(Client):
                           'provided user / password credentials or sessions will be ignored.')
 
         # Forcibly set session, user and password
-        kwargs['session'] = OAuth2Session(client=LegacyApplicationClient(client_id=client_id))
         kwargs['user'] = None
         kwargs['password'] = None
 
@@ -128,12 +129,16 @@ class OAuthClient(Client):
             - TokenCreateError: If there was an error generating the new token
         """
 
+        logger.debug('(TOKEN_CREATE) :: User: %s' % user)
+
+        session = OAuth2Session(client=LegacyApplicationClient(client_id=self.client_id))
+
         try:
-            return dict(self.session.fetch_token(token_url=self.token_url,
-                                                 username=user,
-                                                 password=password,
-                                                 client_id=self.client_id,
-                                                 client_secret=self.client_secret))
+            return dict(session.fetch_token(token_url=self.token_url,
+                                            username=user,
+                                            password=password,
+                                            client_id=self.client_id,
+                                            client_secret=self.client_secret))
         except OAuth2Error as exception:
             raise TokenCreateError('Error creating user token', exception.description, exception.status_code)
 
