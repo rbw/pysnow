@@ -41,17 +41,14 @@ The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four secti
  - `Usage <http://pysnow.readthedocs.io/en/latest/#usage>`_
  - `Full examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
 
-
-Author
-------
-Robert Wikman <rbw@vault13.org>
-
-
 Other projects using pysnow
 ---------------------------
 - `pysnow-flask <https://github.com/rbw0/pysnow-flask>`_ - Creates a bridge between your Flask backend and ServiceNow
 - `pysnow-shovel <https://github.com/zetup/pysnow-shovel>`_ - Simple CLI to push data into ServiceNow
 
+Author
+------
+Robert Wikman <rbw@vault13.org>
 
 Contributors
 ------------
