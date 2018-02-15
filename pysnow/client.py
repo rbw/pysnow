@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import inspect
 import warnings
 
@@ -15,6 +16,8 @@ from .url_builder import URLBuilder
 from .params_builder import ParamsBuilder
 
 warnings.simplefilter("always", DeprecationWarning)
+
+logger = logging.getLogger('pysnow')
 
 
 class Client(object):
@@ -61,10 +64,11 @@ class Client(object):
         if not (host or instance):
             raise InvalidUsage("You must supply either 'instance' or 'host'")
 
-        if not (user and password) and not session:
-            raise InvalidUsage("You must supply either username and password or a session object")
-        elif (user and session) is not None:
-            raise InvalidUsage("Provide either username and password or a session, not both.")
+        if not isinstance(self, pysnow.OAuthClient):
+            if not (user and password) and not session:
+                raise InvalidUsage("You must supply either username and password or a session object")
+            elif (user and session) is not None:
+                raise InvalidUsage("Provide either username and password or a session, not both.")
 
         self.parameters = ParamsBuilder()
 
@@ -80,9 +84,12 @@ class Client(object):
         self._user = user
         self._password = password
         self.use_ssl = use_ssl
-
         self.base_url = URLBuilder.get_base_url(use_ssl, instance, host)
-        self.session = self._get_session(session)
+
+        if not isinstance(self, pysnow.OAuthClient):
+            self.session = self._get_session(session)
+        else:
+            self.session = None
 
     def _get_session(self, session):
         """Creates a new session with basic auth, unless one was provided, and sets headers.
@@ -91,10 +98,13 @@ class Client(object):
         :return:
             - :class:`requests.Session` object
         """
+
         if not session:
+            logger.debug('(SESSION_CREATE) User: %s' % self._user)
             s = requests.Session()
             s.auth = HTTPBasicAuth(self._user, self._password)
         else:
+            logger.debug('(SESSION_CREATE) Object: %s' % session)
             s = session
 
         s.headers.update(
