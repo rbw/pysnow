@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import json
 
 from .response import Response
 from .exceptions import InvalidUsage
+
+logger = logging.getLogger('pysnow')
 
 
 class SnowRequest(object):
@@ -14,11 +17,12 @@ class SnowRequest(object):
     :param url_builder: :class:`url_builder.URLBuilder` object
     """
 
-    def __init__(self, parameters=None, session=None, url_builder=None, chunk_size=None):
+    def __init__(self, parameters=None, session=None, url_builder=None, chunk_size=None, parent=None):
         self._parameters = parameters
         self._url_builder = url_builder
         self._session = session
-        self._chunk_size = chunk_size or 8192
+        self._chunk_size = chunk_size
+        self._parent = parent
 
         self._url = url_builder.get_url()
 
@@ -32,8 +36,14 @@ class SnowRequest(object):
             - :class:`pysnow.Response` object
         """
 
-        response = self._session.request(method, self._url, stream=True, params=self._parameters.as_dict(), **kwargs)
+        params = self._parameters.as_dict()
+
+        logger.debug('(REQUEST_SEND) Method: %s, Resource: %s' % (method, self._parent))
+
+        response = self._session.request(method, self._url, stream=True, params=params, **kwargs)
         response.raw.decode_content = True
+
+        logger.debug('(RESPONSE_RECEIVE) Code: %d, Resource: %s' % (response.status_code, self._parent))
 
         return Response(response, self._chunk_size)
 
