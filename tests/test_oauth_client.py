@@ -68,7 +68,6 @@ class TestOAuthClient(unittest.TestCase):
         c = OAuthClient(instance="test", client_id="test1", client_secret="test2",
                         session="testsess", user="testuser", password="testpass")
 
-        self.assertEqual(isinstance(c.session, OAuth2Session), True)
         self.assertEqual(c._user, None)
         self.assertEqual(c._password, None)
 
@@ -86,7 +85,6 @@ class TestOAuthClient(unittest.TestCase):
         c.set_token(self.mock_token)
 
         self.assertEqual(c.token, self.mock_token)
-        self.assertEqual(isinstance(c.session, OAuth2Session), True)
 
     def test_request_without_token(self):
         """OauthClient should raise MissingToken when creating query when no token has been set"""
