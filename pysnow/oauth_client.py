@@ -113,7 +113,7 @@ class OAuthClient(Client):
 
         if isinstance(self.token, dict):
             self.session = self._get_oauth_session()
-            return super(OAuthClient, self).resource(api_path, base_path)
+            return super(OAuthClient, self).resource(api_path, base_path, chunk_size)
 
         raise MissingToken("You must set_token() before creating a resource with OAuthClient")
 
