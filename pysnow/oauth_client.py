@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import warnings
+import six
 
 from oauthlib.oauth2 import LegacyApplicationClient
 from oauthlib.oauth2.rfc6749.errors import OAuth2Error
@@ -133,6 +134,8 @@ class OAuthClient(Client):
                                                  password=password,
                                                  client_id=self.client_id,
                                                  client_secret=self.client_secret))
-        except OAuth2Error as e:
-            raise TokenCreateError(error=e.error, description=e.description)
+        except OAuth2Error as exception:
+            raise TokenCreateError('Error creating user token', exception.description, exception.status_code)
+
+
 

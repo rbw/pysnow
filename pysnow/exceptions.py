@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 ######################
 # Generic exceptions #
 ######################
@@ -53,11 +52,10 @@ class MissingToken(Exception):
 
 
 class TokenCreateError(Exception):
-    def __init__(self, error, description):
-        message = "Error creating new user token"
-        super(TokenCreateError, self).__init__(message)
+    def __init__(self, error, description, status_code):
         self.error = error
         self.description = description
+        self.snow_status_code = status_code
 
 
 ############################
