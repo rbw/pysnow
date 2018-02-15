@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from copy import deepcopy
 
 from .request import SnowRequest
 from .url_builder import URLBuilder
+
+logger = logging.getLogger('pysnow')
 
 
 class Resource(object):
@@ -31,8 +35,10 @@ class Resource(object):
 
         self.parameters = deepcopy(parameters)
 
+        logger.debug('(RESOURCE_ADD) Object: %s, chunk_size: %d' % (self, kwargs.get('chunk_size')))
+
     def __repr__(self):
-        return '<%s [%s]>' % (self.__class__.__name__, self.path)
+        return '<%s [%s] at %s>' % (self.__class__.__name__, self.path, hex(id(self)))
 
     @property
     def path(self):
@@ -42,7 +48,7 @@ class Resource(object):
     def _request(self):
         parameters = deepcopy(self.parameters)
 
-        return SnowRequest(url_builder=self._url_builder, parameters=parameters, **self.kwargs)
+        return SnowRequest(url_builder=self._url_builder, parameters=parameters, parent=self, **self.kwargs)
 
     def get(self, query, limit=None, offset=None, fields=list()):
         """Queries the API resource
