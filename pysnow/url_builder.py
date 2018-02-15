@@ -6,15 +6,15 @@ from .exceptions import InvalidUsage
 
 class URLBuilder(object):
     def __init__(self, base_url, base_path, api_path):
-        self._base_url = base_url
-        self._base_path = base_path
-        self._api_path = api_path
+        self.base_url = base_url
+        self.base_path = base_path
+        self.api_path = api_path
+        self.full_path = base_path + api_path
 
-        self._resource_url = "%(base_url)s%(base_path)s%(api_path)s" % (
+        self._resource_url = "%(base_url)s%(full_path)s" % (
             {
                 'base_url': base_url,
-                'base_path': base_path,
-                'api_path': api_path
+                'full_path': self.full_path
             }
         )
 
