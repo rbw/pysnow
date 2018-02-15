@@ -146,7 +146,7 @@ class Client(object):
         return Resource(api_path=api_path,
                         base_path=base_path,
                         parameters=self.parameters,
-                        chunk_size=chunk_size,
+                        chunk_size=chunk_size or 8192,
                         session=self.session,
                         base_url=self.base_url)
 
