@@ -44,6 +44,7 @@ The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four secti
 Other projects using pysnow
 ---------------------------
 - `flask-snow <https://github.com/rbw0/flask-snow>`_ - Adds ServiceNow support to Flask
+- `django-snow <https://github.com/godaddy/django-snow>`_ - ServiceNow Ticket Management App for Django based projects
 - `pysnow-shovel <https://github.com/zetup/pysnow-shovel>`_ - Script for easy peasy pushing data into ServiceNow
 
 Author
