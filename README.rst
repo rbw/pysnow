@@ -43,7 +43,7 @@ The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four secti
 
 Other projects using pysnow
 ---------------------------
-- `flask-snow <https://github.com/rbw0/flask-snow>`_ - Create a fully customizable Flask-powered platform on top of the ServiceNow REST API
+- `flask-snow <https://github.com/rbw0/flask-snow>`_ - Adds ServiceNow support to Flask
 - `pysnow-shovel <https://github.com/zetup/pysnow-shovel>`_ - Script for easy peasy pushing data into ServiceNow
 
 Author
