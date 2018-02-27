@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import inspect
+import six
 
 from .exceptions import (QueryEmpty,
                          QueryExpressionError,
@@ -85,7 +86,7 @@ class QueryBuilder(object):
             - QueryTypeError: if `data` is of an unexpected type
         """
 
-        if isinstance(data, str):
+        if isinstance(data, six.string_types):
             return self._add_condition('=', data, types=[int, str])
         elif isinstance(data, list):
             return self._add_condition('IN', ",".join(map(str, data)), types=[str])
@@ -100,7 +101,7 @@ class QueryBuilder(object):
             - QueryTypeError: if `data` is of an unexpected type
         """
 
-        if isinstance(data, str):
+        if isinstance(data, six.string_types):
             return self._add_condition('!=', data, types=[int, str])
         elif isinstance(data, list):
             return self._add_condition('NOT IN', ",".join(data), types=[str])
@@ -117,7 +118,7 @@ class QueryBuilder(object):
 
         if hasattr(greater_than, 'strftime'):
             greater_than = greater_than.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(greater_than, str):
+        elif isinstance(greater_than, six.string_types):
             raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(greater_than))
 
         return self._add_condition('>', greater_than, types=[int, str])
@@ -132,7 +133,7 @@ class QueryBuilder(object):
 
         if hasattr(less_than, 'strftime'):
             less_than = less_than.strftime('%Y-%m-%d %H:%M:%S')
-        elif isinstance(less_than, str):
+        elif isinstance(less_than, six.string_types):
             raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(less_than))
 
         return self._add_condition('<', less_than, types=[int, str])

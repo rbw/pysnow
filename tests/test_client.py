@@ -43,6 +43,15 @@ class TestClient(unittest.TestCase):
         self.assertEquals(r._api_path, api_path)
         self.assertEquals(r._base_path, base_path)
 
+    def test_valid_resource_paths_unicode(self):
+        """:meth:`resource` should return a :class:`pysnow.Response` object with paths set to the expected value"""
+        api_path = u'/api/path'
+        base_path = u'/base/path'
+        c = Client(user="foo", password="foo", instance="instance")
+        r = c.resource(api_path=api_path, base_path=base_path)
+        self.assertEquals(r._api_path, api_path)
+        self.assertEquals(r._base_path, base_path)
+
     def test_client_with_session(self):
         """Should be able to create a client given a requests session object."""
         session = requests.Session()
