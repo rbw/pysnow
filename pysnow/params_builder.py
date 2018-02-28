@@ -39,7 +39,7 @@ class ParamsBuilder(object):
         elif isinstance(query, dict):
             # Dict-type query
             return '^'.join(['%s=%s' % (k, v) for k, v in six.iteritems(query)])
-        elif isinstance(query, str):
+        elif isinstance(query, six.string_types):
             # Regular string-type query
             return query
         else:
