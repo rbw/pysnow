@@ -25,6 +25,7 @@ Library written in Python that makes interacting with the ServiceNow REST API mu
    api/resource
    api/params_builder
    api/response
+   api/exceptions
 
 .. _usage:
 
