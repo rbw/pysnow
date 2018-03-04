@@ -5,12 +5,9 @@ import inspect
 import warnings
 
 import requests
-from requests.auth import HTTPBasicAuth
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
-
 import pysnow
 
+from requests.auth import HTTPBasicAuth
 from .legacy_request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
@@ -116,10 +113,6 @@ class Client(object):
                 'User-Agent': 'pysnow/%s' % pysnow.__version__
             }
         )
-
-        # set auto retry for about 2 seconds on some common errors
-        s.mount('http://', HTTPAdapter(max_retries=Retry(total=3, backoff_factor=0.3, status_forcelist=(401,408,429,431,500,502,503,504,511))))
-        s.mount('https://', HTTPAdapter(max_retries=Retry(total=3, backoff_factor=0.3, status_forcelist=(401,408,429,431,500,502,503,504,511))))
 
         return s
 
