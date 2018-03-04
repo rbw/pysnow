@@ -1,5 +1,5 @@
 Exceptions
-======
+==========
 
 .. automodule:: pysnow.exceptions
 

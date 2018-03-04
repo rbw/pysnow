@@ -1,5 +1,5 @@
 Using threaded queries
-=====================
+======================
 
 This is an example of multiple threads doing simple fetches.
 
