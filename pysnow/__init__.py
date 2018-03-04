@@ -7,7 +7,7 @@ from .query_builder import QueryBuilder
 from .resource import Resource
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 
 # Set default logging handler to avoid "No handler found" warnings.
 import logging
