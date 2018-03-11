@@ -50,6 +50,9 @@ class Resource(object):
 
         return SnowRequest(url_builder=self._url_builder, parameters=parameters, parent=self, **self.kwargs)
 
+    def get_record_link(self, sys_id):
+        return "%s/%s" % (self._url_builder.full_path, sys_id)
+
     def get(self, query, limit=None, offset=None, fields=list()):
         """Queries the API resource
 
