@@ -5,10 +5,9 @@ import inspect
 import warnings
 
 import requests
-from requests.auth import HTTPBasicAuth
-
 import pysnow
 
+from requests.auth import HTTPBasicAuth
 from .legacy_request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource

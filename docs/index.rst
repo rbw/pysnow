@@ -25,6 +25,7 @@ Library written in Python that makes interacting with the ServiceNow REST API mu
    api/resource
    api/params_builder
    api/response
+   api/exceptions
 
 .. _usage:
 
@@ -50,3 +51,5 @@ Library written in Python that makes interacting with the ServiceNow REST API mu
    full_examples/oauth_client
    full_examples/query_builder
    full_examples/attachments
+   full_examples/threads
+   full_examples/retry

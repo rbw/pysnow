@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import six
 from .exceptions import InvalidUsage
 
 
@@ -27,7 +28,7 @@ class URLBuilder(object):
             :InvalidUsage: If validation fails.
         """
 
-        if not isinstance(path, str) or not re.match('^/(?:[._a-zA-Z0-9-]/?)+[^/]$', path):
+        if not isinstance(path, six.string_types) or not re.match('^/(?:[._a-zA-Z0-9-]/?)+[^/]$', path):
             raise InvalidUsage(
                 "Path validation failed - Expected: '/<component>[/component], got: %s" % path
             )

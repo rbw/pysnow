@@ -36,10 +36,10 @@ Documentation
 
 The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four sections:
 
- - `General <http://pysnow.readthedocs.io/en/latest/#general>`_ (install, compatibility etc)
- - `Library API <http://pysnow.readthedocs.io/en/latest/#api>`_
- - `Usage <http://pysnow.readthedocs.io/en/latest/#usage>`_
- - `Full examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
+- `General <http://pysnow.readthedocs.io/en/latest/#general>`_ (install, compatibility etc)
+- `Library API <http://pysnow.readthedocs.io/en/latest/#api>`_
+- `Usage <http://pysnow.readthedocs.io/en/latest/#usage>`_
+- `Full examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
 
 Other projects using pysnow
 ---------------------------
@@ -58,4 +58,5 @@ lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk
 
 JetBrains
 ---------
-Thank you Jetbrains (www.jetbrains.com) for supporting with IDE licenses!
+Thank you `Jetbrains <http://www.jetbrains.com>`_ for creating pycharm and providing me with free licenses
+

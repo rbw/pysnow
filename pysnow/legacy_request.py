@@ -387,7 +387,7 @@ class LegacyRequest(object):
             sysparm_query = str(self.query)
         elif isinstance(self.query, dict):  # Dict-type query
             sysparm_query = '^'.join(['%s=%s' % (k, v) for k, v in six.iteritems(self.query)])
-        elif isinstance(self.query, str):  # String-type query
+        elif isinstance(self.query, six.string_types):  # String-type query
             sysparm_query = self.query
         else:
             raise InvalidUsage("Query must be instance of %s, %s or %s" % (QueryBuilder, str, dict))
