@@ -2,9 +2,10 @@
 
 import logging
 
-from copy import deepcopy
+from copy import copy
 
 from .request import SnowRequest
+from .attachment import Attachment
 from .url_builder import URLBuilder
 
 logger = logging.getLogger('pysnow')
@@ -33,7 +34,7 @@ class Resource(object):
         # @TODO - Remove this alias in a future release
         self.custom = self.request
 
-        self.parameters = deepcopy(parameters)
+        self.parameters = copy(parameters)
 
         logger.debug('(RESOURCE_ADD) Object: %s, chunk_size: %d' % (self, kwargs.get('chunk_size')))
 
@@ -42,15 +43,45 @@ class Resource(object):
 
     @property
     def path(self):
+        """Get current path relative to base URL
+
+        :return: resource path
+        """
+
         return "%s" % self._base_path + self._api_path
 
     @property
+    def attachments(self):
+        """Clones self, performs some path modifications and passes along to :class:`Attachment`
+
+        :return: Attachment object
+        """
+
+        resource = copy(self)
+        resource._url_builder = URLBuilder(self._base_url, self._base_path, '/attachment')
+
+        api_name, resource_name = self._api_path.strip('/').split('/')
+
+        return Attachment(resource, api_name, resource_name)
+
+    @property
     def _request(self):
-        parameters = deepcopy(self.parameters)
+        """Request wrapper
+
+        :return: SnowRequest object
+        """
+
+        parameters = copy(self.parameters)
 
         return SnowRequest(url_builder=self._url_builder, parameters=parameters, parent=self, **self.kwargs)
 
     def get_record_link(self, sys_id):
+        """Provides full URL to the provided sys_id
+
+        :param sys_id: sys_id to generate URL for
+        :return: full sys_id URL
+        """
+
         return "%s/%s" % (self._url_builder.full_path, sys_id)
 
     def get(self, query, limit=None, offset=None, fields=list()):
