@@ -62,7 +62,10 @@ class Resource(object):
 
         api_name, resource_name = self._api_path.strip('/').split('/')
 
-        return Attachment(resource, api_name, resource_name)
+        if api_name != 'table':
+            raise InvalidUsage('The attachment API can only be used with the table API')
+
+        return Attachment(resource, resource_name)
 
     @property
     def _request(self):
