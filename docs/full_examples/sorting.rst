@@ -22,6 +22,4 @@ Example showing how sorting can be dynamically created from a comma-separated st
       if idx != len(fields) - 1:
           query.AND()
 
-  print(str(query))  # priorityIN3,4^ORDERBYnumber^ORDERBYDESCdescription
-
-
+  print(str(query))  # priorityIN3,4^ORDERBYDESCcreated_at^ORDERBYpriority
