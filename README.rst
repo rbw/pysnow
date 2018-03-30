@@ -20,15 +20,10 @@
 News
 ----
 
-Version 0.6 has been released :tada:
+**Version 0.7**
 
-This release comes with changes to some fundamental parts of the library. The old code has been kept, and should work seamlessly but raises a deprecation warning upon usage.
-
-In short, the new version introduces the concept of **resources**, which enables a natural interaction with any ServiceNow API and changes how requests are performed, while
-providing an improved response interface.
-
-Also, the documentation has been reworked and covers only version 0.6 and later. If you're not interested in switching, that's OK, `The old documentation <http://pysnow.readthedocs.io/en/0.5.2>`_ is still available.
-
+This release comes with a new attachment helper, available in *table-type* `Resources`.
+Go `here <http://pysnow.readthedocs.io/en/latest/api/attachment.html>`_ for its API documentation, or check out an `example <http://pysnow.readthedocs.io/en/latest/full_examples/attachments.html>`_.
 
 
 Documentation
