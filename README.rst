@@ -20,7 +20,7 @@
 News
 ----
 
-**Version 0.7**
+Version 0.7 released
 
 This release comes with a new attachment helper, available in *table-type* `Resources`.
 Go `here <http://pysnow.readthedocs.io/en/latest/api/attachment.html>`_ for its API documentation, or check out an `example <http://pysnow.readthedocs.io/en/latest/full_examples/attachments.html>`_.
