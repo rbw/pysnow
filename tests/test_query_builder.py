@@ -10,7 +10,7 @@ from pysnow.exceptions import (QueryEmpty,
                                QueryTypeError)
 
 
-class TestIncident(unittest.TestCase):
+class TestQueryBuilder(unittest.TestCase):
     def test_query_no_expression(self):
         q = pysnow.QueryBuilder().field('test')
         self.assertRaises(QueryEmpty, q.__str__)

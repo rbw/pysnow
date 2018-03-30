@@ -1,10 +1,9 @@
-Attaching a file
-================
+Attaching files
+===============
 
-Shows how to upload a binary file specified in the request body, providing information about the attachment using the `pysnow.ParamsBuilder` API exposed in `Resource.parameters`.
+Shows how to upload a file using `Resource.attachments`.
 
-.. note::
-    The attachment API (/api/now/attachment/file), as with all ServiceNow APIs that doesn't conform with the standard REST principles, requires you to use :meth:`Client.resource.request` and create a custom request.
+Check out the `Attachment` API documentation for more info!
 
 
 .. code-block:: python
@@ -15,21 +14,9 @@ Shows how to upload a binary file specified in the request body, providing infor
     c = pysnow.Client(instance='myinstance', user='myusername', password='mypassword')
 
     # Create a resource
-    attachment = c.resource(api_path='/attachment/file')
+    incidents = c.resource(api_path='/table/incident')
 
-    # Provide the required information about the attachment
-    attachment.parameters.add_custom({
-        'table_name': 'incident',
-        'table_sys_id': '<incident_sys_id>',
-        'file_name': 'attachment.txt'
-    })
-
-    # Set the payload
-    data = open('/tmp/attachment.txt', 'rb').read()
-
-    # Override the content-type header
-    headers = { "Content-Type": "text/plain" }
-
-    # Fire off the request
-    attachment.request(method='POST', data=data, headers=headers)
+    # Uploads file '/tmp/attachment.txt' to the provided incident
+    incidents.attachments.upload(sys_id='9b9dd196dbc91f005ab1f58dbf96192b',
+                                 file_path='/tmp/attachment.txt')
 

@@ -77,11 +77,13 @@ class OAuthClient(Client):
             self.token = None
             return
 
-        expected_keys = set(("token_type", "refresh_token", "access_token", "scope", "expires_in", "expires_at"))
-        if not isinstance(token, dict) or not expected_keys <= set(token):
-            raise InvalidUsage("Token should contain a dictionary obtained using fetch_token()")
+        expected_keys = ['token_type', 'refresh_token', 'access_token', 'scope', 'expires_in', 'expires_at']
+        if not isinstance(token, dict) or not set(token) >= set(expected_keys):
+            raise InvalidUsage("Expected a token dictionary containing the following keys: {0}"
+                               .format(expected_keys))
 
-        self.token = token
+        # Set sanitized token
+        self.token = dict((k, v) for k, v in token.items() if k in expected_keys)
 
     def _legacy_request(self, *args, **kwargs):
         """Makes sure token has been set, then calls parent to create a new :class:`pysnow.LegacyRequest` object

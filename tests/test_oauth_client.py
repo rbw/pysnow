@@ -3,8 +3,8 @@ import unittest
 import datetime
 import httpretty
 import json
-from requests_oauthlib import OAuth2Session
 
+from copy import copy
 from pysnow import OAuthClient
 from pysnow.exceptions import InvalidUsage, MissingToken, TokenCreateError
 
@@ -78,6 +78,17 @@ class TestOAuthClient(unittest.TestCase):
         token = self.mock_token.pop('refresh_token')
 
         self.assertRaises(InvalidUsage, c.set_token, token)
+
+    def test_set_token_sanitation(self):
+        """Unexpected keys passed to token in set_token() should get sanitized"""
+
+        c = self.client
+        token = copy(self.mock_token)
+        token['extra'] = 'test'
+        c.set_token(token)
+
+        # The `extra` key should not be available in the set token
+        self.assertEqual(c.token, self.mock_token)
 
     def test_set_token(self):
         """set_token() should set token property and create an OAuth2Session"""

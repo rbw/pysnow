@@ -6,6 +6,7 @@ from six.moves.urllib.parse import urlparse, unquote
 
 from pysnow.response import Response
 from pysnow.client import Client
+from pysnow.attachment import Attachment
 
 from requests.exceptions import HTTPError
 
@@ -497,3 +498,27 @@ class TestResourceRequest(unittest.TestCase):
         response_repr = repr(response)
 
         self.assertEquals(response_repr, '<Response [200 - GET]>')
+
+    @httpretty.activate
+    def test_attachment_non_table(self):
+        """Accessing `Resource.attachments` from a non-table API should fail"""
+
+        resource = self.client.resource(base_path=self.base_path, api_path='/invalid')
+
+        self.assertRaises(InvalidUsage, getattr, resource, 'attachments')
+
+    @httpretty.activate
+    def test_attachment_type(self):
+        """`Resource.attachments` should be of type Attachment"""
+
+        attachment_type = type(self.resource.attachments)
+
+        self.assertEqual(attachment_type, Attachment)
+
+    @httpretty.activate
+    def test_get_record_link(self):
+        """`Resource.get_record_link()` should return full URL to the record"""
+
+        record_link = self.resource.get_record_link('98ace1a537ea2a00cf5c9c9953990e19')
+
+        self.assertEqual(record_link, self.mock_url_builder_sys_id)
