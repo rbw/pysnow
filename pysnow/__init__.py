@@ -8,7 +8,7 @@ from .resource import Resource
 from .params_builder import ParamsBuilder
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 
 # Set default logging handler to avoid "No handler found" warnings.
 import logging
