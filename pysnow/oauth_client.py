@@ -82,7 +82,8 @@ class OAuthClient(Client):
             raise InvalidUsage("Expected a token dictionary containing the following keys: {0}"
                                .format(expected_keys))
 
-        self.token = token
+        # Set sanitized token
+        self.token = {k: v for k, v in token.items() if k in expected_keys}
 
     def _legacy_request(self, *args, **kwargs):
         """Makes sure token has been set, then calls parent to create a new :class:`pysnow.LegacyRequest` object
