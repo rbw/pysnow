@@ -1,14 +1,26 @@
 Resources
 =========
 
-The :class:`pysnow.Resource`, given an API path, offers an interface to all CRUD functionality available in the ServiceNow REST API.
+``pysnow.Resource`` provides an interface to easily and efficiently create, read, update and delete records in ServiceNow. Additionally, it's also equipped with helpers for common operations, such as attaching files.
 
-The idea with Resources is to provide a logical, nameable and reusable container-like object.
+Check out the `Resource` `API documentation <http://pysnow.readthedocs.io/en/latest/api/resource.html>`_ for more info.
 
-Example of a resource using the **incident table API** with a doubled **chunk_size** of 8192 bytes and **sysparm_display_value** set to True.
 
 .. code-block:: python
 
-    incident = client.resource(api_path='/table/incident', chunk_size=8192)
+    incident = client.resource(api_path='/table/incident')
     incident.parameters.display_value = True
+
+    record = incident.get(query={'number': 'INC012345'}).one()
+    
+    sys_id = record['sys_id']
+    incident.attachments.upload(sys_id, file_path='/tmp/document.txt)
+    
+    updated = incident.update(query={'sys_id': sys_id},
+                              payload={
+                                  'short_description': 'Uh-uh',
+                                  'description': 'I fear I might be getting deleted.'
+                              })
+   
+    incident.delete(query={'sys_id': sys_id})
 
