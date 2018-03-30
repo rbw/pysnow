@@ -53,7 +53,8 @@ class Resource(object):
 
     @property
     def attachments(self):
-        """Clones self, performs some path modifications and passes along to :class:`Attachment`
+        """Provides an `Attachment` API for this resource.
+        Enables easy listing, deleting and creating new attachments.     
 
         :return: Attachment object
         """
