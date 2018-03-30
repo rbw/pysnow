@@ -7,6 +7,7 @@ from copy import copy
 from .request import SnowRequest
 from .attachment import Attachment
 from .url_builder import URLBuilder
+from .exceptions import InvalidUsage
 
 logger = logging.getLogger('pysnow')
 
@@ -60,12 +61,12 @@ class Resource(object):
         resource = copy(self)
         resource._url_builder = URLBuilder(self._base_url, self._base_path, '/attachment')
 
-        api_name, resource_name = self._api_path.strip('/').split('/')
+        path = self._api_path.strip('/').split('/')
 
-        if api_name != 'table':
+        if path[0] != 'table':
             raise InvalidUsage('The attachment API can only be used with the table API')
 
-        return Attachment(resource, resource_name)
+        return Attachment(resource, path[1])
 
     @property
     def _request(self):
@@ -85,7 +86,7 @@ class Resource(object):
         :return: full sys_id URL
         """
 
-        return "%s/%s" % (self._url_builder.full_path, sys_id)
+        return "%s/%s" % (self._url_builder.get_url(), sys_id)
 
     def get(self, query, limit=None, offset=None, fields=list()):
         """Queries the API resource

@@ -22,6 +22,7 @@ Library written in Python that makes interacting with the ServiceNow REST API mu
    api/client
    api/oauth_client
    api/query_builder
+   api/attachment
    api/resource
    api/params_builder
    api/response
