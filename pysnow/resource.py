@@ -2,7 +2,7 @@
 
 import logging
 
-from copy import copy
+from copy import copy, deepcopy
 
 from .request import SnowRequest
 from .attachment import Attachment
@@ -35,7 +35,7 @@ class Resource(object):
         # @TODO - Remove this alias in a future release
         self.custom = self.request
 
-        self.parameters = copy(parameters)
+        self.parameters = deepcopy(parameters)
 
         logger.debug('(RESOURCE_ADD) Object: %s, chunk_size: %d' % (self, kwargs.get('chunk_size')))
 
