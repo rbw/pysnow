@@ -11,7 +11,6 @@ from requests.auth import HTTPBasicAuth
 from .legacy_request import LegacyRequest
 from .exceptions import InvalidUsage
 from .resource import Resource
-from .attachment import Attachment
 from .url_builder import URLBuilder
 from .params_builder import ParamsBuilder
 
