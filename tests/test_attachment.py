@@ -52,12 +52,13 @@ attachment = {
 }
 
 delete_status = {'status': 'record deleted'}
+mock_api_path = '/table/incident'
 
 
 class TestAttachment(unittest.TestCase):
     def setUp(self):
-        client = pysnow.Client(instance='test', user='test', password='test')
-        r = self.resource = client.resource(api_path='/table/incident')
+        self.client = pysnow.Client(instance='test', user='test', password='test')
+        r = self.resource = self.client.resource(api_path=mock_api_path)
         a = self.attachment_base_url = r._base_url + r._base_path + '/attachment'
         self.attachment_url_binary = a + '/file'
         self.attachment_url_multipart = a + '/upload'
@@ -99,10 +100,10 @@ class TestAttachment(unittest.TestCase):
                                status=201,
                                content_type="application/json")
 
-        result = self.resource.attachments.upload(sys_id=mock_sys_id,
-                                                  file_path=attachment_path)
+        response = self.resource.attachments.upload(sys_id=mock_sys_id,
+                                                    file_path=attachment_path)
 
-        self.assertEqual(result, attachment)
+        self.assertEqual(response.one(), attachment)
 
     @httpretty.activate
     def test_upload_multipart(self):
@@ -114,11 +115,11 @@ class TestAttachment(unittest.TestCase):
                                status=201,
                                content_type="application/json")
 
-        result = self.resource.attachments.upload(sys_id=mock_sys_id,
-                                                  file_path=attachment_path,
-                                                  multipart=True)
+        response = self.resource.attachments.upload(sys_id=mock_sys_id,
+                                                    file_path=attachment_path,
+                                                    multipart=True)
 
-        self.assertEqual(result, attachment)
+        self.assertEqual(response.one(), attachment)
 
     @httpretty.activate
     def test_upload_delete(self):
@@ -136,7 +137,8 @@ class TestAttachment(unittest.TestCase):
                                status=204,
                                content_type="application/json")
 
-        result = self.resource.attachments.delete(mock_sys_id)
+        resource = self.client.resource(api_path=mock_api_path)
+        result = resource.attachments.delete(mock_sys_id)
 
         self.assertEqual(result, delete_status)
 

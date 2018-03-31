@@ -40,6 +40,12 @@ class TestResourceRequest(unittest.TestCase):
             'message': 'test_message',
             'detail': 'test_details'
         }
+
+        self.record_response_get_dict = {
+            'sys_id': '98ace1a537ea2a00cf5c9c9953990e19',
+            'attr1': 'foo',
+            'attr2': 'bar'
+        }
         
         self.record_response_get_one = [{
             'sys_id': '98ace1a537ea2a00cf5c9c9953990e19',
@@ -87,13 +93,23 @@ class TestResourceRequest(unittest.TestCase):
             'instance': 'mock_instance'
         }
 
-        self.base_path = '/api/now/test'
+        self.attachment = {
+            'sys_id': 'attachment_sys_id',
+            'size_bytes': '512',
+            'file_name': 'test1.txt'
+        }
+
+        self.attachment_path = 'tests/data/attachment.txt'
+
+        self.base_path = '/api/now'
         self.api_path = '/table/incident'
 
         self.client = Client(**self.client_kwargs)
         self.resource = self.client.resource(base_path=self.base_path, api_path=self.api_path)
 
         self.mock_url_builder = self.resource._url_builder
+
+        self.attachment_upload_url = self.resource._base_url + self.resource._base_path + '/attachment/file'
 
         self.mock_url_builder_base = self.resource._url_builder.get_url()
         self.mock_url_builder_sys_id = (self.mock_url_builder
@@ -140,7 +156,7 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.get(self.dict_query)
+        response = self.resource.get(self.dict_query, stream=True)
 
         expected_str = "Error in response. Message: %s, Details: %s" % (self.error_message_body['message'],
                                                                         self.error_message_body['detail'])
@@ -226,13 +242,28 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.get(self.dict_query)
+        response = self.resource.get(self.dict_query, stream=True)
         result = list(response.all())
 
         self.assertEquals(result, [])
 
     @httpretty.activate
-    def test_get_one_missing_result_keys(self):
+    def test_get_all_single(self):
+        """Single items with all() using the stream parser should return a list containing the item"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_dict),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query, stream=True)
+        result = list(response.all())[0]
+
+        self.assertEquals(result, self.record_response_get_dict)
+
+    @httpretty.activate
+    def test_get_buffer_missing_result_keys(self):
         """:meth:`one` of :class:`pysnow.Response` should raise an exception if none of the expected keys
         was found in the result"""
 
@@ -245,6 +276,21 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query)
 
         self.assertRaises(MissingResult, response.one)
+
+    @httpretty.activate
+    def test_get_stream_missing_result_keys(self):
+        """:meth:`one` of :class:`pysnow.Response` should raise an exception if none of the expected keys
+        was found in the result"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=json.dumps({}),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query, stream=True)
+
+        self.assertRaises(MissingResult, response.first)
 
     @httpretty.activate
     def test_http_error_get_one(self):
@@ -310,7 +356,7 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.get(self.dict_query)
+        response = self.resource.get(self.dict_query, stream=True)
         result = response.first_or_none()
 
         self.assertEquals(result, None)
@@ -325,7 +371,7 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.get(self.dict_query)
+        response = self.resource.get(self.dict_query, stream=True)
         result = response.first_or_none()
 
         self.assertEquals(result, self.record_response_get_three[0])
@@ -340,7 +386,7 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.get(self.dict_query)
+        response = self.resource.get(self.dict_query, stream=True)
         result = response.first()
 
         self.assertEquals(result, self.record_response_get_three[0])
@@ -355,7 +401,7 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        response = self.resource.get(self.dict_query)
+        response = self.resource.get(self.dict_query, stream=True)
 
         self.assertRaises(NoResults, response.first)
 
@@ -369,10 +415,10 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        result = self.resource.create(self.record_response_create)
+        response = self.resource.create(self.record_response_create)
 
-        self.assertEquals(type(result), dict)
-        self.assertEquals(result, self.record_response_create)
+        self.assertEquals(type(response.one()), dict)
+        self.assertEquals(response.one(), self.record_response_create)
 
     @httpretty.activate
     def test_update(self):
@@ -390,7 +436,8 @@ class TestResourceRequest(unittest.TestCase):
                                status=200,
                                content_type="application/json")
 
-        result = self.resource.update(self.dict_query, self.record_response_update)
+        response = self.resource.update(self.dict_query, self.record_response_update)
+        result = response.one()
 
         self.assertEquals(type(result), dict)
         self.assertEquals(self.record_response_update['attr1'], result['attr1'])
@@ -422,6 +469,27 @@ class TestResourceRequest(unittest.TestCase):
                                content_type="application/json")
 
         result = self.resource.delete(self.dict_query)
+
+        self.assertEquals(type(result), dict)
+        self.assertEquals(result['status'], 'record deleted')
+
+    @httpretty.activate
+    def test_delete_chained(self):
+        """:meth:`Response.delete` should return a dictionary containing status"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.DELETE,
+                               self.mock_url_builder_sys_id,
+                               body=get_serialized_result(self.record_response_delete),
+                               status=204,
+                               content_type="application/json")
+
+        result = self.resource.get(query={}).delete()
 
         self.assertEquals(type(result), dict)
         self.assertEquals(result['status'], 'record deleted')
@@ -499,7 +567,6 @@ class TestResourceRequest(unittest.TestCase):
 
         self.assertEquals(response_repr, '<Response [200 - GET]>')
 
-    @httpretty.activate
     def test_attachment_non_table(self):
         """Accessing `Resource.attachments` from a non-table API should fail"""
 
@@ -507,7 +574,6 @@ class TestResourceRequest(unittest.TestCase):
 
         self.assertRaises(InvalidUsage, getattr, resource, 'attachments')
 
-    @httpretty.activate
     def test_attachment_type(self):
         """`Resource.attachments` should be of type Attachment"""
 
@@ -515,10 +581,77 @@ class TestResourceRequest(unittest.TestCase):
 
         self.assertEqual(attachment_type, Attachment)
 
-    @httpretty.activate
     def test_get_record_link(self):
         """`Resource.get_record_link()` should return full URL to the record"""
 
         record_link = self.resource.get_record_link('98ace1a537ea2a00cf5c9c9953990e19')
 
         self.assertEqual(record_link, self.mock_url_builder_sys_id)
+
+    @httpretty.activate
+    def test_get_response_item(self):
+        """Accessing the response as a dict should work"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(query={})
+
+        self.assertEquals(response['sys_id'], self.record_response_get_one[0].get('sys_id'))
+
+    @httpretty.activate
+    def test_get_buffered_first(self):
+        """Using Response.first() without stream=True should fail"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(query={})
+
+        self.assertRaises(InvalidUsage, response.first)
+
+    @httpretty.activate
+    def test_response_update(self):
+        """Using Response.update should update the queried record"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.PUT,
+                               self.mock_url_builder_sys_id,
+                               body=get_serialized_result(self.record_response_update),
+                               status=200,
+                               content_type="application/json")
+
+        response = self.resource.get(query={}).update(self.record_response_update)
+
+        self.assertEqual(self.record_response_update['sys_id'], response['sys_id'])
+
+    @httpretty.activate
+    def test_response_upload(self):
+        """Using Response.upload() should attach the file to the queried record and return metadata"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=200,
+                               content_type="application/json")
+
+        httpretty.register_uri(httpretty.POST,
+                               self.attachment_upload_url,
+                               body=get_serialized_result(self.attachment),
+                               status=201,
+                               content_type="application/json")
+
+        response = self.resource.get(query={}).upload(file_path=self.attachment_path)
+
+        self.assertEqual(self.attachment['file_name'], response['file_name'])

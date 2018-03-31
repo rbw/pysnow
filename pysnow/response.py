@@ -3,11 +3,10 @@
 import ijson
 
 from ijson.common import ObjectBuilder
-
 from itertools import chain
-
 from .exceptions import (ResponseError,
                          NoResults,
+                         InvalidUsage,
                          MultipleResults,
                          MissingResult)
 
@@ -15,14 +14,17 @@ from .exceptions import (ResponseError,
 class Response(object):
     """Takes a :class:`requests.Response` object and performs deserialization and validation.
 
-    :param response: :class:`request.Response` object
+    :param response: :class:`requests.Response` object
+    :param resource: parent :class:`resource.Resource` object
     :param chunk_size: Read and return up to this size (in bytes) in the stream parser
     """
 
-    def __init__(self, response, chunk_size=2048):
+    def __init__(self, response, resource, chunk_size=2048, stream=False):
         self._response = response
         self._chunk_size = chunk_size
         self._count = 0
+        self._resource = resource
+        self._stream = stream
 
     @property
     def count(self):
@@ -34,6 +36,9 @@ class Response(object):
             raise TypeError("Count must be an integer")
 
         self._count = count
+
+    def __getitem__(self, key):
+        return self.one().get(key)
 
     def __repr__(self):
         return '<%s [%d - %s]>' % (self.__class__.__name__, self._response.status_code, self._response.request.method)
@@ -47,18 +52,20 @@ class Response(object):
             - MissingResult: If no result nor error was found
         """
 
+        response = self._get_response()
+
         has_result_single = False
         has_result_many = False
         has_error = False
 
-        for prefix, event, value in ijson.parse(self._response.raw, buf_size=self._chunk_size):
+        builder = ObjectBuilder()
+
+        for prefix, event, value in ijson.parse(response.raw, buf_size=self._chunk_size):
             if (prefix, event) == ('error', 'start_map'):
                 # Matched ServiceNow `error` object at the root
                 has_error = True
-                builder = ObjectBuilder()
             elif prefix == 'result' and event in ['start_map', 'start_array']:
                 # Matched ServiceNow `result`
-                builder = ObjectBuilder()
                 if event == 'start_map':  # Matched object
                     has_result_single = True
                 elif event == 'start_array':  # Matched array
@@ -97,26 +104,47 @@ class Response(object):
         if not (has_result_single or has_result_many or has_error):  # None of the expected keys were found
             raise MissingResult('The expected `result` key was missing in the response. Cannot continue')
 
-    def _get_validated_response(self):
-        """Validates response then calls :meth:`_parse_response` to yield content
-
-        Immediately yields response content if request method is DELETE and code 204 (this response never
-        contains a body).
-
-        :raise:
-            - HTTPError: if a non-200 response is encountered
-        """
-
+    def _get_response(self):
         response = self._response
 
-        if response.request.method == 'DELETE' and response.status_code == 204:
-            yield [{'status': 'record deleted'}]
-        else:
-            # Raise an HTTPError if we hit a non-200 status code
-            response.raise_for_status()
+        # Raise an HTTPError if we hit a non-200 status code
+        response.raise_for_status()
 
-            # Parse byte stream
-            yield self._parse_response()
+        return response
+
+    def _get_streamed_response(self):
+        """Parses byte stream (memory efficient)
+
+        :return: Parsed JSON
+        """
+
+        yield self._parse_response()
+
+    def _get_buffered_response(self):
+        """Returns a buffered response
+
+        :return: Buffered response
+        """
+
+        response = self._get_response()
+
+        if response.request.method == 'DELETE' and response.status_code == 204:
+            return [{'status': 'record deleted'}], 1
+
+        result = self._response.json().get('result', None)
+
+        if result is None:
+            raise MissingResult('The expected `result` key was missing in the response. Cannot continue')
+
+        length = 0
+
+        if isinstance(result, list):
+            length = len(result)
+        elif isinstance(result, dict):
+            result = [result]
+            length = 1
+
+        return result, length
 
     def all(self):
         """Returns a chained generator response containing all matching records
@@ -125,7 +153,10 @@ class Response(object):
             - Iterable response
         """
 
-        return chain.from_iterable(self._get_validated_response())
+        if self._stream:
+            return chain.from_iterable(self._get_streamed_response())
+
+        return self._get_buffered_response()[0]
 
     def first(self):
         """Return the first record or raise an exception if the result doesn't contain any data
@@ -136,6 +167,9 @@ class Response(object):
         :raise:
             - NoResults: If no results were found
         """
+
+        if not self._stream:
+            raise InvalidUsage('first() is only available when stream=True')
 
         try:
             content = next(self.all())
@@ -167,21 +201,14 @@ class Response(object):
             - NoResults: If the result is empty
         """
 
-        r = self.all()
+        result, count = self._get_buffered_response()
 
-        try:
-            result = next(r)
-        except StopIteration:
+        if count == 0:
             raise NoResults("No records found")
-
-        try:
-            next(r)
-        except StopIteration:
-            pass
-        else:
+        elif count > 1:
             raise MultipleResults("Expected single-record result, got multiple")
 
-        return result
+        return result[0]
 
     def one_or_none(self):
         """Return at most one record or raise an exception.
@@ -197,3 +224,30 @@ class Response(object):
             return self.one()
         except NoResults:
             return None
+
+    def update(self, payload):
+        """Convenience method for updating a fetched record
+
+        :param payload: update payload
+        :return: update response object
+        """
+
+        return self._resource.update({'sys_id': self['sys_id']}, payload)
+
+    def delete(self):
+        """Convenience method for deleting a fetched record
+
+        :return: delete response object
+        """
+
+        return self._resource.delete({'sys_id': self['sys_id']})
+
+    def upload(self, *args, **kwargs):
+        """Convenience method for attaching files to a fetched record
+
+        :param args: args to pass along to `Attachment.upload`
+        :param kwargs: kwargs to pass along to `Attachment.upload`
+        :return: upload response object
+        """
+
+        return self._resource.attachments.upload(self['sys_id'], *args, **kwargs)

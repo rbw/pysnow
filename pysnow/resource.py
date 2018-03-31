@@ -78,7 +78,7 @@ class Resource(object):
 
         parameters = copy(self.parameters)
 
-        return SnowRequest(url_builder=self._url_builder, parameters=parameters, parent=self, **self.kwargs)
+        return SnowRequest(url_builder=self._url_builder, parameters=parameters, resource=self, **self.kwargs)
 
     def get_record_link(self, sys_id):
         """Provides full URL to the provided sys_id
@@ -89,18 +89,19 @@ class Resource(object):
 
         return "%s/%s" % (self._url_builder.get_url(), sys_id)
 
-    def get(self, query, limit=None, offset=None, fields=list()):
+    def get(self, query, limit=None, offset=None, fields=list(), stream=False):
         """Queries the API resource
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
         :param limit: (optional) Limits the number of records returned
         :param fields: (optional) List of fields to include in the response created_on in descending order.
         :param offset: (optional) Number of records to skip before returning records
+        :param stream: Whether or not to use streaming / generator response interface
         :return:
             - :class:`Response` object
         """
 
-        return self._request.get(query, limit, offset, fields)
+        return self._request.get(query, limit, offset, fields, stream)
 
     def create(self, payload):
         """Creates a new record in the API resource
