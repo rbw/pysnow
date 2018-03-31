@@ -20,10 +20,23 @@
 News
 ----
 
-Version 0.7 released
+**Version 0.7 released**
 
 This release comes with a new attachment helper, available in *table-type* `Resources`.
 Go `here <http://pysnow.readthedocs.io/en/latest/api/attachment.html>`_ for its API documentation, or check out an `example <http://pysnow.readthedocs.io/en/latest/full_examples/attachments.html>`_.
+
+Also, the ``Response`` interface has been further improved and now allows chaining. Example:
+
+.. code-block:: python
+    
+    incidents = c.resource(api_path='/table/incident')
+    incident = incidents.get(query={'number': 'INC01234'})
+    print('uploading last words to incident: {0}'.format(incident['sys_id']))
+    incident.upload(file_path='/tmp/last_words.txt')
+    incident.update({'description': 'Bye bye'})
+    incident.delete()
+
+Additionally, generator / streamed responses are now default off, but can be easily enabled by passing stream=True to ``Resource.get`` for those memory-intensive queries.
 
 
 Documentation

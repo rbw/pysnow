@@ -62,7 +62,7 @@ class Attachment(object):
             headers["Content-Type"] = "text/plain"
             path_append = '/file'
 
-        return resource.request(method='POST', data=data, headers=headers, path_append=path_append).one()
+        return resource.request(method='POST', data=data, headers=headers, path_append=path_append)
 
     def delete(self, sys_id):
         """Deletes the provided attachment record

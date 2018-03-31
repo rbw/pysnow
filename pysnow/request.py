@@ -17,12 +17,12 @@ class SnowRequest(object):
     :param url_builder: :class:`url_builder.URLBuilder` object
     """
 
-    def __init__(self, parameters=None, session=None, url_builder=None, chunk_size=None, parent=None):
+    def __init__(self, parameters=None, session=None, url_builder=None, chunk_size=None, resource=None):
         self._parameters = parameters
         self._url_builder = url_builder
         self._session = session
         self._chunk_size = chunk_size
-        self._parent = parent
+        self._resource = resource
 
         self._url = url_builder.get_url()
 
@@ -37,17 +37,18 @@ class SnowRequest(object):
         """
 
         params = self._parameters.as_dict()
+        use_stream = kwargs.pop('stream', False)
 
-        logger.debug('(REQUEST_SEND) Method: %s, Resource: %s' % (method, self._parent))
+        logger.debug('(REQUEST_SEND) Method: %s, Resource: %s' % (method, self._resource))
 
-        response = self._session.request(method, self._url, stream=True, params=params, **kwargs)
+        response = self._session.request(method, self._url, stream=use_stream, params=params, **kwargs)
         response.raw.decode_content = True
 
-        logger.debug('(RESPONSE_RECEIVE) Code: %d, Resource: %s' % (response.status_code, self._parent))
+        logger.debug('(RESPONSE_RECEIVE) Code: %d, Resource: %s' % (response.status_code, self._resource))
 
-        return Response(response, self._chunk_size)
+        return Response(response=response, resource=self._resource, chunk_size=self._chunk_size, stream=use_stream)
 
-    def get(self, query, limit=None, offset=None, fields=list()):
+    def get(self, query, limit=None, offset=None, fields=list(), stream=False):
         """Fetches one or more records, exposes a public API of :class:`pysnow.Response`
 
         :param query: Dictionary, string or :class:`QueryBuilder` object
@@ -55,6 +56,7 @@ class SnowRequest(object):
         :param fields: List of fields to include in the response
         created_on in descending order.
         :param offset: Number of records to skip before returning records
+        :param stream: Whether or not to use streaming / generator response interface
         :return:
             - :class:`pysnow.Response` object
         """
@@ -70,7 +72,7 @@ class SnowRequest(object):
         if len(fields) > 0:
             self._parameters.fields = fields
 
-        return self._get_response('GET')
+        return self._get_response('GET', stream=stream)
 
     def create(self, payload):
         """Creates a new record
@@ -80,7 +82,7 @@ class SnowRequest(object):
             - Dictionary of the inserted record
         """
 
-        return self._get_response('POST', data=json.dumps(payload)).one()
+        return self._get_response('POST', data=json.dumps(payload))
 
     def update(self, query, payload):
         """Updates a record
@@ -97,7 +99,7 @@ class SnowRequest(object):
         record = self.get(query).one()
 
         self._url = self._url_builder.get_appended_custom("/{0}".format(record['sys_id']))
-        return self._get_response('PUT', data=json.dumps(payload)).one()
+        return self._get_response('PUT', data=json.dumps(payload))
 
     def delete(self, query):
         """Deletes a record
