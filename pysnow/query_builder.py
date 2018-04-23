@@ -2,6 +2,7 @@
 
 import inspect
 import six
+import pytz
 
 from .exceptions import (QueryEmpty,
                          QueryExpressionError,
@@ -111,13 +112,13 @@ class QueryBuilder(object):
     def greater_than(self, greater_than):
         """Adds new `>` condition
 
-        :param greater_than: str or datetime compatible object
+        :param greater_than: str or datetime compatible object (naive UTC datetime or tz-aware datetime)
         :raise:
             - QueryTypeError: if `greater_than` is of an unexpected type
         """
 
         if hasattr(greater_than, 'strftime'):
-            greater_than = greater_than.strftime('%Y-%m-%d %H:%M:%S')
+            greater_than = datetime_as_utc(greater_than).strftime('%Y-%m-%d %H:%M:%S')
         elif isinstance(greater_than, six.string_types):
             raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(greater_than))
 
@@ -126,13 +127,13 @@ class QueryBuilder(object):
     def less_than(self, less_than):
         """Adds new `<` condition
 
-        :param less_than: str or datetime compatible object
+        :param less_than: str or datetime compatible object (naive UTC datetime or tz-aware datetime)
         :raise:
             - QueryTypeError: if `less_than` is of an unexpected type
         """
 
         if hasattr(less_than, 'strftime'):
-            less_than = less_than.strftime('%Y-%m-%d %H:%M:%S')
+            less_than = datetime_as_utc(less_than).strftime('%Y-%m-%d %H:%M:%S')
         elif isinstance(less_than, six.string_types):
             raise QueryTypeError('Expected value of type `int` or instance of `datetime`, not %s' % type(less_than))
 
@@ -141,8 +142,8 @@ class QueryBuilder(object):
     def between(self, start, end):
         """Adds new `BETWEEN` condition
 
-        :param start: int or datetime  compatible object
-        :param end: int or datetime compatible object
+        :param start: int or datetime  compatible object (in SNOW user's timezone)
+        :param end: int or datetime compatible object (in SNOW user's timezone)
         :raise:
             - QueryTypeError: if start or end arguments is of an invalid type
         """
@@ -246,3 +247,9 @@ class QueryBuilder(object):
             raise QueryExpressionError("field() expects an expression")
 
         return str().join(self._query)
+
+
+def datetime_as_utc(date_obj):
+    if date_obj.tzinfo is not None and date_obj.tzinfo.utcoffset(date_obj) is not None:
+        return date_obj.astimezone(pytz.UTC)
+    return date_obj
