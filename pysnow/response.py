@@ -27,6 +27,10 @@ class Response(object):
         self._stream = stream
 
     @property
+    def headers(self):
+        return self._response.headers
+
+    @property
     def count(self):
         return self._count
 
