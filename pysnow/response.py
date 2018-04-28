@@ -19,7 +19,7 @@ class Response(object):
     :param chunk_size: Read and return up to this size (in bytes) in the stream parser
     """
 
-    def __init__(self, response, resource, chunk_size=2048, stream=False):
+    def __init__(self, response, resource, chunk_size=8192, stream=False):
         self._response = response
         self._chunk_size = chunk_size
         self._count = 0
