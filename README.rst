@@ -31,8 +31,7 @@ Also, the ``Response`` interface has been further improved and now allows chaini
     
     incidents = c.resource(api_path='/table/incident')
     incident = incidents.get(query={'number': 'INC01234'})
-    print('uploading last words to incident: {0}'.format(incident['sys_id']))
-    incident.upload(file_path='/tmp/last_words.txt')
+    incident.upload(file_path='/tmp/attachment.txt')
     incident.update({'description': 'Bye bye'})
     incident.delete()
 
@@ -62,7 +61,7 @@ Robert Wikman <rbw@vault13.org>
 
 Contributors
 ------------
-lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk
+lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk, DenverJ
 
 
 JetBrains
