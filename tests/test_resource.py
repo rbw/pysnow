@@ -132,6 +132,21 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(r.path, self.base_path + self.api_path)
 
     @httpretty.activate
+    def test_response_headers(self):
+        """Request response headers should be available in Response.headers property"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               status=200,
+                               adding_headers={'x-test-1': 'foo', 'x-test-2': 'bar'},
+                               content_type="application/json")
+
+        response = self.resource.get(self.dict_query)
+
+        self.assertEqual(response.headers['x-test-1'], 'foo')
+        self.assertEqual(response.headers['x-test-2'], 'bar')
+
+    @httpretty.activate
     def test_response_count(self):
         """:prop:`count` of :class:`pysnow.Response` should raise an exception if count is set to non-integer"""
 
