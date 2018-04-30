@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.6"
   - "2.7"
   - "3.3"
   - "3.4"
@@ -8,12 +7,9 @@ python:
   - "3.6"
 # command to install dependencies
 install:
-  - pip install pysnow requests httpretty oauthlib requests_oauthlib coverage python-coveralls nose ijson six
+  - pip install pysnow requests httpretty oauthlib requests_oauthlib coverage python-coveralls nose ijson six pytz
 # command to run tests
 script:
   - nosetests --with-coverage --cover-package=pysnow --cover-erase
 after_success:
   - coveralls
-
-
-

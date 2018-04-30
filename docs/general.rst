@@ -1,7 +1,7 @@
 Compatibility
 -------------
 
-Python 2.6+ and Python 3.3+
+Fully tested and verified working: Python 2.7+ and Python 3.3+
 
 
 Installing
@@ -34,7 +34,7 @@ License
 
 MIT License
 
-Copyright (c) 2017 Robert Wikman <rbw@vault13.org>
+Copyright (c) 2018 Robert Wikman <rbw@vault13.org>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
