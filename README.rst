@@ -5,7 +5,7 @@
 	\ \  _-/ \ \____ \ \ \___  \ \ \ \-.  \ \ \ \/\ \ \ \ \/ ".\ \
 	 \ \_\    \/\_____\ \/\_____\ \ \_\\"\_\ \ \_____\ \ \__/".~\_\
 	  \/_/     \/_____/  \/_____/  \/_/ \/_/  \/_____/  \/_/   \/_/
-			- a Python library for the ServiceNow REST API
+			- a Python client library for ServiceNow
 			
 .. image:: https://travis-ci.org/rbw0/pysnow.svg?branch=master
     :target: https://travis-ci.org/rbw0/pysnow
@@ -53,7 +53,6 @@ Other projects using pysnow
 ---------------------------
 - `flask-snow <https://github.com/rbw0/flask-snow>`_ - Adds ServiceNow support to Flask
 - `django-snow <https://github.com/godaddy/django-snow>`_ - ServiceNow Ticket Management App for Django based projects
-- `pysnow-shovel <https://github.com/zetup/pysnow-shovel>`_ - Script for easy peasy pushing data into ServiceNow
 
 Author
 ------
