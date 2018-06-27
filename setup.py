@@ -24,7 +24,7 @@ with io.open('README.rst') as readme:
         name='pysnow',
         packages=['pysnow'],
         version=get_version(),
-        description='Python library for the ServiceNow REST API',
+        description='ServiceNow HTTP client library',
         long_description=readme.read(),
         install_requires=['requests', 'oauthlib', 'requests_oauthlib', 'httpretty', 'six', 'ijson', 'pytz'],
         author='Robert Wikman',
@@ -33,7 +33,7 @@ with io.open('README.rst') as readme:
         maintainer_email='rbw@vault13.org',
         url='https://github.com/rbw0/pysnow',
         download_url='https://github.com/rbw0/pysnow/tarball/%s' % get_version(),
-        keywords=['servicenow', 'rest', 'api', 'http'],
+        keywords=['servicenow', 'rest', 'api', 'http', 'client'],
         platforms='any',
         classifiers=[
             'Environment :: Web Environment',

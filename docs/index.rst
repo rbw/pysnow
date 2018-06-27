@@ -3,8 +3,7 @@
 PYSNOW
 ======
 
-
-Library written in Python that makes interacting with the ServiceNow REST API much enjoyable.
+ServiceNow HTTP client library written in Python.
 
 .. _general:
 

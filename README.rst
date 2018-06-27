@@ -37,7 +37,6 @@ Also, the ``Response`` interface has been further improved and now allows chaini
 
 Additionally, generator / streamed responses are now default off, but can be easily enabled by passing stream=True to ``Resource.get`` for those memory-intensive queries.
 
-Furthermore, I've decided to **remove legacy parts of the library**, which has been deprecated for quite some time, in version 0.8 of pysnow (around May).
 
 Documentation
 -------------
