@@ -7,36 +7,14 @@
 	  \/_/     \/_____/  \/_____/  \/_/ \/_/  \/_____/  \/_/   \/_/
 			- a Python client library for ServiceNow
 			
-.. image:: https://travis-ci.org/rbw0/pysnow.svg?branch=master
-    :target: https://travis-ci.org/rbw0/pysnow
+.. image:: https://travis-ci.org/rbw/pysnow.svg?branch=master
+    :target: https://travis-ci.org/rbw/pysnow
 .. image:: https://coveralls.io/repos/github/rbw0/pysnow/badge.svg?branch=master
     :target: https://coveralls.io/github/rbw0/pysnow?branch=master
 .. image:: https://badge.fury.io/py/pysnow.svg
     :target: https://pypi.python.org/pypi/pysnow
 .. image:: https://img.shields.io/badge/License-MIT-green.svg
     :target: https://opensource.org/licenses/MIT
-
-
-News
-----
-
-**Version 0.7 released**
-
-This release comes with a new attachment helper, available in *table-type* `Resources`.
-Go `here <http://pysnow.readthedocs.io/en/latest/api/attachment.html>`_ for its API documentation, or check out an `example <http://pysnow.readthedocs.io/en/latest/full_examples/attachments.html>`_.
-
-Also, the ``Response`` interface has been further improved and now allows chaining. Example:
-
-.. code-block:: python
-    
-    incidents = c.resource(api_path='/table/incident')
-    incident = incidents.get(query={'number': 'INC01234'})
-    incident.upload(file_path='/tmp/attachment.txt')
-    incident.update({'description': 'Bye bye'})
-    incident.delete()
-
-Additionally, generator / streamed responses are now default off, but can be easily enabled by passing stream=True to ``Resource.get`` for those memory-intensive queries.
-
 
 Documentation
 -------------
