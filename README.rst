@@ -30,6 +30,7 @@ Other projects using pysnow
 ---------------------------
 - `flask-snow <https://github.com/rbw0/flask-snow>`_ - Adds ServiceNow support to Flask
 - `django-snow <https://github.com/godaddy/django-snow>`_ - ServiceNow Ticket Management App for Django based projects
+- `pyfnalsnow <https://github.com/tskirvin/pyfnalsnow>`_ - Python libraries and scripts to interact with the FNAL instance
 
 Author
 ------
