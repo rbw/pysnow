@@ -38,7 +38,7 @@ Robert Wikman <rbw@vault13.org>
 
 Contributors
 ------------
-lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk, DenverJ
+lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk, DenverJ, siddweiker
 
 
 JetBrains
