@@ -5,13 +5,14 @@ The :meth:`pysnow.Resource.get` returns an instance of :class:`pysnow.Response`,
 various methods available for getting the data you're after.
 
 .. note::
-    All get-methods uses an incremental stream parser when fetching data.
+    Fetching large amounts of data? Use the incremental stream parser by passing stream=True to get(),
+    this will return a memory-friendly generator instead of a buffered result.
 
 
 Multiple records
 ----------------
 
-The :meth:`pysnow.Response.all` returns a generator iterator, which is iterated on in chunks of 8192 bytes by default.
+In this example, :meth:`pysnow.Response.all` returns a generator (stream=True), which is iterated on in chunks of 8192 bytes by default.
 
 
 .. code-block:: python
@@ -25,7 +26,7 @@ The :meth:`pysnow.Response.all` returns a generator iterator, which is iterated 
     incident = c.resource(api_path='/table/incident')
 
     # Query for incidents with state 1
-    response = incident.get(query={'state': 1})
+    response = incident.get(query={'state': 1}, stream=True)
 
     # Iterate over the result and print out `sys_id` of the matching records.
     for record in response.all():
