@@ -79,6 +79,11 @@ class QueryBuilder(object):
 
         return self._add_condition('ISEMPTY', '', types=[str, int])
 
+    def is_not_empty(self):
+        """Adds new `ISNOTEMPTY` condition"""
+
+        return self._add_condition('ISNOTEMPTY', '', types=[str, int])
+
     def equals(self, data):
         """Adds new `IN` or `=` condition depending on if a list or string was provided
 

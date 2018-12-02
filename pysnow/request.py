@@ -48,31 +48,19 @@ class SnowRequest(object):
 
         return Response(response=response, resource=self._resource, chunk_size=self._chunk_size, stream=use_stream)
 
-    def get(self, query, limit=None, offset=None, fields=list(), stream=False):
-        """Fetches one or more records, exposes a public API of :class:`pysnow.Response`
+    def get(self, *args, **kwargs):
+        """Fetches one or more records
 
-        :param query: Dictionary, string or :class:`QueryBuilder` object
-        :param limit: Limits the number of records returned
-        :param fields: List of fields to include in the response
-        created_on in descending order.
-        :param offset: Number of records to skip before returning records
-        :param stream: Whether or not to use streaming / generator response interface
         :return:
             - :class:`pysnow.Response` object
         """
 
-        self._parameters.query = query
+        self._parameters.query = kwargs.pop('query', {}) if len(args) == 0 else args[0]
+        self._parameters.limit = kwargs.pop('limit', 0)
+        self._parameters.offset = kwargs.pop('offset', 0)
+        self._parameters.fields = kwargs.pop('fields', kwargs.pop('fields', []))
 
-        if limit is not None:
-            self._parameters.limit = limit
-
-        if offset is not None:
-            self._parameters.offset = offset
-
-        if len(fields) > 0:
-            self._parameters.fields = fields
-
-        return self._get_response('GET', stream=stream)
+        return self._get_response('GET', stream=kwargs.pop('stream', False))
 
     def create(self, payload):
         """Creates a new record

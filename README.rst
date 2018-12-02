@@ -30,6 +30,7 @@ Other projects using pysnow
 ---------------------------
 - `flask-snow <https://github.com/rbw0/flask-snow>`_ - Adds ServiceNow support to Flask
 - `django-snow <https://github.com/godaddy/django-snow>`_ - ServiceNow Ticket Management App for Django based projects
+- `pyfnalsnow <https://github.com/tskirvin/pyfnalsnow>`_ - Python libraries and scripts to interact with the FNAL instance
 
 Author
 ------
@@ -37,7 +38,7 @@ Robert Wikman <rbw@vault13.org>
 
 Contributors
 ------------
-lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk, DenverJ
+lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk, DenverJ, siddweiker
 
 
 JetBrains

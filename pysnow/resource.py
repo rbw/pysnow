@@ -31,10 +31,6 @@ class Resource(object):
         self._url_builder = URLBuilder(base_url, base_path, api_path)
 
         self.kwargs = kwargs
-
-        # @TODO - Remove this alias in a future release
-        self.custom = self.request
-
         self.parameters = deepcopy(parameters)
 
         logger.debug('(RESOURCE_ADD) Object: %s, chunk_size: %d' % (self, kwargs.get('chunk_size')))
@@ -89,19 +85,25 @@ class Resource(object):
 
         return "%s/%s" % (self._url_builder.get_url(), sys_id)
 
-    def get(self, query, limit=None, offset=None, fields=list(), stream=False):
+    def get(self, *args, **kwargs):
         """Queries the API resource
 
-        :param query: Dictionary, string or :class:`QueryBuilder` object
-        :param limit: (optional) Limits the number of records returned
-        :param fields: (optional) List of fields to include in the response created_on in descending order.
-        :param offset: (optional) Number of records to skip before returning records
-        :param stream: Whether or not to use streaming / generator response interface
+        :param args:
+            - :param query: Dictionary, string or :class:`QueryBuilder` object
+                            defaults to empty dict (all)
+
+        :param kwargs:
+            - :param limit: Limits the number of records returned
+            - :param fields: List of fields to include in the response
+                             created_on in descending order.
+            - :param offset: Number of records to skip before returning records
+            - :param stream: Whether or not to use streaming / generator response interface
+
         :return:
             - :class:`Response` object
         """
 
-        return self._request.get(query, limit, offset, fields, stream)
+        return self._request.get(*args, **kwargs)
 
     def create(self, payload):
         """Creates a new record in the API resource

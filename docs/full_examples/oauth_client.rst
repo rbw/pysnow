@@ -19,7 +19,8 @@ The `store` here could be a database table, file, session or whatever you want.
 
     # Create the OAuthClient with the ServiceNow provided `client_id` and `client_secret`, and a `token_updater`
     # function which takes care of refreshing local token storage.
-    s = pysnow.OAuthClient(client_id='<client_id_from_servicenow>', client_secret='<client_secret_from_servicenow>',
+    s = pysnow.OAuthClient(client_id='<client_id_from_servicenow>',
+                           client_secret='<client_secret_from_servicenow>',
                            token_updater=updater, instance='<instance_name>')
 
     if not store['token']:
@@ -33,7 +34,7 @@ The `store` here could be a database table, file, session or whatever you want.
     incident_resource = s.resource(api_path='/table/incident')
 
     # Fetch the first record in the response
-    record = incident_resource.get(query={}).first()
+    record = incident_resource.get(stream=True).first()
 
     # Print it
     print(record)
