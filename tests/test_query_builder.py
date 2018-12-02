@@ -124,6 +124,12 @@ class TestQueryBuilder(unittest.TestCase):
 
         self.assertEqual(str(q), 'testISEMPTY')
 
+    def test_query_cond_is_not_empty(self):
+        # Make sure a valid operation works
+        q = pysnow.QueryBuilder().field('test').is_not_empty()
+
+        self.assertEqual(str(q), 'testISNOTEMPTY')
+
     def test_query_cond_equals(self):
         # Make sure type checking works
         q1 = pysnow.QueryBuilder().field('test')
