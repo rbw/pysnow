@@ -56,7 +56,7 @@ class SnowRequest(object):
         """
 
         self._parameters.query = kwargs.pop('query', {}) if len(args) == 0 else args[0]
-        self._parameters.limit = kwargs.pop('limit', 1)
+        self._parameters.limit = kwargs.pop('limit', 10000)
         self._parameters.offset = kwargs.pop('offset', 0)
         self._parameters.fields = kwargs.pop('fields', kwargs.pop('fields', []))
 
