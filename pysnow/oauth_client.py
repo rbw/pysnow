@@ -10,8 +10,6 @@ from requests_oauthlib import OAuth2Session
 from .client import Client
 from .exceptions import InvalidUsage, MissingToken, TokenCreateError
 
-warnings.simplefilter("always", DeprecationWarning)
-
 logger = logging.getLogger('pysnow')
 
 
