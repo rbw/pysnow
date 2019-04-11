@@ -135,12 +135,13 @@ class Client(object):
                              base_url=self.base_url,
                              **kwargs)
 
-    def resource(self, api_path=None, base_path='/api/now', chunk_size=None):
+    def resource(self, api_path=None, base_path='/api/now', chunk_size=None, **kwargs):
         """Creates a new :class:`Resource` object after validating paths
 
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
         :param chunk_size: Response stream parser chunk size (in bytes)
+        :param **kwargs: Pass request.request parameters to the Resource object
         :return:
             - :class:`Resource` object
         :raises:
@@ -155,7 +156,8 @@ class Client(object):
                         parameters=self.parameters,
                         chunk_size=chunk_size or 8192,
                         session=self.session,
-                        base_url=self.base_url)
+                        base_url=self.base_url,
+                        **kwargs)
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.
