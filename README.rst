@@ -15,6 +15,8 @@
     :target: https://pypi.python.org/pypi/pysnow
 .. image:: https://img.shields.io/badge/License-MIT-green.svg
     :target: https://opensource.org/licenses/MIT
+.. image:: https://pepy.tech/badge/pysnow/month
+    :target: https://pepy.tech/project/pysnow
 
 Documentation
 -------------
@@ -25,12 +27,6 @@ The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four secti
 - `Library API <http://pysnow.readthedocs.io/en/latest/#api>`_
 - `Usage <http://pysnow.readthedocs.io/en/latest/#usage>`_
 - `Full examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
-
-Other projects using pysnow
----------------------------
-- `flask-snow <https://github.com/rbw0/flask-snow>`_ - Adds ServiceNow support to Flask
-- `django-snow <https://github.com/godaddy/django-snow>`_ - ServiceNow Ticket Management App for Django based projects
-- `pyfnalsnow <https://github.com/tskirvin/pyfnalsnow>`_ - Python libraries and scripts to interact with the FNAL instance
 
 Author
 ------
