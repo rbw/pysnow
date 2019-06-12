@@ -72,7 +72,7 @@ class QueryBuilder(object):
         :param not_contains: Match field not containing the provided value
         """
 
-        return self._add_condition('NOTLIKE', not_contains, types=[str])
+        return self._add_condition('NOT LIKE', not_contains, types=[str])
 
     def is_empty(self):
         """Adds new `ISEMPTY` condition"""

@@ -116,7 +116,7 @@ class TestQueryBuilder(unittest.TestCase):
 
         # Make sure a valid operation works
         q2 = pysnow.QueryBuilder().field('test').not_contains('val')
-        self.assertEqual(str(q2), 'testNOTLIKEval')
+        self.assertEqual(str(q2), 'testNOT LIKEval')
 
     def test_query_cond_is_empty(self):
         # Make sure a valid operation works
