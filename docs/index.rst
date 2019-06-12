@@ -49,6 +49,7 @@ ServiceNow HTTP client library written in Python.
    full_examples/update
    full_examples/delete
    full_examples/sorting
+   full_examples/filtering
    full_examples/oauth_client
    full_examples/query_builder
    full_examples/attachments
