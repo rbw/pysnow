@@ -112,10 +112,6 @@ class SnowRequest(object):
         :return:
             - :class:`pysnow.Response` object
         """
-
-        if headers:
-            self._session.headers.update(headers)
-
         if path_append is not None:
             try:
                 self._url = self._url_builder.get_appended_custom(path_append)
@@ -123,4 +119,4 @@ class SnowRequest(object):
                 raise InvalidUsage("Argument 'path_append' must be a string in the following format: "
                                    "/path-to-append[/.../...]")
 
-        return self._get_response(method, **kwargs)
+        return self._get_response(method, headers=headers, **kwargs)
