@@ -102,7 +102,7 @@ class SnowRequest(object):
         self._url = self._url_builder.get_appended_custom("/{0}".format(record['sys_id']))
         return self._get_response('DELETE').one()
 
-    def custom(self, method, path_append=None, headers=None, **kwargs):
+    def custom(self, method, path_append=None, **kwargs):
         """Creates a custom request
 
         :param method: HTTP method
@@ -112,10 +112,6 @@ class SnowRequest(object):
         :return:
             - :class:`pysnow.Response` object
         """
-
-        if headers:
-            self._session.headers.update(headers)
-
         if path_append is not None:
             try:
                 self._url = self._url_builder.get_appended_custom(path_append)
