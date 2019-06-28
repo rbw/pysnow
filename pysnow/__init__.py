@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Public API
 from .client import Client
 from .oauth_client import OAuthClient
 from .query_builder import QueryBuilder
@@ -8,7 +7,7 @@ from .resource import Resource
 from .params_builder import ParamsBuilder
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.7.7"
+__version__ = "0.7.8"
 
 # Set default logging handler to avoid "No handler found" warnings.
 import logging
