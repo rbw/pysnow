@@ -102,7 +102,7 @@ class SnowRequest(object):
         self._url = self._url_builder.get_appended_custom("/{0}".format(record['sys_id']))
         return self._get_response('DELETE').one()
 
-    def custom(self, method, path_append=None, headers=None, **kwargs):
+    def custom(self, method, path_append=None, **kwargs):
         """Creates a custom request
 
         :param method: HTTP method
@@ -119,4 +119,4 @@ class SnowRequest(object):
                 raise InvalidUsage("Argument 'path_append' must be a string in the following format: "
                                    "/path-to-append[/.../...]")
 
-        return self._get_response(method, headers=headers, **kwargs)
+        return self._get_response(method, **kwargs)
