@@ -7,7 +7,7 @@ python:
   - "3.6"
 # command to install dependencies
 install:
-  - pip install pysnow requests httpretty oauthlib requests_oauthlib coverage python-coveralls nose ijson six pytz
+  - pip install pysnow requests httpretty oauthlib requests_oauthlib coverage python-coveralls nose ijson six pytz python-magic
 # command to run tests
 script:
   - nosetests --with-coverage --cover-package=pysnow --cover-erase
