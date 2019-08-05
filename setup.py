@@ -26,7 +26,7 @@ with io.open('README.rst') as readme:
         version=get_version(),
         description='ServiceNow HTTP client library',
         long_description=readme.read(),
-        install_requires=['requests', 'oauthlib', 'requests_oauthlib', 'httpretty', 'six', 'ijson', 'pytz'],
+        install_requires=['requests', 'oauthlib', 'python-magic', 'requests_oauthlib', 'httpretty', 'six', 'ijson', 'pytz'],
         author='Robert Wikman',
         author_email='rbw@vault13.org',
         maintainer='Robert Wikman',
