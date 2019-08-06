@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os
+import warnings
 
-import magic
+try:
+    import magic
+    HAS_MAGIC = True
+except ImportError:  # pragma: no cover
+    HAS_MAGIC = False
+    warnings.warn("Missing the python-magic library; attachment content-type will be set to text/plain. "
+                  "Try installing the python-magic-bin package if running on Mac or Windows")
 
 from pysnow.exceptions import InvalidUsage
 
@@ -62,7 +69,7 @@ class Attachment(object):
             headers["Content-Type"] = "multipart/form-data"
             path_append = '/upload'
         else:
-            headers["Content-Type"] = magic.from_file(file_path, mime=True)
+            headers["Content-Type"] = magic.from_file(file_path, mime=True) if HAS_MAGIC else "text/plain"
             path_append = '/file'
 
         return resource.request(method='POST', data=data, headers=headers, path_append=path_append)
