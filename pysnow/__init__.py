@@ -7,13 +7,13 @@ from .resource import Resource
 from .params_builder import ParamsBuilder
 
 __author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.7.8"
+__version__ = "0.7.9"
 
 # Set default logging handler to avoid "No handler found" warnings.
 import logging
 try:  # Python 2.7+
     from logging import NullHandler
-except ImportError:
+except ImportError:  # pragma: no cover
     class NullHandler(logging.Handler):
         def emit(self, record):
             pass
