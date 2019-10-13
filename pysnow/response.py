@@ -134,6 +134,8 @@ class Response(object):
 
         if response.request.method == 'DELETE' and response.status_code == 204:
             return [{'status': 'record deleted'}], 1
+        elif response.status_code == 202:  # No content
+            return [{}], 1
 
         result = self._response.json().get('result', None)
 
