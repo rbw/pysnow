@@ -36,6 +36,10 @@ class ReportUnavailable(Exception):
     pass
 
 
+class EmptyContent(Exception):
+    pass
+
+
 class NoResults(Exception):
     pass
 
