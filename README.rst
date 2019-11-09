@@ -18,6 +18,7 @@
 .. image:: https://pepy.tech/badge/pysnow/month
     :target: https://pepy.tech/project/pysnow
 
+
 Documentation
 -------------
 
@@ -27,6 +28,12 @@ The `documentation <http://pysnow.readthedocs.org/>`_ is divided into four secti
 - `Library API <http://pysnow.readthedocs.io/en/latest/#api>`_
 - `Usage <http://pysnow.readthedocs.io/en/latest/#usage>`_
 - `Full examples <http://pysnow.readthedocs.io/en/latest/#examples>`_
+
+Snowstorm
+----
+
+Check out `snowstorm <https://github.com/rbw/snowstorm/>`_: another ServiceNow project in the works.
+
 
 Author
 ------
