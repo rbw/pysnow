@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-######################
-# Generic exceptions #
-######################
-class InvalidUsage(Exception):
+
+class PysnowException(Exception):
     pass
 
 
-#######################
-# Response exceptions #
-#######################
-class ResponseError(Exception):
+class InvalidUsage(PysnowException):
+    pass
+
+
+class ResponseError(PysnowException):
     message = '<empty>'
     detail = '<empty>'
 
@@ -24,62 +23,48 @@ class ResponseError(Exception):
         return 'Error in response. Message: %s, Details: %s' % (self.message, self.detail)
 
 
-class MissingResult(Exception):
+class MissingResult(PysnowException):
     pass
 
 
-class UnexpectedResponseFormat(Exception):
+class NoResults(PysnowException):
+    pass
+
+  
+class EmptyContent(PysnowException):
+    pass
+
+  
+class MultipleResults(PysnowException):
     pass
 
 
-class ReportUnavailable(Exception):
+class MissingToken(PysnowException):
     pass
 
 
-class EmptyContent(Exception):
-    pass
-
-
-class NoResults(Exception):
-    pass
-
-
-class MultipleResults(Exception):
-    pass
-
-
-##########################
-# OAuthClient exceptions #
-##########################
-class MissingToken(Exception):
-    pass
-
-
-class TokenCreateError(Exception):
+class TokenCreateError(PysnowException):
     def __init__(self, error, description, status_code):
         self.error = error
         self.description = description
         self.snow_status_code = status_code
 
 
-############################
-# Query builder exceptions #
-############################
-class QueryTypeError(TypeError):
+class QueryTypeError(PysnowException):
     pass
 
 
-class QueryMissingField(Exception):
+class QueryMissingField(PysnowException):
     pass
 
 
-class QueryEmpty(Exception):
+class QueryEmpty(PysnowException):
     pass
 
 
-class QueryExpressionError(Exception):
+class QueryExpressionError(PysnowException):
     pass
 
 
-class QueryMultipleExpressions(Exception):
+class QueryMultipleExpressions(PysnowException):
     pass
