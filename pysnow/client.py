@@ -108,7 +108,7 @@ class Client(object):
             {
                 'content-type': 'application/json',
                 'accept': 'application/json',
-                'User-Agent': 'pysnow/%s' % pysnow.__version__
+                'User-Agent': 'pysnow'
             }
         )
 
