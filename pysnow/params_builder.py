@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 import six
@@ -15,14 +14,14 @@ class ParamsBuilder(object):
         self._custom_params = {}
 
         self._sysparms = {
-            'sysparm_query': '',
-            'sysparm_limit': 10000,
-            'sysparm_offset': None,
-            'sysparm_display_value': False,
-            'sysparm_suppress_pagination_header': False,
-            'sysparm_exclude_reference_link': False,
-            'sysparm_view': '',
-            'sysparm_fields': []
+            "sysparm_query": "",
+            "sysparm_limit": 10000,
+            "sysparm_offset": None,
+            "sysparm_display_value": False,
+            "sysparm_suppress_pagination_header": False,
+            "sysparm_exclude_reference_link": False,
+            "sysparm_view": "",
+            "sysparm_fields": [],
         }
 
     @staticmethod
@@ -38,12 +37,14 @@ class ParamsBuilder(object):
             return str(query)
         elif isinstance(query, dict):
             # Dict-type query
-            return '^'.join(['%s=%s' % (k, v) for k, v in six.iteritems(query)])
+            return "^".join(["%s=%s" % (k, v) for k, v in six.iteritems(query)])
         elif isinstance(query, six.string_types):
             # Regular string-type query
             return query
         else:
-            raise InvalidUsage('Query must be of type string, dict or a QueryBuilder object')
+            raise InvalidUsage(
+                "Query must be of type string, dict or a QueryBuilder object"
+            )
 
     def add_custom(self, params):
         """Adds new custom parameter after making sure it's of type dict.
@@ -64,7 +65,7 @@ class ParamsBuilder(object):
     @property
     def display_value(self):
         """Maps to `sysparm_display_value`"""
-        return self._sysparms['sysparm_display_value']
+        return self._sysparms["sysparm_display_value"]
 
     @display_value.setter
     def display_value(self, value):
@@ -73,15 +74,15 @@ class ParamsBuilder(object):
         :param value:  Bool or 'all'
         """
 
-        if not (isinstance(value, bool) or value == 'all'):
+        if not (isinstance(value, bool) or value == "all"):
             raise InvalidUsage("Display value can be of type bool or value 'all'")
 
-        self._sysparms['sysparm_display_value'] = value
+        self._sysparms["sysparm_display_value"] = value
 
     @property
     def query(self):
         """Maps to `sysparm_query`"""
-        return self._sysparms['sysparm_query']
+        return self._sysparms["sysparm_query"]
 
     @query.setter
     def query(self, query):
@@ -90,12 +91,12 @@ class ParamsBuilder(object):
         :param query: String, dict or QueryBuilder
         """
 
-        self._sysparms['sysparm_query'] = self.stringify_query(query)
+        self._sysparms["sysparm_query"] = self.stringify_query(query)
 
     @property
     def limit(self):
         """Maps to `sysparm_limit`"""
-        return self._sysparms['sysparm_limit']
+        return self._sysparms["sysparm_limit"]
 
     @limit.setter
     def limit(self, limit):
@@ -107,12 +108,12 @@ class ParamsBuilder(object):
         if not isinstance(limit, int) or isinstance(limit, bool):
             raise InvalidUsage("limit size must be of type integer")
 
-        self._sysparms['sysparm_limit'] = limit
+        self._sysparms["sysparm_limit"] = limit
 
     @property
     def offset(self):
         """Maps to `sysparm_offset`"""
-        return self._sysparms['sysparm_offset']
+        return self._sysparms["sysparm_offset"]
 
     @offset.setter
     def offset(self, offset):
@@ -124,14 +125,14 @@ class ParamsBuilder(object):
         """
 
         if not isinstance(offset, int) or isinstance(offset, bool):
-            raise InvalidUsage('Offset must be an integer')
+            raise InvalidUsage("Offset must be an integer")
 
-        self._sysparms['sysparm_offset'] = offset
+        self._sysparms["sysparm_offset"] = offset
 
     @property
     def fields(self):
         """Maps to `sysparm_fields`"""
-        return self._sysparms['sysparm_fields']
+        return self._sysparms["sysparm_fields"]
 
     @fields.setter
     def fields(self, fields):
@@ -143,14 +144,14 @@ class ParamsBuilder(object):
         """
 
         if not isinstance(fields, list):
-            raise InvalidUsage('fields must be of type `list`')
+            raise InvalidUsage("fields must be of type `list`")
 
-        self._sysparms['sysparm_fields'] = ",".join(fields)
+        self._sysparms["sysparm_fields"] = ",".join(fields)
 
     @property
     def exclude_reference_link(self):
         """Maps to `sysparm_exclude_reference_link`"""
-        return self._sysparms['sysparm_exclude_reference_link']
+        return self._sysparms["sysparm_exclude_reference_link"]
 
     @exclude_reference_link.setter
     def exclude_reference_link(self, exclude):
@@ -159,14 +160,14 @@ class ParamsBuilder(object):
         :param exclude: bool
         """
         if not isinstance(exclude, bool):
-            raise InvalidUsage('exclude_reference_link must be of type bool')
+            raise InvalidUsage("exclude_reference_link must be of type bool")
 
-        self._sysparms['sysparm_exclude_reference_link'] = exclude
+        self._sysparms["sysparm_exclude_reference_link"] = exclude
 
     @property
     def suppress_pagination_header(self):
         """Maps to `sysparm_suppress_pagination_header`"""
-        return self._sysparms['sysparm_suppress_pagination_header']
+        return self._sysparms["sysparm_suppress_pagination_header"]
 
     @suppress_pagination_header.setter
     def suppress_pagination_header(self, suppress):
@@ -175,9 +176,9 @@ class ParamsBuilder(object):
         :param suppress: bool
         """
         if not isinstance(suppress, bool):
-            raise InvalidUsage('suppress_pagination_header must be of type bool')
+            raise InvalidUsage("suppress_pagination_header must be of type bool")
 
-        self._sysparms['sysparm_suppress_pagination_header'] = suppress
+        self._sysparms["sysparm_suppress_pagination_header"] = suppress
 
     def as_dict(self):
         """Constructs query params compatible with :class:`requests.Request`

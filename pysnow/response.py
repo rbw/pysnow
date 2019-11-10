@@ -10,7 +10,7 @@ from .exceptions import (
     InvalidUsage,
     MultipleResults,
     EmptyContent,
-    MissingResult
+    MissingResult,
 )
 
 
@@ -48,7 +48,11 @@ class Response(object):
         return self.one().get(key)
 
     def __repr__(self):
-        return '<%s [%d - %s]>' % (self.__class__.__name__, self._response.status_code, self._response.request.method)
+        return "<%s [%d - %s]>" % (
+            self.__class__.__name__,
+            self._response.status_code,
+            self._response.request.method,
+        )
 
     def _parse_response(self):
         """Looks for `result.item` (array), `result` (object) and `error` (object) keys and parses
@@ -67,49 +71,55 @@ class Response(object):
 
         builder = ObjectBuilder()
 
-        for prefix, event, value in ijson.parse(response.raw, buf_size=self._chunk_size):
-            if (prefix, event) == ('error', 'start_map'):
+        for prefix, event, value in ijson.parse(
+            response.raw, buf_size=self._chunk_size
+        ):
+            if (prefix, event) == ("error", "start_map"):
                 # Matched ServiceNow `error` object at the root
                 has_error = True
-            elif prefix == 'result' and event in ['start_map', 'start_array']:
+            elif prefix == "result" and event in ["start_map", "start_array"]:
                 # Matched ServiceNow `result`
-                if event == 'start_map':  # Matched object
+                if event == "start_map":  # Matched object
                     has_result_single = True
-                elif event == 'start_array':  # Matched array
+                elif event == "start_array":  # Matched array
                     has_result_many = True
 
             if has_result_many:
                 # Build the result
-                if (prefix, event) == ('result.item', 'end_map'):
+                if (prefix, event) == ("result.item", "end_map"):
                     # Reached end of object. Set count and yield
                     builder.event(event, value)
                     self.count += 1
-                    yield getattr(builder, 'value')
-                elif prefix.startswith('result.item'):
+                    yield getattr(builder, "value")
+                elif prefix.startswith("result.item"):
                     # Build the result object
                     builder.event(event, value)
             elif has_result_single:
-                if (prefix, event) == ('result', 'end_map'):
+                if (prefix, event) == ("result", "end_map"):
                     # Reached end of the result object. Set count and yield.
                     builder.event(event, value)
                     self.count += 1
-                    yield getattr(builder, 'value')
-                elif prefix.startswith('result'):
+                    yield getattr(builder, "value")
+                elif prefix.startswith("result"):
                     # Build the error object
                     builder.event(event, value)
             elif has_error:
-                if (prefix, event) == ('error', 'end_map'):
+                if (prefix, event) == ("error", "end_map"):
                     # Reached end of the error object - raise ResponseError exception
-                    raise ResponseError(getattr(builder, 'value'))
-                elif prefix.startswith('error'):
+                    raise ResponseError(getattr(builder, "value"))
+                elif prefix.startswith("error"):
                     # Build the error object
                     builder.event(event, value)
 
         if (has_result_single or has_result_many) and self.count == 0:  # Results empty
             return
 
-        if not (has_result_single or has_result_many or has_error):  # None of the expected keys were found
-            raise MissingResult('The expected `result` key was missing in the response. Cannot continue')
+        if not (
+            has_result_single or has_result_many or has_error
+        ):  # None of the expected keys were found
+            raise MissingResult(
+                "The expected `result` key was missing in the response. Cannot continue"
+            )
 
     def _get_response(self):
         response = self._response
@@ -117,9 +127,13 @@ class Response(object):
         # Raise an HTTPError if we hit a non-200 status code
         response.raise_for_status()
 
-        if response.request.method == 'GET' and response.status_code == 202:
+        if response.request.method == "GET" and response.status_code == 202:
             # GET request with a "202: no content" response: Raise NoContent Exception.
-            raise EmptyContent('Unexpected empty content in response for GET request: {}'.format(response.request.url))
+            raise EmptyContent(
+                "Unexpected empty content in response for GET request: {}".format(
+                    response.request.url
+                )
+            )
 
         return response
 
@@ -139,13 +153,15 @@ class Response(object):
 
         response = self._get_response()
 
-        if response.request.method == 'DELETE' and response.status_code == 204:
-            return [{'status': 'record deleted'}], 1
+        if response.request.method == "DELETE" and response.status_code == 204:
+            return [{"status": "record deleted"}], 1
 
-        result = self._response.json().get('result', None)
+        result = self._response.json().get("result", None)
 
         if result is None:
-            raise MissingResult('The expected `result` key was missing in the response. Cannot continue')
+            raise MissingResult(
+                "The expected `result` key was missing in the response. Cannot continue"
+            )
 
         length = 0
 
@@ -180,7 +196,7 @@ class Response(object):
         """
 
         if not self._stream:
-            raise InvalidUsage('first() is only available when stream=True')
+            raise InvalidUsage("first() is only available when stream=True")
 
         try:
             content = next(self.all())
@@ -243,7 +259,7 @@ class Response(object):
         :return: update response object
         """
 
-        return self._resource.update({'sys_id': self['sys_id']}, payload)
+        return self._resource.update({"sys_id": self["sys_id"]}, payload)
 
     def delete(self):
         """Convenience method for deleting a fetched record
@@ -251,7 +267,7 @@ class Response(object):
         :return: delete response object
         """
 
-        return self._resource.delete({'sys_id': self['sys_id']})
+        return self._resource.delete({"sys_id": self["sys_id"]})
 
     def upload(self, *args, **kwargs):
         """Convenience method for attaching files to a fetched record
@@ -261,4 +277,4 @@ class Response(object):
         :return: upload response object
         """
 
-        return self._resource.attachments.upload(self['sys_id'], *args, **kwargs)
+        return self._resource.attachments.upload(self["sys_id"], *args, **kwargs)

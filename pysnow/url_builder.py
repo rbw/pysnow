@@ -13,10 +13,7 @@ class URLBuilder(object):
         self.full_path = base_path + api_path
 
         self._resource_url = "%(base_url)s%(full_path)s" % (
-            {
-                'base_url': base_url,
-                'full_path': self.full_path
-            }
+            {"base_url": base_url, "full_path": self.full_path}
         )
 
     @staticmethod
@@ -28,9 +25,12 @@ class URLBuilder(object):
             :InvalidUsage: If validation fails.
         """
 
-        if not isinstance(path, six.string_types) or not re.match('^/(?:[._a-zA-Z0-9-]/?)+[^/]$', path):
+        if not isinstance(path, six.string_types) or not re.match(
+            "^/(?:[._a-zA-Z0-9-]/?)+[^/]$", path
+        ):
             raise InvalidUsage(
-                "Path validation failed - Expected: '/<component>[/component], got: %s" % path
+                "Path validation failed - Expected: '/<component>[/component], got: %s"
+                % path
             )
 
         return True
@@ -43,7 +43,7 @@ class URLBuilder(object):
         """
 
         if instance is not None:
-            host = ("%s.service-now.com" % instance).rstrip('/')
+            host = ("%s.service-now.com" % instance).rstrip("/")
 
         if use_ssl is True:
             return "https://%s" % host
@@ -66,5 +66,3 @@ class URLBuilder(object):
         :return: :prop:`_resource_url`
         """
         return self._resource_url
-
-

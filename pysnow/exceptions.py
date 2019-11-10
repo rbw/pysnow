@@ -10,17 +10,20 @@ class InvalidUsage(PysnowException):
 
 
 class ResponseError(PysnowException):
-    message = '<empty>'
-    detail = '<empty>'
+    message = "<empty>"
+    detail = "<empty>"
 
     def __init__(self, error):
-        if 'message' in error:
-            self.message = error['message'] or self.message
-        if 'detail' in error:
-            self.detail = error['detail'] or self.detail
+        if "message" in error:
+            self.message = error["message"] or self.message
+        if "detail" in error:
+            self.detail = error["detail"] or self.detail
 
     def __str__(self):
-        return 'Error in response. Message: %s, Details: %s' % (self.message, self.detail)
+        return "Error in response. Message: %s, Details: %s" % (
+            self.message,
+            self.detail,
+        )
 
 
 class MissingResult(PysnowException):
@@ -30,11 +33,11 @@ class MissingResult(PysnowException):
 class NoResults(PysnowException):
     pass
 
-  
+
 class EmptyContent(PysnowException):
     pass
 
-  
+
 class MultipleResults(PysnowException):
     pass
 
