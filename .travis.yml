@@ -7,8 +7,8 @@ python:
 before_install:
     - pip install poetry
 install:
-    - poetry install
+    - pip install $(poetry run pip freeze)
 script:
-    - poetry run nosetests --with-coverage --cover-package=pysnow --cover-erase
+    - nosetests --with-coverage --cover-package=pysnow --cover-erase
 after_success:
     - coveralls
