@@ -1,10 +1,10 @@
 ```
-	 ______   __  __    ______    __   __    ______    __     __
-	/\  == \ /\ \_\ \  /\  ___\  /\ "-.\ \  /\  __ \  /\ \  _ \ \
-	\ \  _-/ \ \____ \ \ \___  \ \ \ \-.  \ \ \ \/\ \ \ \ \/ ".\ \
-	 \ \_\    \/\_____\ \/\_____\ \ \_\\"\_\ \ \_____\ \ \__/".~\_\
-	  \/_/     \/_____/  \/_____/  \/_/ \/_/  \/_____/  \/_/   \/_/
-			- a Python client library for ServiceNow
+ ______   __  __    ______    __   __    ______    __     __
+/\  == \ /\ \_\ \  /\  ___\  /\ "-.\ \  /\  __ \  /\ \  _ \ \
+\ \  _-/ \ \____ \ \ \___  \ \ \ \-.  \ \ \ \/\ \ \ \ \/ ".\ \
+ \ \_\    \/\_____\ \/\_____\ \ \_\\"\_\ \ \_____\ \ \__/".~\_\
+  \/_/     \/_____/  \/_____/  \/_/ \/_/  \/_____/  \/_/   \/_/
+		- a Python client library for ServiceNow
 ```
 
 [![image](https://travis-ci.org/rbw/pysnow.svg?branch=master)](https://travis-ci.org/rbw/pysnow)
@@ -23,16 +23,10 @@ The documentation is available at [https://pysnow.readthedocs.io](https://pysnow
 Author
 ---
 
-Robert Wikman <rbw@vault13.org>
+Robert Wikman \<rbw@vault13.org\>
 
-Contributors
+Credits
 ---
 
-lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk, DenverJ, siddweiker
-
-
-JetBrains
----
-
-Thanks [Jetbrains](http://www.jetbrains.com) for IDE licenses.
+Thank you [@contributors](https://github.com/rbw/pysnow/graphs/contributors) and [Jetbrains](http://www.jetbrains.com) for IDE licenses.
 
