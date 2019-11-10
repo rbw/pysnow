@@ -6,7 +6,7 @@ import json
 from .response import Response
 from .exceptions import InvalidUsage
 
-logger = logging.getLogger('pysnow')
+logger = logging.getLogger("pysnow")
 
 
 class SnowRequest(object):
@@ -17,7 +17,14 @@ class SnowRequest(object):
     :param url_builder: :class:`url_builder.URLBuilder` object
     """
 
-    def __init__(self, parameters=None, session=None, url_builder=None, chunk_size=None, resource=None):
+    def __init__(
+        self,
+        parameters=None,
+        session=None,
+        url_builder=None,
+        chunk_size=None,
+        resource=None,
+    ):
         self._parameters = parameters
         self._url_builder = url_builder
         self._session = session
@@ -37,16 +44,28 @@ class SnowRequest(object):
         """
 
         params = self._parameters.as_dict()
-        use_stream = kwargs.pop('stream', False)
+        use_stream = kwargs.pop("stream", False)
 
-        logger.debug('(REQUEST_SEND) Method: %s, Resource: %s' % (method, self._resource))
+        logger.debug(
+            "(REQUEST_SEND) Method: %s, Resource: %s" % (method, self._resource)
+        )
 
-        response = self._session.request(method, self._url, stream=use_stream, params=params, **kwargs)
+        response = self._session.request(
+            method, self._url, stream=use_stream, params=params, **kwargs
+        )
         response.raw.decode_content = True
 
-        logger.debug('(RESPONSE_RECEIVE) Code: %d, Resource: %s' % (response.status_code, self._resource))
+        logger.debug(
+            "(RESPONSE_RECEIVE) Code: %d, Resource: %s"
+            % (response.status_code, self._resource)
+        )
 
-        return Response(response=response, resource=self._resource, chunk_size=self._chunk_size, stream=use_stream)
+        return Response(
+            response=response,
+            resource=self._resource,
+            chunk_size=self._chunk_size,
+            stream=use_stream,
+        )
 
     def get(self, *args, **kwargs):
         """Fetches one or more records
@@ -55,12 +74,12 @@ class SnowRequest(object):
             - :class:`pysnow.Response` object
         """
 
-        self._parameters.query = kwargs.pop('query', {}) if len(args) == 0 else args[0]
-        self._parameters.limit = kwargs.pop('limit', 10000)
-        self._parameters.offset = kwargs.pop('offset', 0)
-        self._parameters.fields = kwargs.pop('fields', kwargs.pop('fields', []))
+        self._parameters.query = kwargs.pop("query", {}) if len(args) == 0 else args[0]
+        self._parameters.limit = kwargs.pop("limit", 10000)
+        self._parameters.offset = kwargs.pop("offset", 0)
+        self._parameters.fields = kwargs.pop("fields", kwargs.pop("fields", []))
 
-        return self._get_response('GET', stream=kwargs.pop('stream', False))
+        return self._get_response("GET", stream=kwargs.pop("stream", False))
 
     def create(self, payload):
         """Creates a new record
@@ -70,7 +89,7 @@ class SnowRequest(object):
             - Dictionary of the inserted record
         """
 
-        return self._get_response('POST', data=json.dumps(payload))
+        return self._get_response("POST", data=json.dumps(payload))
 
     def update(self, query, payload):
         """Updates a record
@@ -86,8 +105,10 @@ class SnowRequest(object):
 
         record = self.get(query).one()
 
-        self._url = self._url_builder.get_appended_custom("/{0}".format(record['sys_id']))
-        return self._get_response('PUT', data=json.dumps(payload))
+        self._url = self._url_builder.get_appended_custom(
+            "/{0}".format(record["sys_id"])
+        )
+        return self._get_response("PUT", data=json.dumps(payload))
 
     def delete(self, query):
         """Deletes a record
@@ -99,8 +120,10 @@ class SnowRequest(object):
 
         record = self.get(query=query).one()
 
-        self._url = self._url_builder.get_appended_custom("/{0}".format(record['sys_id']))
-        return self._get_response('DELETE').one()
+        self._url = self._url_builder.get_appended_custom(
+            "/{0}".format(record["sys_id"])
+        )
+        return self._get_response("DELETE").one()
 
     def custom(self, method, path_append=None, **kwargs):
         """Creates a custom request
@@ -116,7 +139,9 @@ class SnowRequest(object):
             try:
                 self._url = self._url_builder.get_appended_custom(path_append)
             except InvalidUsage:
-                raise InvalidUsage("Argument 'path_append' must be a string in the following format: "
-                                   "/path-to-append[/.../...]")
+                raise InvalidUsage(
+                    "Argument 'path_append' must be a string in the following format: "
+                    "/path-to-append[/.../...]"
+                )
 
         return self._get_response(method, **kwargs)

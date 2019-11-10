@@ -14,7 +14,7 @@ from .resource import Resource
 from .url_builder import URLBuilder
 from .params_builder import ParamsBuilder
 
-logger = logging.getLogger('pysnow')
+logger = logging.getLogger("pysnow")
 
 
 class Client(object):
@@ -32,18 +32,22 @@ class Client(object):
         - InvalidUsage: On argument validation error
     """
 
-    def __init__(self,
-                 instance=None,
-                 host=None,
-                 user=None,
-                 password=None,
-                 raise_on_empty=None,
-                 request_params=None,
-                 use_ssl=True,
-                 session=None):
+    def __init__(
+        self,
+        instance=None,
+        host=None,
+        user=None,
+        password=None,
+        raise_on_empty=None,
+        request_params=None,
+        use_ssl=True,
+        session=None,
+    ):
 
         if (host and instance) is not None:
-            raise InvalidUsage("Arguments 'instance' and 'host' are mutually exclusive, you cannot use both.")
+            raise InvalidUsage(
+                "Arguments 'instance' and 'host' are mutually exclusive, you cannot use both."
+            )
 
         if type(use_ssl) is not bool:
             raise InvalidUsage("Argument 'use_ssl' must be of type bool")
@@ -51,8 +55,11 @@ class Client(object):
         if raise_on_empty is None:
             self.raise_on_empty = True
         elif type(raise_on_empty) is bool:
-            warnings.warn("The use of the `raise_on_empty` argument is deprecated and will be removed in a "
-                          "future release.", DeprecationWarning)
+            warnings.warn(
+                "The use of the `raise_on_empty` argument is deprecated and will be removed in a "
+                "future release.",
+                DeprecationWarning,
+            )
 
             self.raise_on_empty = raise_on_empty
         else:
@@ -63,15 +70,22 @@ class Client(object):
 
         if not isinstance(self, pysnow.OAuthClient):
             if not (user and password) and not session:
-                raise InvalidUsage("You must supply either username and password or a session object")
+                raise InvalidUsage(
+                    "You must supply either username and password or a session object"
+                )
             elif (user and session) is not None:
-                raise InvalidUsage("Provide either username and password or a session, not both.")
+                raise InvalidUsage(
+                    "Provide either username and password or a session, not both."
+                )
 
         self.parameters = ParamsBuilder()
 
         if request_params is not None:
-            warnings.warn("The use of the `request_params` argument is deprecated and will be removed in a "
-                          "future release. Please use Client.parameters instead.", DeprecationWarning)
+            warnings.warn(
+                "The use of the `request_params` argument is deprecated and will be removed in a "
+                "future release. Please use Client.parameters instead.",
+                DeprecationWarning,
+            )
 
             self.parameters.add_custom(request_params)
 
@@ -97,18 +111,18 @@ class Client(object):
         """
 
         if not session:
-            logger.debug('(SESSION_CREATE) User: %s' % self._user)
+            logger.debug("(SESSION_CREATE) User: %s" % self._user)
             s = requests.Session()
             s.auth = HTTPBasicAuth(self._user, self._password)
         else:
-            logger.debug('(SESSION_CREATE) Object: %s' % session)
+            logger.debug("(SESSION_CREATE) Object: %s" % session)
             s = session
 
         s.headers.update(
             {
-                'content-type': 'application/json',
-                'accept': 'application/json',
-                'User-Agent': 'pysnow'
+                "content-type": "application/json",
+                "accept": "application/json",
+                "User-Agent": "pysnow",
             }
         )
 
@@ -123,19 +137,24 @@ class Client(object):
             - :class:`LegacyRequest` object
         """
 
-        warnings.warn("`%s` is deprecated and will be removed in a future release. "
-                      "Please use `resource()` instead." % inspect.stack()[1][3], DeprecationWarning)
+        warnings.warn(
+            "`%s` is deprecated and will be removed in a future release. "
+            "Please use `resource()` instead." % inspect.stack()[1][3],
+            DeprecationWarning,
+        )
 
-        return LegacyRequest(method,
-                             table,
-                             request_params=self.request_params,
-                             raise_on_empty=self.raise_on_empty,
-                             session=self.session,
-                             instance=self.instance,
-                             base_url=self.base_url,
-                             **kwargs)
+        return LegacyRequest(
+            method,
+            table,
+            request_params=self.request_params,
+            raise_on_empty=self.raise_on_empty,
+            session=self.session,
+            instance=self.instance,
+            base_url=self.base_url,
+            **kwargs
+        )
 
-    def resource(self, api_path=None, base_path='/api/now', chunk_size=None, **kwargs):
+    def resource(self, api_path=None, base_path="/api/now", chunk_size=None, **kwargs):
         """Creates a new :class:`Resource` object after validating paths
 
         :param api_path: Path to the API to operate on
@@ -151,13 +170,15 @@ class Client(object):
         for path in [api_path, base_path]:
             URLBuilder.validate_path(path)
 
-        return Resource(api_path=api_path,
-                        base_path=base_path,
-                        parameters=self.parameters,
-                        chunk_size=chunk_size or 8192,
-                        session=self.session,
-                        base_url=self.base_url,
-                        **kwargs)
+        return Resource(
+            api_path=api_path,
+            base_path=base_path,
+            parameters=self.parameters,
+            chunk_size=chunk_size or 8192,
+            session=self.session,
+            base_url=self.base_url,
+            **kwargs
+        )
 
     def query(self, table, **kwargs):
         """Query (GET) request wrapper.
@@ -168,7 +189,7 @@ class Client(object):
             - List of dictionaries containing the matching records
         """
 
-        return self._legacy_request('GET', table, **kwargs)
+        return self._legacy_request("GET", table, **kwargs)
 
     def insert(self, table, payload, **kwargs):
         """Insert (POST) request wrapper
@@ -180,6 +201,5 @@ class Client(object):
             - Dictionary containing the created record
         """
 
-        r = self._legacy_request('POST', table, **kwargs)
+        r = self._legacy_request("POST", table, **kwargs)
         return r.insert(payload)
-

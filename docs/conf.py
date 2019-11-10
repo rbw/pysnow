@@ -3,7 +3,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(".."))
 
 html_theme = "sphinx_rtd_theme"
 
@@ -30,7 +30,4 @@ autoclass_content = "both"
 autodoc_docstring_signature = False
 coverage_skip_undoc_in_source = True
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-
-
-
+on_rtd = os.environ.get("READTHEDOCS", None) == "True"

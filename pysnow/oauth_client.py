@@ -10,7 +10,7 @@ from requests_oauthlib import OAuth2Session
 from .client import Client
 from .exceptions import InvalidUsage, MissingToken, TokenCreateError
 
-logger = logging.getLogger('pysnow')
+logger = logging.getLogger("pysnow")
 
 
 class OAuthClient(Client):
@@ -24,18 +24,22 @@ class OAuthClient(Client):
 
     token = None
 
-    def __init__(self, client_id=None, client_secret=None, token_updater=None, **kwargs):
+    def __init__(
+        self, client_id=None, client_secret=None, token_updater=None, **kwargs
+    ):
 
         if not (client_secret and client_id):
-            raise InvalidUsage('You must supply a client_id and client_secret')
+            raise InvalidUsage("You must supply a client_id and client_secret")
 
-        if kwargs.get('session') or kwargs.get('user'):
-            warnings.warn('pysnow.OAuthClient manages sessions internally, '
-                          'provided user / password credentials or sessions will be ignored.')
+        if kwargs.get("session") or kwargs.get("user"):
+            warnings.warn(
+                "pysnow.OAuthClient manages sessions internally, "
+                "provided user / password credentials or sessions will be ignored."
+            )
 
         # Forcibly set session, user and password
-        kwargs['user'] = None
-        kwargs['password'] = None
+        kwargs["user"] = None
+        kwargs["password"] = None
 
         super(OAuthClient, self).__init__(**kwargs)
 
@@ -60,8 +64,8 @@ class OAuthClient(Client):
                 auto_refresh_url=self.token_url,
                 auto_refresh_kwargs={
                     "client_id": self.client_id,
-                    "client_secret": self.client_secret
-                }
+                    "client_secret": self.client_secret,
+                },
             )
         )
 
@@ -75,10 +79,20 @@ class OAuthClient(Client):
             self.token = None
             return
 
-        expected_keys = ['token_type', 'refresh_token', 'access_token', 'scope', 'expires_in', 'expires_at']
+        expected_keys = [
+            "token_type",
+            "refresh_token",
+            "access_token",
+            "scope",
+            "expires_in",
+            "expires_at",
+        ]
         if not isinstance(token, dict) or not set(token) >= set(expected_keys):
-            raise InvalidUsage("Expected a token dictionary containing the following keys: {0}"
-                               .format(expected_keys))
+            raise InvalidUsage(
+                "Expected a token dictionary containing the following keys: {0}".format(
+                    expected_keys
+                )
+            )
 
         # Set sanitized token
         self.token = dict((k, v) for k, v in token.items() if k in expected_keys)
@@ -98,9 +112,11 @@ class OAuthClient(Client):
             self.session = self._get_oauth_session()
             return super(OAuthClient, self)._legacy_request(*args, **kwargs)
 
-        raise MissingToken("You must set_token() before creating a legacy request with OAuthClient")
+        raise MissingToken(
+            "You must set_token() before creating a legacy request with OAuthClient"
+        )
 
-    def resource(self, api_path=None, base_path='/api/now', chunk_size=None):
+    def resource(self, api_path=None, base_path="/api/now", chunk_size=None):
         """Overrides :meth:`resource` provided by :class:`pysnow.Client` with extras for OAuth
 
         :param api_path: Path to the API to operate on
@@ -116,7 +132,9 @@ class OAuthClient(Client):
             self.session = self._get_oauth_session()
             return super(OAuthClient, self).resource(api_path, base_path, chunk_size)
 
-        raise MissingToken("You must set_token() before creating a resource with OAuthClient")
+        raise MissingToken(
+            "You must set_token() before creating a resource with OAuthClient"
+        )
 
     def generate_token(self, user, password):
         """Takes user and password credentials and generates a new token
@@ -129,18 +147,25 @@ class OAuthClient(Client):
             - TokenCreateError: If there was an error generating the new token
         """
 
-        logger.debug('(TOKEN_CREATE) :: User: %s' % user)
+        logger.debug("(TOKEN_CREATE) :: User: %s" % user)
 
-        session = OAuth2Session(client=LegacyApplicationClient(client_id=self.client_id))
+        session = OAuth2Session(
+            client=LegacyApplicationClient(client_id=self.client_id)
+        )
 
         try:
-            return dict(session.fetch_token(token_url=self.token_url,
-                                            username=user,
-                                            password=password,
-                                            client_id=self.client_id,
-                                            client_secret=self.client_secret))
+            return dict(
+                session.fetch_token(
+                    token_url=self.token_url,
+                    username=user,
+                    password=password,
+                    client_id=self.client_id,
+                    client_secret=self.client_secret,
+                )
+            )
         except OAuth2Error as exception:
-            raise TokenCreateError('Error creating user token', exception.description, exception.status_code)
-
-
-
+            raise TokenCreateError(
+                "Error creating user token",
+                exception.description,
+                exception.status_code,
+            )
