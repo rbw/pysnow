@@ -6,9 +6,6 @@ from .query_builder import QueryBuilder
 from .resource import Resource
 from .params_builder import ParamsBuilder
 
-__author__ = "Robert Wikman <rbw@vault13.org>"
-__version__ = "0.7.10"
-
 # Set default logging handler to avoid "No handler found" warnings.
 import logging
 try:  # Python 2.7+
