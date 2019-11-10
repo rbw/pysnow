@@ -25,7 +25,6 @@ with io.open('README.rst') as readme:
         packages=['pysnow'],
         version=get_version(),
         description='ServiceNow HTTP client library',
-        long_description=readme.read(),
         install_requires=[
             'requests',
             'oauthlib',
