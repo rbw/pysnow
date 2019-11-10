@@ -15,7 +15,8 @@ from pysnow.exceptions import (
     NoResults,
     MultipleResults,
     InvalidUsage,
-    MissingResult
+    MissingResult,
+    EmptyContent
 )
 
 
@@ -261,6 +262,20 @@ class TestResourceRequest(unittest.TestCase):
         result = list(response.all())
 
         self.assertEquals(result, [])
+
+    @httpretty.activate
+    def test_get_nocontent(self):
+        """Result.one should raise EmptyContent for GET 202"""
+
+        httpretty.register_uri(httpretty.GET,
+                               self.mock_url_builder_base,
+                               body=get_serialized_result(self.record_response_get_one),
+                               status=202,
+                               content_type="application/json")
+
+        result = self.resource.get(self.dict_query)
+
+        self.assertRaises(EmptyContent, result.one)
 
     @httpretty.activate
     def test_get_all_single(self):

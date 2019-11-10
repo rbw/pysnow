@@ -46,5 +46,5 @@ lingfish, jcpunk, AMMullan, amontalban, ryancurrah, jdugan1024, punkrokk, Denver
 
 JetBrains
 ---------
-Thank you `Jetbrains <http://www.jetbrains.com>`_ for creating pycharm and providing me with free licenses
+Thanks `Jetbrains <http://www.jetbrains.com>`_ for IDE licenses.
 

@@ -4,11 +4,14 @@ import ijson
 
 from ijson.common import ObjectBuilder
 from itertools import chain
-from .exceptions import (ResponseError,
-                         NoResults,
-                         InvalidUsage,
-                         MultipleResults,
-                         MissingResult)
+from .exceptions import (
+    ResponseError,
+    NoResults,
+    InvalidUsage,
+    MultipleResults,
+    EmptyContent,
+    MissingResult
+)
 
 
 class Response(object):
@@ -113,6 +116,10 @@ class Response(object):
 
         # Raise an HTTPError if we hit a non-200 status code
         response.raise_for_status()
+
+        if response.request.method == 'GET' and response.status_code == 202:
+            # GET request with a "202: no content" response: Raise NoContent Exception.
+            raise EmptyContent('Unexpected empty content in response for GET request: {}'.format(response.request.url))
 
         return response
 
