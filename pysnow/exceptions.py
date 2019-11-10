@@ -30,7 +30,11 @@ class MissingResult(PysnowException):
 class NoResults(PysnowException):
     pass
 
+  
+class EmptyContent(PysnowException):
+    pass
 
+  
 class MultipleResults(PysnowException):
     pass
 
