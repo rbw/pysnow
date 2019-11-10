@@ -28,5 +28,5 @@ Robert Wikman \<rbw@vault13.org\>
 Credits
 ---
 
-Thank you [@contributors](https://github.com/rbw/pysnow/graphs/contributors) and [Jetbrains](http://www.jetbrains.com) for IDE licenses.
+Thank you [@contributors](https://github.com/rbw/pysnow/graphs/contributors), and [Jetbrains](http://www.jetbrains.com) for IDE licenses.
 
