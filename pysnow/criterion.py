@@ -246,7 +246,7 @@ class IsEmptyCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return f'{term}ISEMPTY'
+        return '{}ISEMPTY'.format(term)
 
 
 class NotEmptyCriterion(Criterion):
@@ -256,7 +256,7 @@ class NotEmptyCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return f'{term}ISNOTEMPTY'
+        return '{}ISNOTEMPTY'.format(term)
 
 
 class IsAnythingCriterion(Criterion):
@@ -266,7 +266,7 @@ class IsAnythingCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return f'{term}ANYTHING'
+        return '{}ANYTHING'.format(term)
 
 
 class IsEmptyStringCriterion(Criterion):
@@ -276,7 +276,7 @@ class IsEmptyStringCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return f'{term}EMPTYSTRING'
+        return '{}EMPTYSTRING'.format(term)
 
 
 class BetweenCriterion(Criterion):
@@ -300,8 +300,8 @@ class BetweenCriterion(Criterion):
                 "Expected both `start` and `end` of type `int` "
                 "or instance of `datetime`, not %s and %s" % (type(start), type(end))
             )
-
-        return f'{term}BETWEEN{dt_between}'
+        
+        return '{}BETWEEN{}'.format(term, dt_between)
 
 
 class DateTimeOnCriterion(Criterion):
@@ -313,12 +313,16 @@ class DateTimeOnCriterion(Criterion):
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
         if isinstance(self.criteria, DateTimeOn):
-            criteria = self.criteria.value
-            return f'{term}ON{criteria}'
+            return '{term}ON{criteria}'.format(
+                term=term,
+                criteria=self.criteria.value
+            )
         else:
-            start = self.criteria.get_query(date_only=True, extra_param='start')
-            end = self.criteria.get_query(date_only=True, extra_param='end')
-            return f'{term}ONcustom@{start}@{end}'
+            return '{term}ONcustom@{start}@{end}'.format(
+                term=term,
+                start=self.criteria.get_query(date_only=True, extra_param='start'),
+                end=self.criteria.get_query(date_only=True, extra_param='end')
+            )
 
 
 class DateTimeNotOnCriterion(Criterion):
@@ -330,12 +334,16 @@ class DateTimeNotOnCriterion(Criterion):
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
         if isinstance(self.criteria, DateTimeOn):
-            criteria = self.criteria.value
-            return f'{term}NOTON{criteria}'
+            return '{term}NOTON{criteria}'.format(
+                term=term,
+                criteria=self.criteria.value
+            )
         else:
-            start = self.criteria.get_query(date_only=True, extra_param='start')
-            end = self.criteria.get_query(date_only=True, extra_param='end')
-            return f'{term}NOTONcustom@{start}@{end}'
+            return '{term}NOTONcustom@{start}@{end}'.format(
+                term=term,
+                start=self.criteria.get_query(date_only=True, extra_param='start'),
+                end=self.criteria.get_query(date_only=True, extra_param='end')
+            )
 
 
 class OrderCriterion(Criterion):
@@ -347,9 +355,9 @@ class OrderCriterion(Criterion):
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
         if self.direction == Order.asc or (isinstance(self.direction, six.string_types) and self.direction.lower() == 'asc'):
-            return f'ORDERBY{term}'
+            return 'ORDERBY{term}'.format(term=term)
         elif self.direction == Order.desc or (isinstance(self.direction, six.string_types) and self.direction.lower() == 'desc'):
-            return f'ORDERBYDESC{term}'
+            return 'ORDERBYDESC{term}'.format(term=term)
         else:
             raise QueryTypeError(
                 "Expected 'asc', 'desc', or an instance of Order, not %s"
@@ -406,9 +414,9 @@ class DateTimeValueWrapper(ValueWrapper):
                 value = datetime_.strftime("%Y-%m-%d %H:%M:%S")
 
             if extra_param:
-                value += f'", "{extra_param}'
+                value += '", "{}'.format(extra_param)
 
-            return f'javascript:gs.dateGenerate("{value}")'
+            return 'javascript:gs.dateGenerate("{}")'.format(value)
         else:
             raise QueryTypeError(
                 "Expected value to be an instance of `datetime`, not %s"
