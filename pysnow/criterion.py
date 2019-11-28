@@ -14,7 +14,7 @@ from .exceptions import (
 )
 
 
-class Term:
+class Term(object):
 
     @staticmethod
     def wrap_constant(value, types, list_type=False):
@@ -198,7 +198,7 @@ class Criterion(Term):
         raise NotImplementedError()
 
 
-class EmptyCriterion:
+class EmptyCriterion(object):
     def __and__(self, other):
         return other
 
@@ -449,7 +449,7 @@ class Field(Criterion):
         return self.name
 
 
-class Table:
+class Table(object):
     '''
         Allows the following:
 
