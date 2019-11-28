@@ -2,6 +2,11 @@
 from enum import Enum
 
 
+class Order(Enum):
+    asc = 'ASC'
+    desc = 'DESC'
+
+
 class Comparator(Enum):
     pass
 

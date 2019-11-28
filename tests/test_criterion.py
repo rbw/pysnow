@@ -1,25 +1,21 @@
 # -*- coding: utf-8 -*-
 import unittest
 import pytz
-import pysnow
 from datetime import datetime as dt
 
 from pysnow.criterion import (
     Field,
 )
-from pysnow.enums import(
+from pysnow.enums import (
     DateTimeOn,
+    Order,
 )
 from pysnow.exceptions import (
-    QueryEmpty,
-    QueryExpressionError,
-    QueryMissingField,
-    QueryMultipleExpressions,
     QueryTypeError,
 )
 
 
-class TestQueryBuilder(unittest.TestCase):
+class TestCriterion(unittest.TestCase):
 
     def test_query_logical_and(self):
         # Make sure AND() operator between expressions works
@@ -299,6 +295,24 @@ class TestQueryBuilder(unittest.TestCase):
 
         q3 = Field("test").not_on(DateTimeOn.today)
         self.assertEqual(str(q3), 'testNOTONToday@javascript:gs.beginningOfToday()@javascript:gs.endOfToday()')
+
+    def test_query_order_desc(self):
+        # :meth:`order_descending` should generate ORDERBYDESC<field>
+        q = (
+            Field("foo").eq("bar")
+            &
+            Field("foo2").order(Order.desc)
+        )
+        self.assertEqual(str(q), "foo=bar^ORDERBYDESCfoo2")
+
+    def test_query_order_ascending(self):
+        # :meth:`order_descending` should generate ORDERBY<field>
+        q = (
+            Field("foo").eq("bar")
+            &
+            Field("foo2").order(Order.asc)
+        )
+        self.assertEqual(str(q), "foo=bar^ORDERBYfoo2")
 
     def test_complex_query(self):
         start = dt(2016, 2, 1)

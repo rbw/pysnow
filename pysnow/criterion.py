@@ -7,6 +7,7 @@ from .enums import (
     Boolean,
     Equality,
     DateTimeOn,
+    Order,
 )
 from .exceptions import (
     QueryTypeError,
@@ -140,8 +141,10 @@ class Term:
 
     def not_on(self, other):
         return DateTimeNotOnCriterion(self, self.wrap_constant(other, types=[datetime, DateTimeOn]))
-
     # End DateTime only
+
+    def order(self, direction):
+        return OrderCriterion(self, direction)
 
     def __str__(self):
         return self.get_query()
@@ -288,10 +291,9 @@ class BetweenCriterion(Criterion):
         start = self.start.get_query(**kwargs)
         end = self.end.get_query(**kwargs)
 
-        if (
-            isinstance(self.start, DateTimeValueWrapper) and isinstance(self.end, DateTimeValueWrapper)
-            or (isinstance(self.start, IntValueWrapper) and isinstance(self.end, IntValueWrapper))
-        ):
+        if isinstance(self.start, DateTimeValueWrapper) and isinstance(self.end, DateTimeValueWrapper):
+            dt_between = "%s@%s" % (start, end)
+        elif isinstance(self.start, IntValueWrapper) and isinstance(self.end, IntValueWrapper):
             dt_between = "%d@%d" % (start, end)
         else:
             raise QueryTypeError(
@@ -334,6 +336,25 @@ class DateTimeNotOnCriterion(Criterion):
             start = self.criteria.get_query(date_only=True, extra_param='start')
             end = self.criteria.get_query(date_only=True, extra_param='end')
             return f'{term}NOTONcustom@{start}@{end}'
+
+
+class OrderCriterion(Criterion):
+    def __init__(self, term, direction):
+        super(OrderCriterion, self).__init__()
+        self.term = term
+        self.direction = direction
+
+    def get_query(self, **kwargs):
+        term = self.term.get_query(**kwargs)
+        if self.direction == Order.asc or (isinstance(self.direction, six.string_types) and self.direction.lower() == 'asc'):
+            return f'ORDERBY{term}'
+        elif self.direction == Order.desc or (isinstance(self.direction, six.string_types) and self.direction.lower() == 'desc'):
+            return f'ORDERBYDESC{term}'
+        else:
+            raise QueryTypeError(
+                "Expected 'asc', 'desc', or an instance of Order, not %s"
+                % (type(self.direction))
+            )
 
 
 class ValueWrapper(Term):
