@@ -139,6 +139,24 @@ class QueryBuilder(object):
 
         return self._add_condition(">", greater_than, types=[int, str])
 
+    def greater_than_or_equal(self, greater_than):
+        """Adds new `>=` condition
+
+        :param greater_than: str or datetime compatible object (naive UTC datetime or tz-aware datetime)
+        :raise:
+            - QueryTypeError: if `greater_than` is of an unexpected type
+        """
+
+        if hasattr(greater_than, "strftime"):
+            greater_than = datetime_as_utc(greater_than).strftime("%Y-%m-%d %H:%M:%S")
+        elif isinstance(greater_than, six.string_types):
+            raise QueryTypeError(
+                "Expected value of type `int` or instance of `datetime`, not %s"
+                % type(greater_than)
+            )
+
+        return self._add_condition(">=", greater_than, types=[int, str])
+
     def less_than(self, less_than):
         """Adds new `<` condition
 
@@ -156,6 +174,24 @@ class QueryBuilder(object):
             )
 
         return self._add_condition("<", less_than, types=[int, str])
+
+    def less_than_or_equal(self, less_than):
+        """Adds new `<=` condition
+
+        :param less_than: str or datetime compatible object (naive UTC datetime or tz-aware datetime)
+        :raise:
+            - QueryTypeError: if `less_than` is of an unexpected type
+        """
+
+        if hasattr(less_than, "strftime"):
+            less_than = datetime_as_utc(less_than).strftime("%Y-%m-%d %H:%M:%S")
+        elif isinstance(less_than, six.string_types):
+            raise QueryTypeError(
+                "Expected value of type `int` or instance of `datetime`, not %s"
+                % type(less_than)
+            )
+
+        return self._add_condition("<=", less_than, types=[int, str])
 
     def between(self, start, end):
         """Adds new `BETWEEN` condition

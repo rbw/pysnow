@@ -217,6 +217,27 @@ class TestQueryBuilder(unittest.TestCase):
         )
         self.assertEqual(str(q4), "test>2016-02-01 02:00:00")
 
+    def test_query_cond_greater_than_or_equal(self):
+        # Make sure type checking works
+        q1 = pysnow.QueryBuilder().field("test")
+        self.assertRaises(QueryTypeError, q1.greater_than_or_equal, "a")
+
+        # Make sure a valid operation works
+        q2 = pysnow.QueryBuilder().field("test").greater_than_or_equal(1)
+        self.assertEqual(str(q2), "test>=1")
+
+        # Make sure naive dates are assumed as UTC
+        q3 = pysnow.QueryBuilder().field("test").greater_than_or_equal(dt(2016, 2, 1))
+        self.assertEqual(str(q3), "test>=2016-02-01 00:00:00")
+
+        # Make sure tz-aware dates are converted to UTC (UTC+1)
+        q4 = (
+            pysnow.QueryBuilder()
+            .field("test")
+            .greater_than_or_equal(dt(2016, 2, 1, 3, tzinfo=pytz.FixedOffset(60)))
+        )
+        self.assertEqual(str(q4), "test>=2016-02-01 02:00:00")
+
     def test_query_cond_less_than(self):
         # Make sure type checking works
         q1 = pysnow.QueryBuilder().field("test")
@@ -237,6 +258,27 @@ class TestQueryBuilder(unittest.TestCase):
             .less_than(dt(2016, 2, 1, 3, tzinfo=pytz.FixedOffset(60)))
         )
         self.assertEqual(str(q3), "test<2016-02-01 02:00:00")
+
+    def test_query_cond_less_than_or_equal(self):
+        # Make sure type checking works
+        q1 = pysnow.QueryBuilder().field("test")
+        self.assertRaises(QueryTypeError, q1.less_than_or_equal, "a")
+
+        # Make sure a valid operation works
+        q2 = pysnow.QueryBuilder().field("test").less_than_or_equal(1)
+        self.assertEqual(str(q2), "test<=1")
+
+        # Make sure naive dates are assumed as UTC
+        q3 = pysnow.QueryBuilder().field("test").less_than_or_equal(dt(2016, 2, 1))
+        self.assertEqual(str(q3), "test<=2016-02-01 00:00:00")
+
+        # Make sure tz-aware dates are converted to UTC (UTC+1)
+        q3 = (
+            pysnow.QueryBuilder()
+            .field("test")
+            .less_than_or_equal(dt(2016, 2, 1, 3, tzinfo=pytz.FixedOffset(60)))
+        )
+        self.assertEqual(str(q3), "test<=2016-02-01 02:00:00")
 
     def test_complex_query(self):
         start = dt(2016, 2, 1)
