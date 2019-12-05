@@ -207,7 +207,7 @@ class TestQueryBuilder(unittest.TestCase):
 
         # Make sure naive dates are assumed as UTC
         q3 = pysnow.QueryBuilder().field("test").greater_than(dt(2016, 2, 1))
-        self.assertEqual(str(q3), "test>2016-02-01 00:00:00")
+        self.assertEqual(str(q3), 'test>javascript:gs.dateGenerate("2016-02-01 00:00:00")')
 
         # Make sure tz-aware dates are converted to UTC (UTC+1)
         q4 = (
@@ -215,7 +215,7 @@ class TestQueryBuilder(unittest.TestCase):
             .field("test")
             .greater_than(dt(2016, 2, 1, 3, tzinfo=pytz.FixedOffset(60)))
         )
-        self.assertEqual(str(q4), "test>2016-02-01 02:00:00")
+        self.assertEqual(str(q4), 'test>javascript:gs.dateGenerate("2016-02-01 02:00:00")')
 
     def test_query_cond_greater_than_or_equal(self):
         # Make sure type checking works
@@ -228,7 +228,7 @@ class TestQueryBuilder(unittest.TestCase):
 
         # Make sure naive dates are assumed as UTC
         q3 = pysnow.QueryBuilder().field("test").greater_than_or_equal(dt(2016, 2, 1))
-        self.assertEqual(str(q3), "test>=2016-02-01 00:00:00")
+        self.assertEqual(str(q3), 'test>=javascript:gs.dateGenerate("2016-02-01 00:00:00")')
 
         # Make sure tz-aware dates are converted to UTC (UTC+1)
         q4 = (
@@ -236,7 +236,7 @@ class TestQueryBuilder(unittest.TestCase):
             .field("test")
             .greater_than_or_equal(dt(2016, 2, 1, 3, tzinfo=pytz.FixedOffset(60)))
         )
-        self.assertEqual(str(q4), "test>=2016-02-01 02:00:00")
+        self.assertEqual(str(q4), 'test>=javascript:gs.dateGenerate("2016-02-01 02:00:00")')
 
     def test_query_cond_less_than(self):
         # Make sure type checking works
@@ -249,7 +249,7 @@ class TestQueryBuilder(unittest.TestCase):
 
         # Make sure naive dates are assumed as UTC
         q3 = pysnow.QueryBuilder().field("test").less_than(dt(2016, 2, 1))
-        self.assertEqual(str(q3), "test<2016-02-01 00:00:00")
+        self.assertEqual(str(q3), 'test<javascript:gs.dateGenerate("2016-02-01 00:00:00")')
 
         # Make sure tz-aware dates are converted to UTC (UTC+1)
         q3 = (
@@ -257,7 +257,7 @@ class TestQueryBuilder(unittest.TestCase):
             .field("test")
             .less_than(dt(2016, 2, 1, 3, tzinfo=pytz.FixedOffset(60)))
         )
-        self.assertEqual(str(q3), "test<2016-02-01 02:00:00")
+        self.assertEqual(str(q3), 'test<javascript:gs.dateGenerate("2016-02-01 02:00:00")')
 
     def test_query_cond_less_than_or_equal(self):
         # Make sure type checking works
@@ -270,7 +270,7 @@ class TestQueryBuilder(unittest.TestCase):
 
         # Make sure naive dates are assumed as UTC
         q3 = pysnow.QueryBuilder().field("test").less_than_or_equal(dt(2016, 2, 1))
-        self.assertEqual(str(q3), "test<=2016-02-01 00:00:00")
+        self.assertEqual(str(q3), 'test<=javascript:gs.dateGenerate("2016-02-01 00:00:00")')
 
         # Make sure tz-aware dates are converted to UTC (UTC+1)
         q3 = (
@@ -278,7 +278,7 @@ class TestQueryBuilder(unittest.TestCase):
             .field("test")
             .less_than_or_equal(dt(2016, 2, 1, 3, tzinfo=pytz.FixedOffset(60)))
         )
-        self.assertEqual(str(q3), "test<=2016-02-01 02:00:00")
+        self.assertEqual(str(q3), 'test<=javascript:gs.dateGenerate("2016-02-01 02:00:00")')
 
     def test_complex_query(self):
         start = dt(2016, 2, 1)
