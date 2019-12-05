@@ -2,6 +2,7 @@
 
 import six
 
+from .criterion import Criterion
 from .query_builder import QueryBuilder
 
 from .exceptions import InvalidUsage
@@ -32,7 +33,7 @@ class ParamsBuilder(object):
             - ServiceNow-compatible string-type query
         """
 
-        if isinstance(query, QueryBuilder):
+        if isinstance(query, QueryBuilder) or isinstance(query, Criterion):
             # Get string-representation of the passed :class:`pysnow.QueryBuilder` object
             return str(query)
         elif isinstance(query, dict):
@@ -43,7 +44,7 @@ class ParamsBuilder(object):
             return query
         else:
             raise InvalidUsage(
-                "Query must be of type string, dict or a QueryBuilder object"
+                "Query must be of type string, dict, QueryBuilder, or Criterion"
             )
 
     def add_custom(self, params):

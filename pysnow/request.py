@@ -78,6 +78,12 @@ class SnowRequest(object):
         self._parameters.limit = kwargs.pop("limit", 10000)
         self._parameters.offset = kwargs.pop("offset", 0)
         self._parameters.fields = kwargs.pop("fields", kwargs.pop("fields", []))
+        if "display_value" in kwargs:
+            self._parameters.display_value = kwargs.pop("display_value")
+        if "exclude_reference_link" in kwargs:
+            self._parameters.exclude_reference_link = kwargs.pop("exclude_reference_link")
+        if "suppress_pagination_header" in kwargs:
+            self._parameters.suppress_pagination_header = kwargs.pop("suppress_pagination_header")
 
         return self._get_response("GET", stream=kwargs.pop("stream", False))
 
