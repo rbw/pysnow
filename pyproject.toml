@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pysnow"
-version = "0.7.12"
+version = "0.7.13"
 description = "ServiceNow HTTP client library"
 authors = ["Robert Wikman <rbw@vault13.org>"]
 license = "MIT"
