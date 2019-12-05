@@ -9,6 +9,10 @@ class InvalidUsage(PysnowException):
     pass
 
 
+class UnexpectedResponseFormat(PysnowException):
+    pass
+
+
 class ResponseError(PysnowException):
     message = "<empty>"
     detail = "<empty>"
