@@ -13,15 +13,6 @@ from .exceptions import (
 )
 
 
-def datetime_as_utc(date_obj):
-    if date_obj.tzinfo is not None and date_obj.tzinfo.utcoffset(date_obj) is not None:
-        dt_str = date_obj.astimezone(pytz.UTC).strftime("%Y-%m-%d %H:%M:%S")
-    else:
-        dt_str = date_obj
-
-    return 'javascript:gs.dateGenerate("%s")' % dt_str
-
-
 class QueryBuilder(object):
     """Query builder - for constructing advanced ServiceNow queries"""
 
@@ -139,7 +130,7 @@ class QueryBuilder(object):
         """
 
         if hasattr(greater_than, "strftime"):
-            greater_than = datetime_as_utc(greater_than)
+            greater_than = datetime_as_utc(greater_than).strftime("%Y-%m-%d %H:%M:%S")
         elif isinstance(greater_than, six.string_types):
             raise QueryTypeError(
                 "Expected value of type `int` or instance of `datetime`, not %s"
@@ -157,7 +148,7 @@ class QueryBuilder(object):
         """
 
         if hasattr(greater_than, "strftime"):
-            greater_than = datetime_as_utc(greater_than)
+            greater_than = datetime_as_utc(greater_than).strftime("%Y-%m-%d %H:%M:%S")
         elif isinstance(greater_than, six.string_types):
             raise QueryTypeError(
                 "Expected value of type `int` or instance of `datetime`, not %s"
@@ -175,7 +166,7 @@ class QueryBuilder(object):
         """
 
         if hasattr(less_than, "strftime"):
-            less_than = datetime_as_utc(less_than)
+            less_than = datetime_as_utc(less_than).strftime("%Y-%m-%d %H:%M:%S")
         elif isinstance(less_than, six.string_types):
             raise QueryTypeError(
                 "Expected value of type `int` or instance of `datetime`, not %s"
@@ -193,7 +184,7 @@ class QueryBuilder(object):
         """
 
         if hasattr(less_than, "strftime"):
-            less_than = datetime_as_utc(less_than)
+            less_than = datetime_as_utc(less_than).strftime("%Y-%m-%d %H:%M:%S")
         elif isinstance(less_than, six.string_types):
             raise QueryTypeError(
                 "Expected value of type `int` or instance of `datetime`, not %s"
@@ -319,3 +310,9 @@ class QueryBuilder(object):
             raise QueryExpressionError("field() expects an expression")
 
         return str().join(self._query)
+
+
+def datetime_as_utc(date_obj):
+    if date_obj.tzinfo is not None and date_obj.tzinfo.utcoffset(date_obj) is not None:
+        return date_obj.astimezone(pytz.UTC)
+    return date_obj
