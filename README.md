@@ -27,7 +27,7 @@ Stable. No new features will be added to pysnow, it will however remain maintain
 
 **Important**
 
-The author of pysnow have decided to create a new modern Python 3.7+ library called snow. It's currently in alpha status, but does work. Check it out at [rbw/snow](https://github.com/rbw/snow).
+The author of pysnow have decided to create a new Python 3.7+ library called snow. It's currently in alpha status, but does work. Check it out at [rbw/snow](https://github.com/rbw/snow).
 
 
 Author
