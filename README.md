@@ -20,12 +20,12 @@ Documentation
 The documentation is available at [https://pysnow.readthedocs.io](https://pysnow.readthedocs.io)
 
 
-The future of pysnow
+Development status
 ---
 
 The development status of this project is stable: no new features will be added, it will however remain maintained.
 
-The author of pysnow is hard at work on the development of a new simple and lightweight yet powerful and extensible Python 3.7+ library called *Snow*. It's currently in alpha and covers basic CRUD functionality; check it out at [rbw/snow](https://github.com/rbw/snow).
+Pysnow's author is hard at work on the development of a new simple and lightweight yet powerful and extensible Python 3.7+ library called *Snow*. It's currently in alpha and covers basic CRUD functionality; check it out at [rbw/snow](https://github.com/rbw/snow).
 
 
 Author
