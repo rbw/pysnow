@@ -25,7 +25,7 @@ Development status
 
 The development status of pysnow is stable; maintenence will be performed, but no new features added.
 
-Pysnow's author is hard at work building a new simple and lightweight yet powerful and extensible Python 3.7+ library called *Snow*. It's currently in alpha and provides only basic CRUD functionality, check it out at [rbw/snow](https://github.com/rbw/snow).
+Pysnow's author is hard at work building a new simple and lightweight yet powerful and extensible Python 3.7+ library called *Snow*. It's currently in alpha and provides basic CRUD functionality, check it out at [rbw/snow](https://github.com/rbw/snow).
 
 
 Author
