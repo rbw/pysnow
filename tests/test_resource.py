@@ -646,7 +646,6 @@ class TestResourceRequest(unittest.TestCase):
     def test_custom_with_path_invalid(self):
         """:meth:`custom` should raise an exception if the provided path is invalid"""
 
-        self.assertRaises(InvalidUsage, self.resource.request, "GET", path_append="foo")
         self.assertRaises(
             InvalidUsage, self.resource.request, "GET", path_append={"foo": "bar"}
         )
