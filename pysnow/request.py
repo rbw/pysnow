@@ -2,6 +2,7 @@
 
 import logging
 import json
+import six
 
 from .response import Response
 from .exceptions import InvalidUsage
@@ -67,9 +68,17 @@ class SnowRequest(object):
             stream=use_stream,
         )
 
-    def _get_custom_endpoint(self, sys_id):
-        value = "/{0}".format(sys_id["value"] if "value" in sys_id else sys_id)
-        return self._url_builder.get_appended_custom(value)
+    def _get_custom_endpoint(self, value):
+        if isinstance(value, dict) and "value" in value:
+            value = value["value"]
+        elif not isinstance(value, six.string_types):
+            raise InvalidUsage(
+                "Argument 'path_append' must be a string in the following format: "
+                "/path-to-append[/.../...]"
+            )
+
+        segment = value if value.startswith("/") else "/{0}".format(value)
+        return self._url_builder.get_appended_custom(segment)
 
     def get(self, *args, **kwargs):
         """Fetches one or more records
@@ -147,12 +156,6 @@ class SnowRequest(object):
             - :class:`pysnow.Response` object
         """
         if path_append is not None:
-            try:
-                self._url = self._get_custom_endpoint(path_append)
-            except InvalidUsage:
-                raise InvalidUsage(
-                    "Argument 'path_append' must be a string in the following format: "
-                    "/path-to-append[/.../...]"
-                )
+            self._url = self._get_custom_endpoint(path_append)
 
         return self._get_response(method, **kwargs)
