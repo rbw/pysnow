@@ -23,7 +23,7 @@ The documentation is available at [https://pysnow.readthedocs.io](https://pysnow
 Looking for testers!
 ---
 
-Pysnow's author is hard at work building a new simple and lightweight yet powerful and extensible Python 3.7+ asyncio library for working with ServiceNow called *Snow*. It's currently in alpha (beta shortly) and currently provides *Table API* CRUD features, check it out at [rbw/snow](https://github.com/rbw/snow).
+Pysnow's author is hard at work building a new simple and lightweight yet powerful and extensible Python 3.7+ asyncio library for working with ServiceNow called *Snow*. It's in alpha (beta shortly) and currently provides *Table API* CRUD features, check it out at [rbw/snow](https://github.com/rbw/snow).
 
 
 Development status
