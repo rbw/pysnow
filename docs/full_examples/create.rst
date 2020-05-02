@@ -3,11 +3,6 @@ Creating a new record
 
 The :meth:`Client.resource.create` takes a dictionary payload with key-values of the record to be created.
 
-
-.. note::
-    This method calls :meth:`pysnow.Resource.one` if the record was created successfully, returning a dictionary of the created record.
-
-
 .. code-block:: python
 
     import pysnow
@@ -20,12 +15,12 @@ The :meth:`Client.resource.create` takes a dictionary payload with key-values of
 
     # Set the payload
     new_record = {
-        'short_description': 'Pysnow created incident',
-        'description': 'This is awesome'
+        'short_description': '<short_description>',
+        'description': '<description>'
     }
 
     # Create a new incident record
     result = incident.create(payload=new_record)
 
-
-
+    # Print the created record
+    print(result.one())
