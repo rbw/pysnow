@@ -2,6 +2,7 @@
 
 import logging
 import json
+import six
 
 from .response import Response
 from .exceptions import InvalidUsage
@@ -67,6 +68,18 @@ class SnowRequest(object):
             stream=use_stream,
         )
 
+    def _get_custom_endpoint(self, value):
+        if isinstance(value, dict) and "value" in value:
+            value = value["value"]
+        elif not isinstance(value, six.string_types):
+            raise InvalidUsage(
+                "Argument 'path_append' must be a string in the following format: "
+                "/path-to-append[/.../...]"
+            )
+
+        segment = value if value.startswith("/") else "/{0}".format(value)
+        return self._url_builder.get_appended_custom(segment)
+
     def get(self, *args, **kwargs):
         """Fetches one or more records
 
@@ -74,7 +87,12 @@ class SnowRequest(object):
             - :class:`pysnow.Response` object
         """
 
-        self._parameters.query = kwargs.pop("query", {}) if len(args) == 0 else args[0]
+        query = kwargs.pop("query", {}) if len(args) == 0 else args[0]
+        for key, value in query.items():
+            if isinstance(value, dict):
+                query[key] = value["value"]
+
+        self._parameters.query = query
         self._parameters.limit = kwargs.pop("limit", 10000)
         self._parameters.offset = kwargs.pop("offset", 0)
         self._parameters.fields = kwargs.pop("fields", kwargs.pop("fields", []))
@@ -109,11 +127,9 @@ class SnowRequest(object):
         if not isinstance(payload, dict):
             raise InvalidUsage("Update payload must be of type dict")
 
-        record = self.get(query).one()
+        record = self.get(query=query).one()
 
-        self._url = self._url_builder.get_appended_custom(
-            "/{0}".format(record["sys_id"])
-        )
+        self._url = self._get_custom_endpoint(record["sys_id"])
         return self._get_response("PUT", data=json.dumps(payload))
 
     def delete(self, query):
@@ -125,10 +141,8 @@ class SnowRequest(object):
         """
 
         record = self.get(query=query).one()
+        self._url = self._get_custom_endpoint(record["sys_id"])
 
-        self._url = self._url_builder.get_appended_custom(
-            "/{0}".format(record["sys_id"])
-        )
         return self._get_response("DELETE").one()
 
     def custom(self, method, path_append=None, **kwargs):
@@ -142,12 +156,6 @@ class SnowRequest(object):
             - :class:`pysnow.Response` object
         """
         if path_append is not None:
-            try:
-                self._url = self._url_builder.get_appended_custom(path_append)
-            except InvalidUsage:
-                raise InvalidUsage(
-                    "Argument 'path_append' must be a string in the following format: "
-                    "/path-to-append[/.../...]"
-                )
+            self._url = self._get_custom_endpoint(path_append)
 
         return self._get_response(method, **kwargs)
