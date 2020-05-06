@@ -9,13 +9,10 @@ from .enums import (
     DateTimeOn,
     Order,
 )
-from .exceptions import (
-    QueryTypeError,
-)
+from .exceptions import QueryTypeError
 
 
 class Term(object):
-
     @staticmethod
     def wrap_constant(value, types, list_type=False):
         if list_type:
@@ -33,7 +30,9 @@ class Term(object):
                 raise QueryTypeError(
                     "Invalid type passed to %s() , expected list or tuple" % (caller)
                 )
-        elif isinstance(value, ValueWrapper) and (value.type_ in types or (value.type_ == list and list_type)):
+        elif isinstance(value, ValueWrapper) and (
+            value.type_ in types or (value.type_ == list and list_type)
+        ):
             return value
         # allow other types than datetime, as long as they have strftime
         elif hasattr(value, "strftime") and datetime in types:
@@ -81,14 +80,16 @@ class Term(object):
         return BetweenCriterion(
             self,
             self.wrap_constant(lower, types=[int, datetime]),
-            self.wrap_constant(upper, types=[int, datetime])
+            self.wrap_constant(upper, types=[int, datetime]),
         )
 
     def starts_with(self, other):
-        return BasicCriterion('STARTSWITH', self, self.wrap_constant(other, types=[str]))
+        return BasicCriterion(
+            "STARTSWITH", self, self.wrap_constant(other, types=[str])
+        )
 
     def ends_with(self, other):
-        return BasicCriterion('ENDSWITH', self, self.wrap_constant(other, types=[str]))
+        return BasicCriterion("ENDSWITH", self, self.wrap_constant(other, types=[str]))
 
     def contains(self, other):
         return self.like(other)
@@ -97,50 +98,71 @@ class Term(object):
         return self.not_like(other)
 
     def like(self, other):
-        return BasicCriterion('LIKE', self, self.wrap_constant(other, types=[str]))
+        return BasicCriterion("LIKE", self, self.wrap_constant(other, types=[str]))
 
     def not_like(self, other):
-        return BasicCriterion('NOT LIKE', self, self.wrap_constant(other, types=[str]))
+        return BasicCriterion("NOT LIKE", self, self.wrap_constant(other, types=[str]))
 
     def is_in(self, other):
-        return BasicCriterion('IN', self, self.wrap_constant(other, types=[int, str], list_type=True))
+        return BasicCriterion(
+            "IN", self, self.wrap_constant(other, types=[int, str], list_type=True)
+        )
 
     def not_in(self, other):
-        return BasicCriterion('NOT IN', self, self.wrap_constant(other, types=[int, str], list_type=True))
+        return BasicCriterion(
+            "NOT IN", self, self.wrap_constant(other, types=[int, str], list_type=True)
+        )
 
     def is_anything(self, other):
         return IsAnythingCriterion(self)
 
     def is_same(self, other):
-        return BasicCriterion('SAMEAS', self, self.wrap_constant(other, types=[Field]))
+        return BasicCriterion("SAMEAS", self, self.wrap_constant(other, types=[Field]))
 
     def is_different(self, other):
-        return BasicCriterion('NSAMEAS', self, self.wrap_constant(other, types=[Field]))
+        return BasicCriterion("NSAMEAS", self, self.wrap_constant(other, types=[Field]))
 
     def __eq__(self, other):
-        return BasicCriterion(Equality.eq, self, self.wrap_constant(other, types=[int, str]))
+        return BasicCriterion(
+            Equality.eq, self, self.wrap_constant(other, types=[int, str])
+        )
 
     def __ne__(self, other):
-        return BasicCriterion(Equality.ne, self, self.wrap_constant(other, types=[int, str]))
+        return BasicCriterion(
+            Equality.ne, self, self.wrap_constant(other, types=[int, str])
+        )
 
     def __gt__(self, other):
-        return BasicCriterion(Equality.gt, self, self.wrap_constant(other, types=[int, datetime]))
+        return BasicCriterion(
+            Equality.gt, self, self.wrap_constant(other, types=[int, datetime])
+        )
 
     def __ge__(self, other):
-        return BasicCriterion(Equality.gte, self, self.wrap_constant(other, types=[int, datetime]))
+        return BasicCriterion(
+            Equality.gte, self, self.wrap_constant(other, types=[int, datetime])
+        )
 
     def __lt__(self, other):
-        return BasicCriterion(Equality.lt, self, self.wrap_constant(other, types=[int, datetime]))
+        return BasicCriterion(
+            Equality.lt, self, self.wrap_constant(other, types=[int, datetime])
+        )
 
     def __le__(self, other):
-        return BasicCriterion(Equality.lte, self, self.wrap_constant(other, types=[int, datetime]))
+        return BasicCriterion(
+            Equality.lte, self, self.wrap_constant(other, types=[int, datetime])
+        )
 
-    # DateTime only 
+    # DateTime only
     def on(self, other):
-        return DateTimeOnCriterion(self, self.wrap_constant(other, types=[datetime, DateTimeOn]))
+        return DateTimeOnCriterion(
+            self, self.wrap_constant(other, types=[datetime, DateTimeOn])
+        )
 
     def not_on(self, other):
-        return DateTimeNotOnCriterion(self, self.wrap_constant(other, types=[datetime, DateTimeOn]))
+        return DateTimeNotOnCriterion(
+            self, self.wrap_constant(other, types=[datetime, DateTimeOn])
+        )
+
     # End DateTime only
 
     def order(self, direction):
@@ -154,7 +176,6 @@ class Term(object):
 
 
 class Criterion(Term):
-
     def AND(self, other):
         return self & other
 
@@ -171,9 +192,9 @@ class Criterion(Term):
         return BasicCriterion(Boolean.or_, self, other)
 
     def __xor__(self, other):
-        '''
+        """
             While not really an XOR operation, this allows us to use Python's bitwise operators
-        '''
+        """
         return BasicCriterion(Boolean.nq_, self, other)
 
     @staticmethod
@@ -232,8 +253,8 @@ class BasicCriterion(Criterion):
         self.right = right
 
     def get_query(self, **kwargs):
-        return '{left}{comparator}{right}'.format(
-            comparator=getattr(self.comparator, 'value', self.comparator),
+        return "{left}{comparator}{right}".format(
+            comparator=getattr(self.comparator, "value", self.comparator),
             left=self.left.get_query(**kwargs),
             right=self.right.get_query(**kwargs),
         )
@@ -246,7 +267,7 @@ class IsEmptyCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return '{}ISEMPTY'.format(term)
+        return "{}ISEMPTY".format(term)
 
 
 class NotEmptyCriterion(Criterion):
@@ -256,7 +277,7 @@ class NotEmptyCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return '{}ISNOTEMPTY'.format(term)
+        return "{}ISNOTEMPTY".format(term)
 
 
 class IsAnythingCriterion(Criterion):
@@ -266,7 +287,7 @@ class IsAnythingCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return '{}ANYTHING'.format(term)
+        return "{}ANYTHING".format(term)
 
 
 class IsEmptyStringCriterion(Criterion):
@@ -276,7 +297,7 @@ class IsEmptyStringCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        return '{}EMPTYSTRING'.format(term)
+        return "{}EMPTYSTRING".format(term)
 
 
 class BetweenCriterion(Criterion):
@@ -291,17 +312,21 @@ class BetweenCriterion(Criterion):
         start = self.start.get_query(**kwargs)
         end = self.end.get_query(**kwargs)
 
-        if isinstance(self.start, DateTimeValueWrapper) and isinstance(self.end, DateTimeValueWrapper):
+        if isinstance(self.start, DateTimeValueWrapper) and isinstance(
+            self.end, DateTimeValueWrapper
+        ):
             dt_between = "%s@%s" % (start, end)
-        elif isinstance(self.start, IntValueWrapper) and isinstance(self.end, IntValueWrapper):
+        elif isinstance(self.start, IntValueWrapper) and isinstance(
+            self.end, IntValueWrapper
+        ):
             dt_between = "%d@%d" % (start, end)
         else:
             raise QueryTypeError(
                 "Expected both `start` and `end` of type `int` "
                 "or instance of `datetime`, not %s and %s" % (type(start), type(end))
             )
-        
-        return '{}BETWEEN{}'.format(term, dt_between)
+
+        return "{}BETWEEN{}".format(term, dt_between)
 
 
 class DateTimeOnCriterion(Criterion):
@@ -313,15 +338,12 @@ class DateTimeOnCriterion(Criterion):
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
         if isinstance(self.criteria, DateTimeOn):
-            return '{term}ON{criteria}'.format(
-                term=term,
-                criteria=self.criteria.value
-            )
+            return "{term}ON{criteria}".format(term=term, criteria=self.criteria.value)
         else:
-            return '{term}ONcustom@{start}@{end}'.format(
+            return "{term}ONcustom@{start}@{end}".format(
                 term=term,
-                start=self.criteria.get_query(date_only=True, extra_param='start'),
-                end=self.criteria.get_query(date_only=True, extra_param='end')
+                start=self.criteria.get_query(date_only=True, extra_param="start"),
+                end=self.criteria.get_query(date_only=True, extra_param="end"),
             )
 
 
@@ -334,15 +356,14 @@ class DateTimeNotOnCriterion(Criterion):
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
         if isinstance(self.criteria, DateTimeOn):
-            return '{term}NOTON{criteria}'.format(
-                term=term,
-                criteria=self.criteria.value
+            return "{term}NOTON{criteria}".format(
+                term=term, criteria=self.criteria.value
             )
         else:
-            return '{term}NOTONcustom@{start}@{end}'.format(
+            return "{term}NOTONcustom@{start}@{end}".format(
                 term=term,
-                start=self.criteria.get_query(date_only=True, extra_param='start'),
-                end=self.criteria.get_query(date_only=True, extra_param='end')
+                start=self.criteria.get_query(date_only=True, extra_param="start"),
+                end=self.criteria.get_query(date_only=True, extra_param="end"),
             )
 
 
@@ -354,10 +375,16 @@ class OrderCriterion(Criterion):
 
     def get_query(self, **kwargs):
         term = self.term.get_query(**kwargs)
-        if self.direction == Order.asc or (isinstance(self.direction, six.string_types) and self.direction.lower() == 'asc'):
-            return 'ORDERBY{term}'.format(term=term)
-        elif self.direction == Order.desc or (isinstance(self.direction, six.string_types) and self.direction.lower() == 'desc'):
-            return 'ORDERBYDESC{term}'.format(term=term)
+        if self.direction == Order.asc or (
+            isinstance(self.direction, six.string_types)
+            and self.direction.lower() == "asc"
+        ):
+            return "ORDERBY{term}".format(term=term)
+        elif self.direction == Order.desc or (
+            isinstance(self.direction, six.string_types)
+            and self.direction.lower() == "desc"
+        ):
+            return "ORDERBYDESC{term}".format(term=term)
         else:
             raise QueryTypeError(
                 "Expected 'asc', 'desc', or an instance of Order, not %s"
@@ -380,8 +407,7 @@ class IntValueWrapper(ValueWrapper):
             return self.value
         else:
             raise QueryTypeError(
-                "Expected value to be an instance of `int`, not %s"
-                % type(self.value)
+                "Expected value to be an instance of `int`, not %s" % type(self.value)
             )
 
 
@@ -395,8 +421,7 @@ class StringValueWrapper(ValueWrapper):
             return self.value
         else:
             raise QueryTypeError(
-                "Expected value to be an instance of `str`, not %s"
-                % type(self.value)
+                "Expected value to be an instance of `str`, not %s" % type(self.value)
             )
 
 
@@ -431,7 +456,9 @@ class ListValueWrapper(ValueWrapper):
         self.types = types
 
     def get_query(self, **kwargs):
-        if isinstance(self.value, (list, tuple)) and all(type(x) in self.types for x in self.value):
+        if isinstance(self.value, (list, tuple)) and all(
+            type(x) in self.types for x in self.value
+        ):
             return ",".join(map(str, self.value))
         else:
             raise QueryTypeError(
@@ -450,14 +477,14 @@ class Field(Criterion):
 
 
 class Table(object):
-    '''
+    """
         Allows the following:
 
         ```
         incident = Table(incident)
         criterion = incident.company.eq('3dasd3')
         ```
-    '''
+    """
 
     # Could be used to automate resource creation?
     def __init__(self, name):
