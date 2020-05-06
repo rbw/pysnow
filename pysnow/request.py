@@ -88,9 +88,11 @@ class SnowRequest(object):
         """
 
         query = kwargs.pop("query", {}) if len(args) == 0 else args[0]
-        for key, value in query.items():
-            if isinstance(value, dict):
-                query[key] = value["value"]
+
+        if isinstance(query, dict):
+            for key, value in query.items():
+                if isinstance(value, dict):
+                    query[key] = value["value"]
 
         self._parameters.query = query
         self._parameters.limit = kwargs.pop("limit", 10000)
@@ -99,9 +101,13 @@ class SnowRequest(object):
         if "display_value" in kwargs:
             self._parameters.display_value = kwargs.pop("display_value")
         if "exclude_reference_link" in kwargs:
-            self._parameters.exclude_reference_link = kwargs.pop("exclude_reference_link")
+            self._parameters.exclude_reference_link = kwargs.pop(
+                "exclude_reference_link"
+            )
         if "suppress_pagination_header" in kwargs:
-            self._parameters.suppress_pagination_header = kwargs.pop("suppress_pagination_header")
+            self._parameters.suppress_pagination_header = kwargs.pop(
+                "suppress_pagination_header"
+            )
 
         return self._get_response("GET", stream=kwargs.pop("stream", False))
 
