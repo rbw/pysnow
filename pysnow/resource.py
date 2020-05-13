@@ -13,7 +13,7 @@ logger = logging.getLogger("pysnow")
 
 
 class Resource(object):
-    """Creates a new :class:`Resource` object
+    r"""Creates a new :class:`Resource` object
 
     Resources provides a natural way of interfacing with ServiceNow APIs.
 
