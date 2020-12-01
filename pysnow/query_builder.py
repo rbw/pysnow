@@ -70,7 +70,7 @@ class QueryBuilder(object):
         return self._add_condition("LIKE", contains, types=[str])
 
     def not_contains(self, not_contains):
-        """Adds new `NOTLIKE` condition
+        """Adds new `NOT LIKE` condition
 
         :param not_contains: Match field not containing the provided value
         """
