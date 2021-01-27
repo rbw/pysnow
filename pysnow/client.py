@@ -102,6 +102,15 @@ class Client(object):
         else:
             self.session = None
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.close()
+
+    def close(self):
+        self.session.close()
+
     def _get_session(self, session):
         """Creates a new session with basic auth, unless one was provided, and sets headers.
 
