@@ -136,6 +136,20 @@ class TestResourceRequest(unittest.TestCase):
         self.assertEquals(r.path, self.base_path + self.api_path)
 
     @httpretty.activate
+    def test_resource_request_default_timeout(self):
+        resource = self.client.resource(
+            base_path=self.base_path, api_path=self.api_path
+        )
+        assert resource._request._timeout == 60
+
+    @httpretty.activate
+    def test_resource_request_custom_timeout(self):
+        resource = self.client.resource(
+            base_path=self.base_path, api_path=self.api_path, timeout=30
+        )
+        assert resource._request._timeout == 30
+
+    @httpretty.activate
     def test_response_headers(self):
         """Request response headers should be available in Response.headers property"""
 
@@ -230,6 +244,25 @@ class TestResourceRequest(unittest.TestCase):
         qs = qs_as_dict(response._response.request.url)
 
         self.assertEquals(int(qs["sysparm_offset"]), offset)
+
+    @httpretty.activate
+    def test_get_limit(self):
+        """limit passed to :meth:`get` should set sysparm_limit in QS"""
+
+        httpretty.register_uri(
+            httpretty.GET,
+            self.mock_url_builder_base,
+            body=get_serialized_result(self.record_response_get_one),
+            status=200,
+            content_type="application/json",
+        )
+
+        limit = 2
+
+        response = self.resource.get(self.dict_query, limit=limit)
+        qs = qs_as_dict(response._response.request.url)
+
+        self.assertEquals(int(qs["sysparm_limit"]), limit)
 
     @httpretty.activate
     def test_get_limit(self):

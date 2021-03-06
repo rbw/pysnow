@@ -25,12 +25,14 @@ class SnowRequest(object):
         url_builder=None,
         chunk_size=None,
         resource=None,
+        timeout=60,
     ):
         self._parameters = parameters
         self._url_builder = url_builder
         self._session = session
         self._chunk_size = chunk_size
         self._resource = resource
+        self._timeout = timeout
 
         self._url = url_builder.get_url()
 
@@ -52,7 +54,7 @@ class SnowRequest(object):
         )
 
         response = self._session.request(
-            method, self._url, stream=use_stream, params=params, **kwargs
+            method, self._url, stream=use_stream, params=params, timeout=self._timeout, **kwargs
         )
         response.raw.decode_content = True
 
