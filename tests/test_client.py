@@ -7,6 +7,11 @@ from pysnow.exceptions import InvalidUsage
 
 
 class TestClient(unittest.TestCase):
+    def test_client_context_manager(self):
+        with Client("snow.example.com", user="foo", password="bar") as c:
+            assert isinstance(c, Client)
+            assert c.session
+
     def test_client_missing_args(self):
         """Client should raise an exception if it is missing arguments."""
         self.assertRaises(InvalidUsage, Client, instance="test")
