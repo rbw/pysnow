@@ -135,9 +135,13 @@ class SnowRequest(object):
         if not isinstance(payload, dict):
             raise InvalidUsage("Update payload must be of type dict")
 
-        record = self.get(query=query).one()
+        if isinstance(query, str):
+            sys_id = query
+        else:
+            record = self.get(query=query, fields=["sys_id"]).one()
+            sys_id = record["sys_id"]
 
-        self._url = self._get_custom_endpoint(record["sys_id"])
+        self._url = self._get_custom_endpoint(sys_id)
         return self._get_response("PUT", data=json.dumps(payload))
 
     def delete(self, query):
