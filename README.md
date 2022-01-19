@@ -4,7 +4,7 @@
 \ \  _-/ \ \____ \ \ \___  \ \ \ \-.  \ \ \ \/\ \ \ \ \/ ".\ \
  \ \_\    \/\_____\ \/\_____\ \ \_\\"\_\ \ \_____\ \ \__/".~\_\
   \/_/     \/_____/  \/_____/  \/_/ \/_/  \/_____/  \/_/   \/_/
-		- Python library for ServiceNow
+		- ServiceNow API Client Library
 ```
 
 [![image](https://travis-ci.org/rbw/pysnow.svg?branch=master)](https://travis-ci.org/rbw/pysnow)
