@@ -11,6 +11,7 @@ from .exceptions import (
     MultipleResults,
     EmptyContent,
     MissingResult,
+    UnexpectedResponseFormat,
 )
 
 
@@ -71,45 +72,48 @@ class Response(object):
 
         builder = ObjectBuilder()
 
-        for prefix, event, value in ijson.parse(
-            response.raw, buf_size=self._chunk_size
-        ):
-            if (prefix, event) == ("error", "start_map"):
-                # Matched ServiceNow `error` object at the root
-                has_error = True
-            elif prefix == "result" and event in ["start_map", "start_array"]:
-                # Matched ServiceNow `result`
-                if event == "start_map":  # Matched object
-                    has_result_single = True
-                elif event == "start_array":  # Matched array
-                    has_result_many = True
+        try:
+            for prefix, event, value in ijson.parse(
+                response.raw, buf_size=self._chunk_size
+            ):
+                if (prefix, event) == ("error", "start_map"):
+                    # Matched ServiceNow `error` object at the root
+                    has_error = True
+                elif prefix == "result" and event in ["start_map", "start_array"]:
+                    # Matched ServiceNow `result`
+                    if event == "start_map":  # Matched object
+                        has_result_single = True
+                    elif event == "start_array":  # Matched array
+                        has_result_many = True
 
-            if has_result_many:
-                # Build the result
-                if (prefix, event) == ("result.item", "end_map"):
-                    # Reached end of object. Set count and yield
-                    builder.event(event, value)
-                    self.count += 1
-                    yield getattr(builder, "value")
-                elif prefix.startswith("result.item"):
-                    # Build the result object
-                    builder.event(event, value)
-            elif has_result_single:
-                if (prefix, event) == ("result", "end_map"):
-                    # Reached end of the result object. Set count and yield.
-                    builder.event(event, value)
-                    self.count += 1
-                    yield getattr(builder, "value")
-                elif prefix.startswith("result"):
-                    # Build the error object
-                    builder.event(event, value)
-            elif has_error:
-                if (prefix, event) == ("error", "end_map"):
-                    # Reached end of the error object - raise ResponseError exception
-                    raise ResponseError(getattr(builder, "value"))
-                elif prefix.startswith("error"):
-                    # Build the error object
-                    builder.event(event, value)
+                if has_result_many:
+                    # Build the result
+                    if (prefix, event) == ("result.item", "end_map"):
+                        # Reached end of object. Set count and yield
+                        builder.event(event, value)
+                        self.count += 1
+                        yield getattr(builder, "value")
+                    elif prefix.startswith("result.item"):
+                        # Build the result object
+                        builder.event(event, value)
+                elif has_result_single:
+                    if (prefix, event) == ("result", "end_map"):
+                        # Reached end of the result object. Set count and yield.
+                        builder.event(event, value)
+                        self.count += 1
+                        yield getattr(builder, "value")
+                    elif prefix.startswith("result"):
+                        # Build the error object
+                        builder.event(event, value)
+                elif has_error:
+                    if (prefix, event) == ("error", "end_map"):
+                        # Reached end of the error object - raise ResponseError exception
+                        raise ResponseError(getattr(builder, "value"))
+                    elif prefix.startswith("error"):
+                        # Build the error object
+                        builder.event(event, value)
+        except ijson.backends.python.UnexpectedSymbol:
+            raise UnexpectedResponseFormat('Broken response from servicenow instance - is it alive?')
 
         if (has_result_single or has_result_many) and self.count == 0:  # Results empty
             return
