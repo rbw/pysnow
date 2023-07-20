@@ -44,6 +44,9 @@ class Client(object):
         session=None,
     ):
 
+        if not (host or instance):
+            raise InvalidUsage("You must supply either 'instance' or 'host'")
+
         if (host and instance) is not None:
             raise InvalidUsage(
                 "Arguments 'instance' and 'host' are mutually exclusive, you cannot use both."
@@ -64,9 +67,6 @@ class Client(object):
             self.raise_on_empty = raise_on_empty
         else:
             raise InvalidUsage("Argument 'raise_on_empty' must be of type bool")
-
-        if not (host or instance):
-            raise InvalidUsage("You must supply either 'instance' or 'host'")
 
         if not isinstance(self, pysnow.OAuthClient):
             if not (user and password) and not session:
