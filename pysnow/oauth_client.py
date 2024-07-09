@@ -116,12 +116,13 @@ class OAuthClient(Client):
             "You must set_token() before creating a legacy request with OAuthClient"
         )
 
-    def resource(self, api_path=None, base_path="/api/now", chunk_size=None):
+    def resource(self, api_path=None, base_path="/api/now", chunk_size=None, **kwargs):
         """Overrides :meth:`resource` provided by :class:`pysnow.Client` with extras for OAuth
 
         :param api_path: Path to the API to operate on
         :param base_path: (optional) Base path override
         :param chunk_size: Response stream parser chunk size (in bytes)
+        :param **kwargs: Pass request.request parameters to the Resource object
         :return:
             - :class:`Resource` object
         :raises:
@@ -130,7 +131,7 @@ class OAuthClient(Client):
 
         if isinstance(self.token, dict):
             self.session = self._get_oauth_session()
-            return super(OAuthClient, self).resource(api_path, base_path, chunk_size)
+            return super(OAuthClient, self).resource(api_path, base_path, chunk_size, **kwargs)
 
         raise MissingToken(
             "You must set_token() before creating a resource with OAuthClient"
