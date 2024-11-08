@@ -128,7 +128,7 @@ class TestOAuthClient(unittest.TestCase):
         c.set_token(self.mock_token)
 
         r = c.resource(api_path="/valid/path")
-        self.assertEquals(r._api_path, api_path)
+        self.assertEqual(r._api_path, api_path)
 
     def test_reset_token(self):
         """OAuthClient should set token property to None and bypass validation if passed token is `False`"""

@@ -130,10 +130,10 @@ class TestResourceRequest(unittest.TestCase):
 
         resource_repr = type(repr(r))
 
-        self.assertEquals(resource_repr, str)
-        self.assertEquals(r._base_path, self.base_path)
-        self.assertEquals(r._api_path, self.api_path)
-        self.assertEquals(r.path, self.base_path + self.api_path)
+        self.assertEqual(resource_repr, str)
+        self.assertEqual(r._base_path, self.base_path)
+        self.assertEqual(r._api_path, self.api_path)
+        self.assertEqual(r.path, self.base_path + self.api_path)
 
     @httpretty.activate
     def test_resource_request_default_timeout(self):
@@ -205,7 +205,7 @@ class TestResourceRequest(unittest.TestCase):
         try:
             response.first()
         except ResponseError as e:
-            self.assertEquals(str(e), expected_str)
+            self.assertEqual(str(e), expected_str)
 
     @httpretty.activate
     def test_get_request_fields(self):
@@ -224,8 +224,8 @@ class TestResourceRequest(unittest.TestCase):
         str_fields = ",".join(self.get_fields)
 
         # List of fields should end up as comma-separated string
-        self.assertEquals(type(response), Response)
-        self.assertEquals(qs["sysparm_fields"], str_fields)
+        self.assertEqual(type(response), Response)
+        self.assertEqual(qs["sysparm_fields"], str_fields)
 
     @httpretty.activate
     def test_get_offset(self):
@@ -243,7 +243,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, offset=offset)
         qs = qs_as_dict(response._response.request.url)
 
-        self.assertEquals(int(qs["sysparm_offset"]), offset)
+        self.assertEqual(int(qs["sysparm_offset"]), offset)
 
     @httpretty.activate
     def test_get_limit(self):
@@ -262,7 +262,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, limit=limit)
         qs = qs_as_dict(response._response.request.url)
 
-        self.assertEquals(int(qs["sysparm_limit"]), limit)
+        self.assertEqual(int(qs["sysparm_limit"]), limit)
 
     @httpretty.activate
     def test_get_limit(self):
@@ -281,7 +281,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, limit=limit)
         qs = qs_as_dict(response._response.request.url)
 
-        self.assertEquals(int(qs["sysparm_limit"]), limit)
+        self.assertEqual(int(qs["sysparm_limit"]), limit)
 
     @httpretty.activate
     def test_get_one(self):
@@ -298,7 +298,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query)
         result = response.one()
 
-        self.assertEquals(result["sys_id"], self.record_response_get_one[0]["sys_id"])
+        self.assertEqual(result["sys_id"], self.record_response_get_one[0]["sys_id"])
 
     @httpretty.activate
     def test_get_all_empty(self):
@@ -315,7 +315,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, stream=True)
         result = list(response.all())
 
-        self.assertEquals(result, [])
+        self.assertEqual(result, [])
 
     @httpretty.activate
     def test_get_nocontent(self):
@@ -348,7 +348,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, stream=True)
         result = list(response.all())[0]
 
-        self.assertEquals(result, self.record_response_get_dict)
+        self.assertEqual(result, self.record_response_get_dict)
 
     @httpretty.activate
     def test_get_buffer_missing_result_keys(self):
@@ -444,7 +444,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query)
         result = response.one_or_none()
 
-        self.assertEquals(result, None)
+        self.assertEqual(result, None)
 
     @httpretty.activate
     def test_get_first_or_none_empty(self):
@@ -461,7 +461,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, stream=True)
         result = response.first_or_none()
 
-        self.assertEquals(result, None)
+        self.assertEqual(result, None)
 
     @httpretty.activate
     def test_get_first_or_none(self):
@@ -478,7 +478,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, stream=True)
         result = response.first_or_none()
 
-        self.assertEquals(result, self.record_response_get_three[0])
+        self.assertEqual(result, self.record_response_get_three[0])
 
     @httpretty.activate
     def test_get_first(self):
@@ -495,7 +495,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(self.dict_query, stream=True)
         result = response.first()
 
-        self.assertEquals(result, self.record_response_get_three[0])
+        self.assertEqual(result, self.record_response_get_three[0])
 
     @httpretty.activate
     def test_get_first_empty(self):
@@ -527,8 +527,8 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.create(self.record_response_create)
 
-        self.assertEquals(type(response.one()), dict)
-        self.assertEquals(response.one(), self.record_response_create)
+        self.assertEqual(type(response.one()), dict)
+        self.assertEqual(response.one(), self.record_response_create)
 
     @httpretty.activate
     def test_update(self):
@@ -553,8 +553,8 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.update(self.dict_query, self.record_response_update)
         result = response.one()
 
-        self.assertEquals(type(result), dict)
-        self.assertEquals(self.record_response_update["attr1"], result["attr1"])
+        self.assertEqual(type(result), dict)
+        self.assertEqual(self.record_response_update["attr1"], result["attr1"])
 
     @httpretty.activate
     def test_update_invalid_payload(self):
@@ -592,8 +592,8 @@ class TestResourceRequest(unittest.TestCase):
 
         result = self.resource.delete(self.dict_query)
 
-        self.assertEquals(type(result), dict)
-        self.assertEquals(result["status"], "record deleted")
+        self.assertEqual(type(result), dict)
+        self.assertEqual(result["status"], "record deleted")
 
     @httpretty.activate
     def test_delete_chained(self):
@@ -617,8 +617,8 @@ class TestResourceRequest(unittest.TestCase):
 
         result = self.resource.get(query={}).delete()
 
-        self.assertEquals(type(result), dict)
-        self.assertEquals(result["status"], "record deleted")
+        self.assertEqual(type(result), dict)
+        self.assertEqual(result["status"], "record deleted")
 
     @httpretty.activate
     def test_custom(self):
@@ -636,8 +636,8 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.request(method)
 
-        self.assertEquals(response._response.request.method, method)
-        self.assertEquals(type(response), Response)
+        self.assertEqual(response._response.request.method, method)
+        self.assertEqual(type(response), Response)
 
     @httpretty.activate
     def test_custom_with_headers(self):
@@ -655,7 +655,7 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.request("GET", headers=headers)
 
-        self.assertEquals(response._response.request.headers["foo"], headers["foo"])
+        self.assertEqual(response._response.request.headers["foo"], headers["foo"])
 
     @httpretty.activate
     def test_custom_with_path(self):
@@ -673,7 +673,7 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.request("GET", path_append="/foo")
 
-        self.assertEquals(response._response.status_code, 200)
+        self.assertEqual(response._response.status_code, 200)
 
     @httpretty.activate
     def test_custom_with_path_invalid(self):
@@ -702,7 +702,7 @@ class TestResourceRequest(unittest.TestCase):
         response = self.resource.get(query={})
         response_repr = repr(response)
 
-        self.assertEquals(response_repr, "<Response [200 - GET]>")
+        self.assertEqual(response_repr, "<Response [200 - GET]>")
 
     def test_attachment_non_table(self):
         """Accessing `Resource.attachments` from a non-table API should fail"""
@@ -739,7 +739,7 @@ class TestResourceRequest(unittest.TestCase):
 
         response = self.resource.get(query={})
 
-        self.assertEquals(
+        self.assertEqual(
             response["sys_id"], self.record_response_get_one[0].get("sys_id")
         )
 

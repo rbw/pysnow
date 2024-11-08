@@ -13,7 +13,7 @@ class TestQuery(unittest.TestCase):
         query = {"dict_foo": "dict_bar"}
         expected_string = "dict_foo=dict_bar"
 
-        self.assertEquals(ParamsBuilder.stringify_query(query), expected_string)
+        self.assertEqual(ParamsBuilder.stringify_query(query), expected_string)
 
     def test_stringify_query_builder(self):
         """:meth:`_stringify` should be able to convert a query builder object to a string of the expected value"""
@@ -21,7 +21,7 @@ class TestQuery(unittest.TestCase):
         query = QueryBuilder().field("qb_foo").equals("qb_bar")
         expected_string = "qb_foo=qb_bar"
 
-        self.assertEquals(ParamsBuilder.stringify_query(query), expected_string)
+        self.assertEqual(ParamsBuilder.stringify_query(query), expected_string)
 
     def test_query_setter_getter(self):
         """:prop:query setter should set _sysparms['sysparm_query'] and be accessible using :prop:query getter"""
@@ -31,8 +31,8 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
         sp.query = query
 
-        self.assertEquals(sp.query, query)
-        self.assertEquals(sp._sysparms["sysparm_query"], query)
+        self.assertEqual(sp.query, query)
+        self.assertEqual(sp._sysparms["sysparm_query"], query)
 
     def test_stringify_invalid_type(self):
         """:meth:`_stringify` should raise an InvalidUsage exception if the query is of invalid type"""
@@ -49,8 +49,8 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
         sp.limit = limit
 
-        self.assertEquals(sp._sysparms["sysparm_limit"], limit)
-        self.assertEquals(sp.limit, limit)
+        self.assertEqual(sp._sysparms["sysparm_limit"], limit)
+        self.assertEqual(sp.limit, limit)
 
     def test_apply_valid_offset(self):
         """:meth:`set_offset` should set `sysparm_offset` in :prop:`_sysparms`"""
@@ -59,8 +59,8 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
         sp.offset = offset
 
-        self.assertEquals(sp._sysparms["sysparm_offset"], offset)
-        self.assertEquals(sp.offset, offset)
+        self.assertEqual(sp._sysparms["sysparm_offset"], offset)
+        self.assertEqual(sp.offset, offset)
 
     def test_apply_valid_fields(self):
         """:meth:`set_fields` should set `sysparm_fields` in :prop:`_sysparms` to a comma-separated string"""
@@ -69,8 +69,8 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
         sp.fields = fields
 
-        self.assertEquals(sp._sysparms["sysparm_fields"], ",".join(fields))
-        self.assertEquals(sp.fields, ",".join(fields))
+        self.assertEqual(sp._sysparms["sysparm_fields"], ",".join(fields))
+        self.assertEqual(sp.fields, ",".join(fields))
 
     def test_apply_invalid_fields(self):
         """:meth:`set_fields` should raise an InvalidUsage exception if fields is of an invalid type"""
@@ -109,12 +109,12 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
 
         sp.suppress_pagination_header = True
-        self.assertEquals(sp._sysparms["sysparm_suppress_pagination_header"], True)
-        self.assertEquals(sp.suppress_pagination_header, True)
+        self.assertEqual(sp._sysparms["sysparm_suppress_pagination_header"], True)
+        self.assertEqual(sp.suppress_pagination_header, True)
 
         sp.suppress_pagination_header = False
-        self.assertEquals(sp._sysparms["sysparm_suppress_pagination_header"], False)
-        self.assertEquals(sp.suppress_pagination_header, False)
+        self.assertEqual(sp._sysparms["sysparm_suppress_pagination_header"], False)
+        self.assertEqual(sp.suppress_pagination_header, False)
 
     def test_set_exclude_reference_link(self):
         """:prop:`exclude_reference_link` setter should set `sysparm_exclude_reference_link` in :prop:`_sysparms`"""
@@ -122,12 +122,12 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
 
         sp.exclude_reference_link = True
-        self.assertEquals(sp._sysparms["sysparm_exclude_reference_link"], True)
-        self.assertEquals(sp.exclude_reference_link, True)
+        self.assertEqual(sp._sysparms["sysparm_exclude_reference_link"], True)
+        self.assertEqual(sp.exclude_reference_link, True)
 
         sp.exclude_reference_link = False
-        self.assertEquals(sp._sysparms["sysparm_exclude_reference_link"], False)
-        self.assertEquals(sp.exclude_reference_link, False)
+        self.assertEqual(sp._sysparms["sysparm_exclude_reference_link"], False)
+        self.assertEqual(sp.exclude_reference_link, False)
 
     def test_set_display_value(self):
         """:prop:`display_value` setter should set `sysparm_display_value` in :prop:`_sysparms`"""
@@ -135,16 +135,16 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
 
         sp.display_value = True
-        self.assertEquals(sp._sysparms["sysparm_display_value"], True)
-        self.assertEquals(sp.display_value, True)
+        self.assertEqual(sp._sysparms["sysparm_display_value"], True)
+        self.assertEqual(sp.display_value, True)
 
         sp.display_value = False
-        self.assertEquals(sp._sysparms["sysparm_display_value"], False)
-        self.assertEquals(sp.display_value, False)
+        self.assertEqual(sp._sysparms["sysparm_display_value"], False)
+        self.assertEqual(sp.display_value, False)
 
         sp.display_value = "all"
-        self.assertEquals(sp._sysparms["sysparm_display_value"], "all")
-        self.assertEquals(sp.display_value, "all")
+        self.assertEqual(sp._sysparms["sysparm_display_value"], "all")
+        self.assertEqual(sp.display_value, "all")
 
     def test_set_exclude_reference_link_invalid(self):
         """:prop:`exclude_reference_link` setter should raise an exception if type is not bool"""
@@ -189,9 +189,9 @@ class TestQuery(unittest.TestCase):
         sp = ParamsBuilder()
         sp.add_custom(custom_param)
 
-        self.assertEquals(sp.custom_params, custom_param)
-        self.assertEquals(sp._custom_params, custom_param)
-        self.assertEquals(sp.as_dict()["foo"], custom_param["foo"])
+        self.assertEqual(sp.custom_params, custom_param)
+        self.assertEqual(sp._custom_params, custom_param)
+        self.assertEqual(sp.as_dict()["foo"], custom_param["foo"])
 
     def test_add_invalid_custom_parameter(self):
         """:meth:`add_custom` should only accept dicts"""
