@@ -7,7 +7,7 @@ coverage==4.5.4
 docutils==0.15.2
 httpretty==0.9.7
 idna==2.8
-ijson==2.5.1
+ijson>=2.5.1
 imagesize==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
